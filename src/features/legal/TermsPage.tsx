@@ -4,7 +4,7 @@ import { termsContent } from './termsContent';
 import { useSEO } from '../../lib/seo';
 
 export function TermsPage() {
-  const { language, t } = useLocale();
+  const { language } = useLocale();
   const sections = termsContent[language];
   useSEO({ title: language === 'ar' ? 'الشروط والأحكام' : 'Terms and Conditions', description: language === 'ar' ? 'الشروط المنظمة لاستخدام موقع مشروعك.net والتعامل مع خدمات تطوير المنتجات الرقمية' : 'Terms governing use of the Mashrouak.net website and engagement with its digital product development services', path: '/terms' });
   return <section className="privacy-page legal-page section-space">
