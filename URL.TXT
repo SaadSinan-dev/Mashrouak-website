@@ -1,2 +1,2 @@
 CODE:https://github.com/SaadSinan-dev/Mashrouak-website
-LIVE:
+LIVE:https://mashrouak-net.pages.dev/
