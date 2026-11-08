@@ -12,7 +12,7 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
       aria-label={t('a11y.switchLanguage')}
       title={t('a11y.switchLanguage')}
       lang={language}
-      aria-pressed={language === 'en'}
+
     >
       <span aria-hidden="true">{label}</span>
     </button>
