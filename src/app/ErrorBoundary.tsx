@@ -10,8 +10,17 @@ function ErrorFallback() {
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState = { hasError: false };
-  public static getDerivedStateFromError(): ErrorBoundaryState { return { hasError: true }; }
-  public componentDidCatch(error: Error, info: ErrorInfo): void { console.error('Application rendering error:', error, info.componentStack); }
-  public render(): ReactNode { return this.state.hasError ? <ErrorFallback /> : this.props.children; }
+  public override state: ErrorBoundaryState = { hasError: false };
+
+  public static  getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  public override componentDidCatch(error: Error, info: ErrorInfo): void {
+    console.error('Application rendering error:', error, info.componentStack);
+  }
+
+  public override render(): ReactNode {
+    return this.state.hasError ? <ErrorFallback /> : this.props.children;
+  }
 }
