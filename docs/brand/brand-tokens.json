@@ -1,0 +1,52 @@
+{
+  "name": "مشروعك.net",
+  "selected": "B — Continuous Exchange / التكامل المتصل",
+  "colours": {
+    "deep-petrol": "#142B3A",
+    "teal": "#0B625D",
+    "warm-ivory": "#F6F4EE",
+    "soft-mist": "#E9EFEC",
+    "white": "#FFFFFF",
+    "steel-gray": "#56636B"
+  },
+  "type": {
+    "arabic": "IBM Plex Sans Arabic SemiBold",
+    "latin": "IBM Plex Sans Medium"
+  },
+  "wordmark": {
+    "visible_order": [
+      "net",
+      ".",
+      "مشروعك"
+    ],
+    "arabic_width": 351.20000000000005,
+    "period_x": 139.64954687500003,
+    "period_width": 13.925578125,
+    "latin_x": 0,
+    "total_width": 511.77512500000006,
+    "height": 98.0,
+    "dot_spacing_units": 7,
+    "direction": "left-to-right visual placement",
+    "arabic_x": 160.575125
+  },
+  "symbol": {
+    "field": 128,
+    "band_width": 22,
+    "minimum_gap": 8,
+    "component_count": 3,
+    "construction": "Two complementary curved modules and a keyed inner module; three independent vector paths."
+  },
+  "lockup": {
+    "symbol_field": 112,
+    "symbol_gap": 40,
+    "total_width": 663.7751250000001
+  },
+  "clear_space": 0.5,
+  "min_width": {
+    "horizontal_px": 160,
+    "symbol_px": 24,
+    "horizontal_mm": 32,
+    "symbol_mm": 6
+  },
+  "method": "Original editable SVG geometry and correctly shaped outlined typography; approved selection is Concept B."
+}

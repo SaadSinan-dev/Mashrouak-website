@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-language="ar" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#142B3A" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="مشروعك.net — استوديو للمنتجات الرقمية والحلول البرمجية نصمّم ونطوّر المواقع والمتاجر والتطبيقات والأنظمة المخصّصة للأعمال" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ar_AR" />
+    <meta property="og:title" content="مشروعك.net — حلول رقمية مصمّمة لأعمالك" />
+    <meta property="og:description" content="مواقع وتطبيقات وأنظمة رقمية تساعد مشروعك على العمل بصورة أوضح وأكثر ترابطاً" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/brand/instagram-avatar.svg" />
+    <title>مشروعك.net — حلول رقمية مصمّمة لأعمالك</title>
+    <style>
+      #app-loader { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; padding: 24px; color: #142B3A; background: #F6F4EE; opacity: 1; visibility: visible; transition: opacity 220ms ease, visibility 220ms ease; }
+      #app-loader[data-state="ready"] { opacity: 0; visibility: hidden; pointer-events: none; }
+      .app-loader__content { display: flex; width: min(220px, 72vw); flex-direction: column; align-items: center; gap: 20px; }
+      .app-loader__logo { display: block; width: 100%; height: 62px; object-fit: contain; }
+      .app-loader__label { color: #56636B; font: 500 12px/1.7 "IBM Plex Sans Arabic", "IBM Plex Sans", sans-serif; letter-spacing: .01em; }
+      .app-loader__track { position: relative; display: block; width: 92px; height: 2px; overflow: hidden; background: rgba(11, 98, 93, .16); }
+      .app-loader__track::after { position: absolute; inset-block: 0; inset-inline-start: 0; width: 38%; content: ""; background: #0B625D; animation: app-loader-travel 1.15s ease-in-out infinite; }
+      .app-loader__retry { padding: 9px 16px; border: 1px solid #0B625D; color: #0B625D; background: transparent; font: 600 12px/1.5 "IBM Plex Sans Arabic", "IBM Plex Sans", sans-serif; cursor: pointer; }
+      :root[data-theme="dark"] .app-loader__retry { border-color: #8FC6BC; color: #A8D0C8; }
+      @keyframes app-loader-travel { from { transform: translateX(-120%); } to { transform: translateX(360%); } }
+      :root[data-theme="dark"] #app-loader { color: #EAF0EC; background: #102733; }
+      :root[data-theme="dark"] .app-loader__label { color: #B8C6C0; }
+      :root[data-theme="dark"] .app-loader__track { background: rgba(168, 208, 200, .2); }
+      :root[data-theme="dark"] .app-loader__track::after { background: #8FC6BC; }
+      @media (prefers-reduced-motion: reduce) { #app-loader { transition: none; } .app-loader__track::after { animation: none; width: 42%; inset-inline-start: 29%; } }
+    </style>
+    <script>
+      try {
+        const language = localStorage.getItem('mashrouak-language');
+        const theme = localStorage.getItem('mashrouak-theme');
+        const root = document.documentElement;
+        if (language === 'en') {
+          root.lang = 'en'; root.dir = 'ltr'; root.dataset.language = 'en';
+          document.title = 'Mashrouak.net — Digital products for your business';
+          document.querySelector('meta[name="description"]').content = 'We design and develop websites, applications, and custom systems that help businesses reach customers and organize operations';
+          document.querySelector('meta[property="og:locale"]').content = 'en_US';
+          document.querySelector('meta[property="og:title"]').content = document.title;
+          document.querySelector('meta[property="og:description"]').content = 'Websites, applications, and digital systems shaped around real business needs';
+        }
+        if (theme === 'dark') {
+          root.dataset.theme = 'dark'; root.style.colorScheme = 'dark';
+          document.querySelector('meta[name="theme-color"]').content = '#102733';
+        }
+      } catch { /* Preferences may be unavailable when storage is blocked. */ }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">انتقل إلى المحتوى الرئيسي</a>
+    <script>if (document.documentElement.lang === 'en') document.querySelector('.skip-link').textContent = 'Skip to main content';</script>
+    <div id="root"></div>
+    <div id="app-loader" role="status" aria-live="polite" aria-busy="true">
+      <div class="app-loader__content">
+        <img id="app-loader-logo" class="app-loader__logo" alt="مشروعك.net" width="220" height="62" decoding="async" fetchpriority="high" />
+        <span id="app-loader-label" class="app-loader__label">جارٍ تجهيز الموقع</span>
+        <span class="app-loader__track" aria-hidden="true"></span>
+        <button id="app-loader-retry" class="app-loader__retry" type="button" hidden>إعادة المحاولة</button>
+      </div>
+    </div>
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const language = root.lang === 'en' ? 'en' : 'ar';
+        const theme = root.dataset.theme === 'dark' ? 'dark' : 'light';
+        const logo = document.getElementById('app-loader-logo');
+        const label = document.getElementById('app-loader-label');
+        if (logo) {
+          logo.src = language === 'en'
+            ? (theme === 'dark' ? '/brand/logo-horizontal-en-ivory.png' : '/brand/logo-horizontal-en-colour.png')
+            : (theme === 'dark' ? '/brand/logo-horizontal-ivory.svg' : '/brand/logo-horizontal-colour.svg');
+          logo.alt = language === 'ar' ? 'مشروعك.net' : 'Mashrouak.net';
+        }
+        if (label) label.textContent = language === 'ar' ? 'جارٍ تجهيز الموقع' : 'Preparing your experience';
+        const retry = document.getElementById('app-loader-retry');
+        const track = document.querySelector('.app-loader__track');
+        if (retry) {
+          retry.textContent = language === 'ar' ? 'إعادة المحاولة' : 'Try again';
+          retry.addEventListener('click', () => window.location.reload());
+        }
+        const showStartupError = () => {
+          if (label) label.textContent = language === 'ar' ? 'تعذّر تحميل الموقع' : 'The website could not be loaded';
+          if (track) track.hidden = true;
+          if (retry) retry.hidden = false;
+        };
+        window.addEventListener('error', (event) => {
+          const target = event.target;
+          const moduleFailed = target instanceof HTMLScriptElement && target.type === 'module';
+          const entryFailed = target === window && /\/src\/main\.tsx/.test(event.filename || '');
+          if (moduleFailed || entryFailed) showStartupError();
+        }, true);
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
