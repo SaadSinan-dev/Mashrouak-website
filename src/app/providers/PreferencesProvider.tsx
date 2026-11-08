@@ -34,8 +34,8 @@ function readStoredTheme(): Theme {
 export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(readStoredLanguage);
   const [theme, setThemeState] = useState<Theme>(readStoredTheme);
-  const direction = language === 'ar' ? 'rtl' : 'ltr';
-
+const direction: PreferencesContextValue['direction'] =
+  language === 'ar' ? 'rtl' : 'ltr';
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.lang = language;
@@ -61,8 +61,29 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const toggleTheme = useCallback(() => setThemeState((current) => current === 'light' ? 'dark' : 'light'), []);
   const t = useCallback((key: TranslationKey) => messages[language][key], [language]);
 
-  const value = useMemo(() => ({ language, direction, theme, isArabic: language === 'ar', setLanguage, setTheme, toggleLanguage, toggleTheme, t }), [direction, language, setLanguage, setTheme, t, theme, toggleLanguage, toggleTheme]);
-
+const value = useMemo<PreferencesContextValue>(
+  () => ({
+    language,
+    direction,
+    theme,
+    isArabic: language === 'ar',
+    setLanguage,
+    setTheme,
+    toggleLanguage,
+    toggleTheme,
+    t,
+  }),
+  [
+    direction,
+    language,
+    setLanguage,
+    setTheme,
+    t,
+    theme,
+    toggleLanguage,
+    toggleTheme,
+  ],
+);
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
 }
 
