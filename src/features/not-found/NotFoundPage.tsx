@@ -1,6 +1,6 @@
 import { ArrowUpLeft, ArrowUpRight, Compass } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useLocale } from '../../app/providers/PreferencesProvider';
+import { useLocale } from '../../app/providers/preferences-context';
 import { Container } from '../../components/ui/Container';
 import { ButtonLink } from '../../components/ui/Button';
 import { useSEO } from '../../lib/seo';

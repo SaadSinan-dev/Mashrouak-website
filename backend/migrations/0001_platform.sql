@@ -1,0 +1,16 @@
+PRAGMA foreign_keys = ON;
+CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, name TEXT NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('owner','editor','support')), active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')));
+CREATE TABLE sessions (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL);
+CREATE INDEX sessions_expiry ON sessions(expires_at);
+CREATE TABLE content (id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK(kind IN ('pages','services','projects','results','settings','knowledge')), slug TEXT NOT NULL, sort_order INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','published','archived')), draft TEXT NOT NULL CHECK(json_valid(draft)), published TEXT CHECK(published IS NULL OR json_valid(published)), version INTEGER NOT NULL DEFAULT 1, updated_at TEXT NOT NULL, UNIQUE(kind,slug));
+CREATE TABLE revisions (id TEXT PRIMARY KEY, content_id TEXT NOT NULL REFERENCES content(id) ON DELETE CASCADE, version INTEGER NOT NULL, data TEXT NOT NULL, actor_id TEXT REFERENCES users(id), created_at TEXT NOT NULL);
+CREATE INDEX content_public ON content(kind,status,sort_order);
+CREATE TABLE audit_logs (id TEXT PRIMARY KEY, actor_id TEXT, action TEXT NOT NULL, target_id TEXT, detail TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL);
+CREATE INDEX audit_time ON audit_logs(created_at);
+CREATE TABLE conversations (id TEXT PRIMARY KEY, visitor_hash TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, language TEXT NOT NULL CHECK(language IN ('ar','en')), status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','active','resolved')), assigned_to TEXT REFERENCES users(id) ON DELETE SET NULL, ai_state TEXT NOT NULL DEFAULT 'idle' CHECK(ai_state IN ('idle','running','failed')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX visitor_conversations ON conversations(visitor_hash,created_at);
+CREATE TABLE messages (id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE, sender TEXT NOT NULL CHECK(sender IN ('visitor','operator','assistant')), body TEXT NOT NULL, client_id TEXT NOT NULL, operator_id TEXT REFERENCES users(id) ON DELETE SET NULL, read_at TEXT, created_at TEXT NOT NULL, UNIQUE(conversation_id,sender,client_id));
+CREATE INDEX message_history ON messages(conversation_id,created_at);
+CREATE TABLE media (id TEXT PRIMARY KEY, object_key TEXT NOT NULL UNIQUE, filename TEXT NOT NULL, type TEXT NOT NULL, size INTEGER NOT NULL, alt_ar TEXT NOT NULL, alt_en TEXT NOT NULL, visibility TEXT NOT NULL CHECK(visibility IN ('public','private')), created_at TEXT NOT NULL);
+CREATE TABLE rate_limits (key TEXT PRIMARY KEY, count INTEGER NOT NULL, reset_at INTEGER NOT NULL);
+CREATE TABLE preview_tokens (token_hash TEXT PRIMARY KEY, content_id TEXT NOT NULL REFERENCES content(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL);

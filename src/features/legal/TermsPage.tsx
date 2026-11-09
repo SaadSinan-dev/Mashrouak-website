@@ -1,4 +1,4 @@
-import { useLocale } from '../../app/providers/PreferencesProvider';
+import { useLocale } from '../../app/providers/preferences-context';
 import { Container } from '../../components/ui/Container';
 import { termsContent } from './termsContent';
 import { useSEO } from '../../lib/seo';

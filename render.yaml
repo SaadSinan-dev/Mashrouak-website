@@ -1,0 +1,55 @@
+# Prepared deployment proposal. Applying this Blueprint creates PAID resources.
+# Obtain approval first. No domains/DNS are changed by this file.
+services:
+  - type: web
+    name: mashrouak-api
+    runtime: node
+    repo: https://github.com/SaadSinan-dev/Mashrouak-website
+    branch: main
+    region: frankfurt
+    plan: 0.5c-512mb
+    rootDir: .
+    buildCommand: npm ci --include=dev && npm run build -w @mashrouak/backend
+    preDeployCommand: npm run db:migrate:production -w @mashrouak/backend
+    startCommand: npm run start -w @mashrouak/backend
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: 24.19.0
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mashrouak-postgres
+          property: connectionString
+      - key: PUBLIC_ORIGIN
+        sync: false
+      - key: ADMIN_ORIGIN
+        sync: false
+      - key: SITE_URL
+        sync: false
+      - key: PAGES_PROXY_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: mashrouak
+      - key: AI_PROVIDER
+        value: none
+      - key: CHAT_RETENTION_DAYS
+        value: 90
+databases:
+  - name: mashrouak-postgres
+    databaseName: mashrouak
+    user: mashrouak
+    region: frankfurt
+    plan: 0.1c-256mb
+    postgresMajorVersion: '18'
+    diskSizeGB: 1
+    storageAutoscalingEnabled: false
+    ipAllowList: []

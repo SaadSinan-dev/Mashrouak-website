@@ -1,3 +1,4 @@
+import {CmsValue} from '../../features/content/Editable';
 import {
   ArrowUpLeft,
   ArrowUpRight,
@@ -9,7 +10,9 @@ import {
 
 import type { TranslationKey } from '../../locales/messages';
 import type { Project } from '../../types/content';
-import { useLocale } from '../../app/providers/PreferencesProvider';
+import { useLocale } from '../../app/providers/preferences-context';
+import { mediaUrl } from '../../lib/platform-api';
+import { SmartImage } from './SmartImage';
 
 function SyrianMenuArtwork() {
   const { t } = useLocale();
@@ -165,7 +168,8 @@ function MashwarakArtwork() {
 }
 
 export function ProjectArtwork({ project }: { project: Project }) {
-  const { t } = useLocale();
+  const { t, language } = useLocale();
+  if (project.cms?.cover) return <CmsValue kind="projects" slug={project.slug} path={['cover']} label="Project cover" image><SmartImage className="project-cover" src={mediaUrl(project.cms.cover.url)} alt={project.cms.cover.alt[language]} width={1200} height={850} /></CmsValue>;
 
   if (project.slug === 'syrian-menu') {
     return <SyrianMenuArtwork />;

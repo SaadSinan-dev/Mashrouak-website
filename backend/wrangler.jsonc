@@ -1,0 +1,29 @@
+// Retained D1 source configuration for read-only backup/export.
+// The application backend runs on native Node.js/PostgreSQL through Render.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "mashrouak-api",
+  "account_id": "2bb9190a914533101fb040ac8bf02a4e",
+  "compatibility_date": "2026-11-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mashrouak-platform",
+      "database_id": "60063745-f763-4643-aa0d-53911c8c1151",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "env": {
+    "production": {
+      "name": "mashrouak-api",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "mashrouak-platform",
+          "database_id": "60063745-f763-4643-aa0d-53911c8c1151",
+          "migrations_dir": "migrations"
+        }
+      ]
+    }
+  }
+}

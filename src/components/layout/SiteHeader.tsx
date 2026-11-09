@@ -1,8 +1,9 @@
+import {CmsText} from '../../features/content/Editable';
 import { useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ArrowUpLeft, ArrowUpRight, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useLocale, useTheme } from '../../app/providers/PreferencesProvider';
+import { useLocale, useTheme } from '../../app/providers/preferences-context';
 import { Logo } from '../shared/Logo';
 import { LanguageToggle, ThemeToggle } from '../shared/PreferenceControls';
 import { ButtonLink } from '../ui/Button';
@@ -68,7 +69,7 @@ export function SiteHeader() {
                   <div><LanguageToggle /><ThemeToggle /></div>
                 </div>
                 <ButtonLink className="mobile-menu-panel__cta" to="/contact" onClick={() => setMobileOpen(false)}>
-                  {t('common.discuss')} <Arrow size={17} />
+                  <CmsText k={'common.discuss'}/> <Arrow size={17} />
                 </ButtonLink>
                 <p className="mobile-menu-panel__note">MASHROUAK.NET</p>
               </Dialog.Content>
@@ -88,7 +89,7 @@ export function SiteHeader() {
             <ThemeToggle />
           </div>
           <ButtonLink className="site-header__cta" to="/contact" size="sm">
-            {t('common.discuss')} <Arrow size={16} aria-hidden="true" />
+            <CmsText k={'common.discuss'}/> <Arrow size={16} aria-hidden="true" />
           </ButtonLink>
         </div>
       </div>

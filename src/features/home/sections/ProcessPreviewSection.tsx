@@ -1,15 +1,16 @@
+import {CmsText} from '../../content/Editable';
 import { useRef } from 'react';
 import { ArrowUpLeft, ArrowUpRight } from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import type { TranslationKey } from '../../../locales/messages';
 import { Link } from 'react-router-dom';
-import { useLocale } from '../../../app/providers/PreferencesProvider';
+import { useLocale } from '../../../app/providers/preferences-context';
 import { Reveal } from '../../../components/shared/Reveal';
 import { Container } from '../../../components/ui/Container';
 import { SectionHeading } from '../../../components/ui/SectionHeading';
 
 export function ProcessPreviewSection() {
-  const { t, isArabic } = useLocale();
+  const { isArabic } = useLocale();
   const Arrow = isArabic ? ArrowUpLeft : ArrowUpRight;
   const trackRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
@@ -20,8 +21,8 @@ export function ProcessPreviewSection() {
     <section className="process-preview section-space">
       <Container>
         <div className="process-preview__heading">
-          <Reveal><SectionHeading eyebrow={t('process.eyebrow')} title={<>{t('process.title')}<br /><span>{t('process.emphasis')}</span></>} description={t('process.description')} /></Reveal>
-          <Reveal delay={0.12}><Link to="/process" className="text-link">{t('process.details')} <Arrow size={17} /></Link></Reveal>
+          <Reveal><SectionHeading eyebrow={<CmsText k="process.eyebrow"/>} title={<><CmsText k="process.title"/><br /><span><CmsText k="process.emphasis"/></span></>} description={<CmsText k="process.description"/>} /></Reveal>
+          <Reveal delay={0.12}><Link to="/process" className="text-link"><CmsText k="process.details"/> <Arrow size={17} /></Link></Reveal>
         </div>
         <div ref={trackRef} className="process-track">
           <motion.span className="process-track__progress" style={reduceMotion ? undefined : { scaleX: progress }} aria-hidden="true" />
@@ -30,8 +31,8 @@ export function ProcessPreviewSection() {
               <article className="process-track__step">
                 <span className="process-track__number" dir="ltr">0{index + 1}</span>
                 <span className="process-track__line" />
-                <h3>{t(`step.${index + 1}.title` as TranslationKey)}</h3>
-                <p>{t(`step.${index + 1}.subtitle` as TranslationKey)}</p>
+                <h3><CmsText k={`step.${index + 1}.title` as TranslationKey}/></h3>
+                <p><CmsText k={`step.${index + 1}.subtitle` as TranslationKey}/></p>
               </article>
             </Reveal>
           ))}

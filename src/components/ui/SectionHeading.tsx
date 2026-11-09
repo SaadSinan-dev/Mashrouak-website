@@ -2,9 +2,9 @@ import type { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
 
 interface SectionHeadingProps {
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   title: ReactNode;
-  description?: string;
+  description?: ReactNode;
   align?: 'start' | 'center';
   inverse?: boolean;
   className?: string;

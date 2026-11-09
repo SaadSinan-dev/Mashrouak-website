@@ -1,7 +1,7 @@
+import { useProjects } from '../../../app/providers/content-context';
 import { ArrowUpLeft, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useLocale } from '../../../app/providers/PreferencesProvider';
-import { getLocalizedProjects } from '../../../locales/content';
+import { useLocale } from '../../../app/providers/preferences-context';
 import { ProjectCard } from '../../../components/shared/ProjectCard';
 import { Reveal } from '../../../components/shared/Reveal';
 import { Container } from '../../../components/ui/Container';
@@ -10,7 +10,7 @@ import { SectionHeading } from '../../../components/ui/SectionHeading';
 export function ProjectsSection() {
   const { t, language, isArabic } = useLocale();
   const Arrow = isArabic ? ArrowUpLeft : ArrowUpRight;
-  const projects = getLocalizedProjects(language);
+  const projects = useProjects(language).filter(project=>project.cms?.featured??true);
   return (
     <section className="projects-section section-space" id="work">
       <Container>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="icon" href="/brand/symbol-colour.svg" />
+    <title>Mashrouak.net — Administration</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #f6f4ee;
+        color: #142b3a;
+      }
+      .admin-boot {
+        min-height: 100dvh;
+      }
+      .admin-boot header {
+        height: 100px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #d8e0dc;
+        padding: 24px 5vw;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .admin-boot img {
+        object-fit: contain;
+      }
+      .admin-boot main {
+        max-width: 1200px;
+        padding: 90px 50px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12vw;
+        align-items: center;
+      }
+      .admin-boot .boot-column {
+        display: grid;
+        gap: 22px;
+      }
+      .admin-boot i {
+        display: block;
+        height: 12px;
+        border-radius: 3px;
+        background: #dce3df;
+        overflow: hidden;
+        position: relative;
+      }
+      .admin-boot i:after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          100deg,
+          transparent,
+          #ffffff77,
+          transparent
+        );
+        transform: translateX(-100%);
+        animation: admin-boot-shimmer 1.9s ease-in-out infinite;
+      }
+      .admin-boot .boot-heading {
+        height: 46px;
+      }
+      .admin-boot .boot-form {
+        padding: 42px;
+        border: 1px solid #d8e0dc;
+        background: #fff;
+        border-radius: 5px;
+      }
+      .admin-boot .boot-input {
+        height: 46px;
+      }
+      .admin-boot .boot-label {
+        width: 100px;
+        height: 9px;
+        margin-bottom: -10px;
+      }
+      .admin-boot button {
+        border: 0;
+        background: #0b625d;
+        color: #f6f4ee;
+        padding: 12px 25px;
+        min-height: 44px;
+        cursor: pointer;
+      }
+      .admin-boot [hidden] {
+        display: none;
+      }
+      html[data-theme="dark"],
+      html[data-theme="dark"] body {
+        background: #102733;
+        color: #eaf0ec;
+      }
+      html[data-theme="dark"] .admin-boot .boot-form {
+        background: #152f3c;
+        border-color: #31505a;
+      }
+      html[data-theme="dark"] .admin-boot i {
+        background: #284551;
+      }
+      html[data-theme="dark"] .admin-boot header {
+        border-color: #31505a;
+      }
+      html[data-theme="dark"] .admin-boot i:after {
+        background: linear-gradient(
+          100deg,
+          transparent,
+          #eaf0ec18,
+          transparent
+        );
+      }
+      @keyframes admin-boot-shimmer {
+        to {
+          transform: translateX(100%);
+        }
+      }
+      @media (max-width: 640px) {
+        .admin-boot header {
+          height: 90px;
+          padding-inline: 20px;
+        }
+        .admin-boot main {
+          grid-template-columns: 1fr;
+          padding: 35px 20px;
+          gap: 35px;
+        }
+        .admin-boot .boot-heading {
+          height: 35px;
+        }
+        .admin-boot .boot-form {
+          padding: 28px 22px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .admin-boot i:after {
+          animation: none;
+        }
+      }
+    </style>
+    <script>
+      try {
+        const root = document.documentElement;
+        const lang = localStorage.getItem("mashrouak-admin-language");
+        const theme = localStorage.getItem("mashrouak-admin-theme");
+        if (lang === "en") {
+          root.lang = "en";
+          root.dir = "ltr";
+        }
+        if (theme === "dark") root.dataset.theme = "dark";
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div
+        class="admin-boot"
+        role="status"
+        aria-busy="true"
+        aria-label="جارٍ تحميل لوحة التحكم"
+      >
+        <header>
+          <img
+            id="boot-admin-logo"
+            src="/brand/logo-horizontal-colour.svg"
+            width="180"
+            height="54"
+            alt="مشروعك.net"
+          /><i style="width: 80px; height: 36px"></i>
+        </header>
+        <main>
+          <div class="boot-column" aria-hidden="true">
+            <i style="width: 190px"></i><i class="boot-heading"></i
+            ><i class="boot-heading" style="width: 82%"></i><i></i
+            ><i style="width: 65%"></i
+            ><i style="width: 55%; height: 120px; margin-top: 25px"></i>
+          </div>
+          <div class="boot-column boot-form" aria-hidden="true">
+            <i style="width: 130px"></i
+            ><i class="boot-heading" style="width: 60%; height: 30px"></i
+            ><i class="boot-label"></i><i class="boot-input"></i
+            ><i class="boot-label"></i><i class="boot-input"></i
+            ><i class="boot-input" style="margin-top: 10px"></i
+            ><button id="admin-boot-retry" hidden>إعادة المحاولة</button>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script>
+      const retry = document.getElementById("admin-boot-retry");
+      retry.addEventListener("click", () => location.reload());
+      const boot = document.querySelector(".admin-boot");
+      const english = document.documentElement.lang === "en";
+      const dark = document.documentElement.dataset.theme === "dark";
+      if (english) boot.setAttribute("aria-label", "Loading administration");
+      document.getElementById("boot-admin-logo").src = english
+        ? "/brand/logo-horizontal-en-" + (dark ? "ivory" : "colour") + ".png"
+        : "/brand/logo-horizontal-" + (dark ? "ivory" : "colour") + ".svg";
+      window.addEventListener(
+        "error",
+        (event) => {
+          const current = document.querySelector(".admin-boot");
+          if (
+            current &&
+            (event.target?.tagName === "SCRIPT" || event instanceof ErrorEvent)
+          ) {
+            current.removeAttribute("aria-busy");
+            current.querySelector(".boot-form").removeAttribute("aria-hidden");
+            const button = document.getElementById("admin-boot-retry");
+            button.hidden = false;
+            button.textContent = english ? "Retry" : "إعادة المحاولة";
+          }
+        },
+        true,
+      );
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

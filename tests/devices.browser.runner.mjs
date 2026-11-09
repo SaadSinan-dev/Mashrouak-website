@@ -1,0 +1,1 @@
+import {chromium} from 'playwright';import{deviceChecks}from'./devices.browser.qa.mjs';const browser=await chromium.launch({headless:true});try{const checks=await deviceChecks(browser);console.log('PASS:',checks.length,'3D browser checks');}finally{await browser.close();}

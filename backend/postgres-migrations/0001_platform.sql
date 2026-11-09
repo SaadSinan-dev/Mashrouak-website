@@ -1,0 +1,21 @@
+-- PostgreSQL production schema. Original D1 remains a read-only migration source.
+CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, name TEXT NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('owner','editor','support')), active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1)), created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE TABLE sessions (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at BIGINT NOT NULL);
+CREATE INDEX sessions_expiry ON sessions(expires_at);
+CREATE TABLE content (id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK(kind IN ('pages','services','projects','results','settings','knowledge')), slug TEXT NOT NULL, sort_order INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','published','archived')), draft TEXT NOT NULL CHECK(jsonb_typeof(draft::jsonb)='object'), published TEXT CHECK(published IS NULL OR jsonb_typeof(published::jsonb)='object'), version INTEGER NOT NULL DEFAULT 1, updated_at TIMESTAMPTZ NOT NULL, UNIQUE(kind,slug));
+CREATE TABLE revisions (id TEXT PRIMARY KEY, content_id TEXT NOT NULL REFERENCES content(id) ON DELETE CASCADE, version INTEGER NOT NULL, data TEXT NOT NULL CHECK(jsonb_typeof(data::jsonb)='object'), actor_id TEXT REFERENCES users(id), created_at TIMESTAMPTZ NOT NULL);
+CREATE INDEX content_public ON content(kind,status,sort_order);
+CREATE INDEX revision_content ON revisions(content_id,version DESC);
+CREATE TABLE audit_logs (id TEXT PRIMARY KEY, actor_id TEXT, action TEXT NOT NULL, target_id TEXT, detail TEXT NOT NULL DEFAULT '', created_at TIMESTAMPTZ NOT NULL);
+CREATE INDEX audit_time ON audit_logs(created_at);
+CREATE TABLE conversations (id TEXT PRIMARY KEY, visitor_hash TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, language TEXT NOT NULL CHECK(language IN ('ar','en')), status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','active','resolved')), assigned_to TEXT REFERENCES users(id) ON DELETE SET NULL, ai_state TEXT NOT NULL DEFAULT 'idle' CHECK(ai_state IN ('idle','running','failed')), created_at TIMESTAMPTZ NOT NULL, updated_at TIMESTAMPTZ NOT NULL);
+CREATE INDEX visitor_conversations ON conversations(visitor_hash,created_at);
+CREATE TABLE messages (id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE, sender TEXT NOT NULL CHECK(sender IN ('visitor','operator','assistant')), body TEXT NOT NULL, client_id TEXT NOT NULL, operator_id TEXT REFERENCES users(id), read_at TIMESTAMPTZ, created_at TIMESTAMPTZ NOT NULL, UNIQUE(conversation_id,sender,client_id));
+CREATE INDEX message_history ON messages(conversation_id,created_at);
+CREATE TABLE media (id TEXT PRIMARY KEY, object_key TEXT NOT NULL UNIQUE, filename TEXT NOT NULL, type TEXT NOT NULL, size INTEGER NOT NULL, alt_ar TEXT NOT NULL, alt_en TEXT NOT NULL, visibility TEXT NOT NULL CHECK(visibility IN ('public','private')), created_at TIMESTAMPTZ NOT NULL, cloudinary_asset_id TEXT UNIQUE, cloudinary_public_id TEXT UNIQUE, cloudinary_resource_type TEXT CHECK(cloudinary_resource_type IS NULL OR cloudinary_resource_type='image'), cloudinary_delivery_type TEXT CHECK(cloudinary_delivery_type IS NULL OR cloudinary_delivery_type='authenticated'), cloudinary_version BIGINT, cloudinary_format TEXT, cloudinary_secure_url TEXT, width INTEGER, height INTEGER, revision INTEGER NOT NULL DEFAULT 1, updated_at TIMESTAMPTZ);
+CREATE TABLE rate_limits (key TEXT PRIMARY KEY, count INTEGER NOT NULL, reset_at BIGINT NOT NULL);
+CREATE TABLE preview_tokens (token_hash TEXT PRIMARY KEY, content_id TEXT NOT NULL REFERENCES content(id) ON DELETE CASCADE, expires_at BIGINT NOT NULL);
+CREATE TABLE media_cleanup (public_id TEXT PRIMARY KEY, not_before BIGINT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE publication_state (id INTEGER PRIMARY KEY CHECK(id=1), revision BIGINT NOT NULL DEFAULT 0, updated_at TIMESTAMPTZ NOT NULL DEFAULT now());
+INSERT INTO publication_state(id) VALUES(1);
+CREATE TABLE scheduled_jobs (name TEXT PRIMARY KEY, last_completed_at TIMESTAMPTZ);

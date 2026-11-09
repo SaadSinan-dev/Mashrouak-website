@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { useLocale } from './providers/PreferencesProvider';
+import { useLocale } from './providers/preferences-context';
 
 interface ErrorBoundaryProps { children: ReactNode }
 interface ErrorBoundaryState { hasError: boolean }

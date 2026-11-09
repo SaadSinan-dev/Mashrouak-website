@@ -1,7 +1,15 @@
 node_modules
 dist
 coverage
-.env
-.env.local
+.env*
+!.env.example
+.dev.vars*
+.wrangler
+.local
+backend/backup*.sql
+artifacts
+playwright-report
+test-results
+*.zip
 *.tsbuildinfo
 .DS_Store

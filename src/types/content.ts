@@ -1,4 +1,5 @@
-export type ServiceCategory =
+export type ServiceCategory = string;
+export type BuiltInServiceCategory =
   | 'websites'
   | 'ecommerce'
   | 'mobile'
@@ -22,6 +23,7 @@ export interface Service {
 export type ProjectCategory = 'web' | 'commerce' | 'mobile' | 'systems';
 
 export interface Project {
+  cms?: import('../../shared/schema').ProjectContent;
   slug: string;
   name: string;
   category: ProjectCategory;

@@ -1,5 +1,5 @@
 import { Moon, Sun } from 'lucide-react';
-import { useLocale, useTheme } from '../../app/providers/PreferencesProvider';
+import { useLocale, useTheme } from '../../app/providers/preferences-context';
 
 export function LanguageToggle({ compact = false }: { compact?: boolean }) {
   const { language, toggleLanguage, t } = useLocale();
