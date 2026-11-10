@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Public network lifecycle test</title>
+    <style>
+      :root {
+        --ivory: #f6f4ee;
+        --mist: #e9efec;
+        color: #142b3a;
+      }
+      :root[data-theme="dark"] {
+        --ivory: #102733;
+        --mist: #193744;
+        color: #eaf0ec;
+      }
+      body {
+        margin: 0;
+        background: var(--ivory);
+        font: 16px/1.7 sans-serif;
+      }
+      #root {
+        min-height: 100vh;
+      }
+      nav {
+        padding: 24px;
+      }
+      button {
+        margin: 8px;
+        padding: 12px;
+      }
+      section {
+        min-height: 75vh;
+        padding: 7vw;
+        box-sizing: border-box;
+        background: var(--ivory);
+      }
+      p {
+        max-width: 420px;
+      }
+      footer {
+        min-height: 25vh;
+        padding: 40px;
+        color: #f6f4ee;
+        background: #142b3a;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <nav>
+        <button id="mount">Mount background</button
+        ><button id="dispose">Unmount background</button>
+      </nav>
+      <main>
+        <section class="hero-section">
+          <h1>Network lifecycle</h1>
+          <p>Readable foreground with an independent animation lifetime.</p>
+        </section>
+      </main>
+      <footer class="site-footer"><p>Existing dark section</p></footer>
+    </div>
+    <script type="module">
+      import "../src/components/layout/public-atmosphere.css";
+      import { createPublicNetwork } from "../src/components/layout/public-network-renderer.ts";
+      let cleanup;
+      const mount = () => {
+        cleanup?.();
+        const host = document.createElement("div");
+        host.className = "public-atmosphere";
+        host.innerHTML = '<canvas class="public-atmosphere__network"></canvas>';
+        document.querySelector("#root").prepend(host);
+        const dispose = createPublicNetwork(host);
+        cleanup = () => {
+          dispose();
+          host.remove();
+          cleanup = undefined;
+        };
+      };
+      document.querySelector("#mount").onclick = mount;
+      document.querySelector("#dispose").onclick = () => cleanup?.();
+      mount();
+    </script>
+  </body>
+</html>

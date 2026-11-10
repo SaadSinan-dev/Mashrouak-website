@@ -1,16 +1,12 @@
-/* The public router owns the background for the lifetime of the route tree. */
 #root:has(.public-atmosphere) {
   isolation: isolate;
-  --page-paper: transparent;
-  --page-mist: color-mix(in srgb, var(--mist) 68%, transparent);
 }
 
 .public-atmosphere {
-  --ambient-ink: #487b69;
-  --ambient-light: rgb(89 150 122 / 10%);
-  --ambient-shade: rgb(47 115 93 / 4%);
-  --ambient-glint: rgb(255 255 250 / 38%);
-  --contour-strength: .10;
+  --network-ink: #0b625d;
+  --network-signal: #26775e;
+  --network-night: #142b3a;
+  --network-on-night: #8fc6bc;
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -18,54 +14,84 @@
   pointer-events: none;
   contain: strict;
 }
-
 :root[data-theme="dark"] .public-atmosphere {
-  --ambient-ink: #8fc6bc;
-  --ambient-light: rgb(66 129 103 / 14%);
-  --ambient-shade: rgb(3 18 24 / 16%);
-  --ambient-glint: rgb(122 171 146 / 4%);
-  --contour-strength: .12;
+  --network-ink: #8fc6bc;
+  --network-signal: #b4deca;
+  --network-night: #0b202b;
+}
+.public-atmosphere__network {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-/* One moving light field. The offset stops give the oblique edge a soft bevel. */
-.public-atmosphere::before {
-  content: "";
-  position: absolute;
-  inset: -6%;
-  background:
-    linear-gradient(133deg, transparent 47%, var(--ambient-shade) 61%,
-      var(--ambient-glint) 62.6%, transparent 71%),
-    linear-gradient(151deg, transparent 50%, var(--ambient-light) 83%, transparent),
-    radial-gradient(ellipse at 9% 95%, var(--ambient-light), transparent 43%);
-  animation: mashrouak-ambient-light 64s ease-in-out infinite alternate;
+/* The canvas paints the existing section colours beneath the network. Cards,
+   forms, navigation and models keep their own backgrounds and stacking. */
+:is(
+  .hero-section,
+  .services-section,
+  .process-preview,
+  .page-hero--light,
+  .services-overview,
+  .portfolio-page,
+  .case-hero,
+  .case-approach,
+  .case-related,
+  .about-statement,
+  .about-commitment,
+  .process-detail,
+  .contact-page,
+  .privacy-page,
+  .case-gallery,
+  .case-final,
+  .results-section,
+  .chat-shell
+) {
+  --network-surface: paper;
+}
+:is(
+  .challenges-section,
+  .why-section,
+  .faq-section,
+  .service-fit-section,
+  .case-overview,
+  .case-features,
+  .about-values,
+  .process-collaboration,
+  .contact-bottom,
+  .not-found-page,
+  .case-development
+) {
+  --network-surface: mist;
+}
+:is(
+  .projects-section,
+  .cta-section,
+  .site-footer,
+  .page-hero--dark,
+  .case-analysis
+) {
+  --network-surface: night;
+}
+.cms-slot--ivory > section,
+.managed-section--ivory {
+  --network-surface: paper;
+}
+.cms-slot--mist > section,
+.managed-section--mist {
+  --network-surface: mist;
+}
+.cms-slot--petrol > section,
+.managed-section--petrol {
+  --network-surface: petrol;
 }
 
-/* Two non-repeating corner contours echo the open bends in the brand symbol. */
-.public-atmosphere::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: var(--ambient-ink);
-  opacity: var(--contour-strength);
-  mask: url("./ambient-contours.svg") center / 100% 100% no-repeat;
+/* Activate only after a successful paint; missing Canvas support keeps CSS surfaces. */
+#root:has(.public-atmosphere[data-ready]) [data-network-surface] {
+  background-color: transparent !important;
 }
-
-@keyframes mashrouak-ambient-light {
-  0% { transform: translate3d(-2.3%, .8%, 0) rotate(-.6deg); }
-  58% { transform: translate3d(.7%, -1.5%, 0) rotate(.3deg); }
-  100% { transform: translate3d(2.1%, .5%, 0) rotate(.6deg); }
-}
-
-@media (max-width: 640px) {
-  .public-atmosphere::after { mask-size: 165% 100%; mask-position: 72% center; opacity: calc(var(--contour-strength) * .8); }
-  .public-atmosphere::before { inset: -4%; animation-duration: 80s; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .public-atmosphere::before { animation: none; }
-}
-
 @media print, (forced-colors: active) {
-  .public-atmosphere { display: none; }
-  #root:has(.public-atmosphere) { --page-paper: var(--ivory); --page-mist: var(--mist); }
+  .public-atmosphere {
+    display: none;
+  }
 }
