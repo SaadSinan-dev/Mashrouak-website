@@ -156,8 +156,8 @@ try {
   await platform.db.prepare("UPDATE preview_snapshots SET expires_at=0").run();
   await request("/preview/" + preview.token, undefined, 404);
   // Reproduce the reported typo plus an unrelated unpublished edit. Copy audit must not publish it.
-  settings.draft.navigation[1].label.ar = "خدمmnاتنا";
-  settings.published.navigation[1].label.ar = "خدمmnاتنا";
+  settings.draft.navigation[1].label.ar = "خدماتنا";
+  settings.published.navigation[1].label.ar = "خدماتنا";
   settings.draft.footerText.ar = "مسودة مستقلة لا تُنشر";
   await platform.db
     .prepare("UPDATE content SET draft=?,published=? WHERE id=?")

@@ -2,7 +2,7 @@
 
 ## Observed evidence
 
-The reported word `خدمmnاتنا` was stored in **published** `settings/global → navigation[1].label.ar`. The same record's draft already contained `خدماتنا`. Its most recent save occurred after its most recent publication: 17:29:54 versus 17:29:48 on 9 November 2026, Riyadh time. The old editor badge still said Published whenever a previous published snapshot existed, even when the saved draft was newer. This made a saved correction look public when it was still private.
+The reported word `خدماتنا` was stored in **published** `settings/global → navigation[1].label.ar`. The same record's draft already contained `خدماتنا`. Its most recent save occurred after its most recent publication: 17:29:54 versus 17:29:48 on 9 November 2026, Riyadh time. The old editor badge still said Published whenever a previous published snapshot existed, even when the saved draft was newer. This made a saved correction look public when it was still private.
 
 The publishing endpoint did await its database operation. Inspection did **not** establish that D1 silently refused a second committed update. That claim would go beyond the evidence. The confirmed delivery defects were the misleading state above, missing publication-aware client invalidation, and a resource-cache race: invalidation could coalesce onto an older in-flight request and let its older snapshot remain authoritative in the client. The regression test reproduces older responses arriving after the newest response.
 

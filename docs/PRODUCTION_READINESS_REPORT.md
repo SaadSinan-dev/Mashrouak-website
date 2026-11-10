@@ -80,7 +80,7 @@ Confirmed CMS defects were a misleading Published badge with a newer private dra
 
 The fixed publication transaction commits snapshots, routes/order, audit, increasing revision and notification together. Dashboard success follows backend commit and public-snapshot verification. Public content is read consistently and cannot include drafts. Cache generations abort/ignore old responses; streaming events plus conditional revision fallback deliver subsequent publications. Dynamic content has revalidation/CDN no-store; hashed static assets and image caching remain efficient. No service worker or React Query cache is involved.
 
-`خدمmnاتنا` is corrected to `خدماتنا` in published navigation and the editor. Both-language audit corrected confirmed grammar, sentence boundaries and consistent catalog/activity-log terminology, preserving all six offerings and layout. Copy corrections transform drafts/published snapshots independently, preserving unrelated private edits and recording revisions/audits. This is verified locally; the preserved raw D1 import source predates those corrections, so the approved correction command must accompany its future production import.
+`خدماتنا` is corrected to `خدماتنا` in published navigation and the editor. Both-language audit corrected confirmed grammar, sentence boundaries and consistent catalog/activity-log terminology, preserving all six offerings and layout. Copy corrections transform drafts/published snapshots independently, preserving unrelated private edits and recording revisions/audits. This is verified locally; the preserved raw D1 import source predates those corrections, so the approved correction command must accompany its future production import.
 
 ## F. Remaining owner actions
 

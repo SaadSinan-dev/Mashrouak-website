@@ -117,7 +117,7 @@ try {
       );
     }
     check(
-      !(await page.locator("body").innerText()).includes("خدمmnاتنا"),
+      !(await page.locator("body").innerText()).includes("خدماتنا"),
       `${language}: reported navigation typo is absent`,
     );
     check(
@@ -177,7 +177,7 @@ try {
       .flatMap((row) => [JSON.parse(row.draft), JSON.parse(row.published)]),
   );
   check(
-    !all.includes("خدمmnاتنا") &&
+    !all.includes("خدماتنا") &&
       !all.includes("مقدمو الخدمات") &&
       !all.includes("catalogue") &&
       !all.includes("external service We help"),

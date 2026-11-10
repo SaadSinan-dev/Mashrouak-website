@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <meta charset="utf-8" />
+  <title>3D scene lifecycle test harness</title>
+  <style>
+    body {
+      margin: 0;
+      background: #102733;
+    }
+    #scenes {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .host {
+      position: relative;
+      width: 610px;
+      height: 445px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <div id="scenes"></div>
+  <script type="module">
+    import { createProductScene } from "/src/features/home/sections/product-scene-renderer.ts";
+    const instances = [],
+      histories = [];
+    window.sceneHarness = {
+      instances,
+      histories,
+      mount(theme = "dark", language = "en") {
+        const host = document.createElement("div");
+        host.className = "host";
+        document.querySelector("#scenes").append(host);
+        const id = instances.length;
+        histories[id] = [{ phase: "loading" }];
+        instances.push(
+          createProductScene(host, { theme, language }, (status) =>
+            histories[id].push(status),
+          ),
+        );
+        return id;
+      },
+      snapshots: () => instances.map((instance) => instance.inspect()),
+      dispose() {
+        instances.forEach((instance) => instance.dispose());
+      },
+    };
+  </script>
+</html>

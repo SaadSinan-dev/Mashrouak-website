@@ -27,7 +27,8 @@
     "test:publishing:browser": "tsx tests/publishing.browser.runner.mjs",
     "test:publishing": "tsx tests/publishing.integration.ts",
     "test:visual:browser": "tsx tests/visual.browser.runner.mjs",
-    "test:devices:browser": "tsx tests/devices.browser.runner.mjs"
+    "test:devices:browser": "tsx tests/devices.browser.runner.mjs",
+    "test:scene:browser": "tsx tests/scene.browser.runner.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

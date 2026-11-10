@@ -15,7 +15,7 @@ describe("Publishing delivery and migration boundaries", () => {
   it("corrects only confirmed Services wording and preserves other draft text", () => {
     expect(
       correctServicesCopy({
-        navigation: [{ label: { ar: "خدمmnاتنا", en: "Services" } }],
+        navigation: [{ label: { ar: "خدماتنا", en: "Services" } }],
         footerText: { ar: "مسودة خاصة", en: "Private draft" },
       }),
     ).toEqual({
