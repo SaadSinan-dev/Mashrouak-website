@@ -1296,6 +1296,37 @@
   background: #193744;
   transform: rotate(8deg);
 }
+/* Keep the existing dark wireframe; use the site's ivory and teal in light mode. */
+:root[data-theme="light"] .hero-scene-skeleton {
+  --mist: #d7e4de;
+  --steel: #5d8075;
+  --ivory: #f6f4ee;
+}
+:root[data-theme="light"] .hero-scene-skeleton__desktop,
+:root[data-theme="light"] .hero-scene-skeleton__phone {
+  background-color: color-mix(in srgb, var(--teal) 6%, #f6f4ee);
+  border-color: color-mix(in srgb, var(--teal) 70%, #f6f4ee);
+}
+:root[data-theme="light"] .hero-scene-skeleton__phone {
+  border-color: color-mix(in srgb, var(--teal) 80%, #f6f4ee);
+}
+:root[data-theme="light"] .sk-product-visual {
+  background-color: transparent;
+}
+.sk-product-visual,
+.hero-scene-skeleton__desktop,
+.hero-scene-skeleton__phone,
+.hero-scene-skeleton .skeleton {
+  transition: background-color 250ms ease, border-color 250ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-product-visual,
+  .hero-scene-skeleton__desktop,
+  .hero-scene-skeleton__phone,
+  .hero-scene-skeleton .skeleton {
+    transition: none;
+  }
+}
 .hero-visual--initializing .product-scene {
   opacity: 0;
 }
