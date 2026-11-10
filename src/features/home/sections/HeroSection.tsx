@@ -205,9 +205,7 @@ export function HeroSection() {
     <section className="hero-section">
       <Container className="hero-section__layout">
         <div className="hero-section__copy">
-          <p className="eyebrow">
-            <span className="eyebrow__dot" /> <CmsText k="hero.eyebrow" />
-          </p>
+
           <h1>
             <CmsText k="hero.title" />{" "}
             <em>
