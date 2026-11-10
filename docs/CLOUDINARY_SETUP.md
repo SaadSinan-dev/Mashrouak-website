@@ -1,4 +1,14 @@
-# Cloudinary setup
+# Cloudinary setup — current native backend
+
+The active backend is Node.js/Hono with PostgreSQL. Follow the current [Arabic deployment guide](../DEPLOYMENT-GUIDE.txt) and [implementation report](PRODUCTION_UPGRADE_REPORT.md). Local Cloudinary credentials are configured: live read-only verification confirmed both signed optimized delivery and an original whose SHA-256 matches the preserved source. No provider writes were made during that verification.
+
+Keep `backend/.env` private. A fresh installation needs a UTF8 PostgreSQL `DATABASE_URL` and the Cloudinary cloud name, API key and API secret there. Apply native migrations and import existing data before seeding. `npm run media:audit -w @mashrouak/backend` reads the old source; `media:migrate` now updates PostgreSQL after verifying bytes and leaves D1/source files intact. The current historical local image already has provider metadata.
+
+For production, enter the same Cloudinary values as **Render server secrets**, independently of local files. The Pages projects use their own server-side API proxy configuration and never receive provider credentials. Render provisioning and production deployment remain pending approval.
+
+## Archived instructions for the former Worker architecture
+
+The instructions below document the earlier migration. Worker/D1 deployment commands below are superseded; use the current guide for Node.js/PostgreSQL production.
 
 ## Enter credentials and start locally
 

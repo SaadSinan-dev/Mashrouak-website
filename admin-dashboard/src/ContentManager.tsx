@@ -304,7 +304,7 @@ function ContentEditor({
         return;
       }
       if (type === "preview") {
-        setPreview('');
+        setPreview("");
         const result = await api<{ token: string }>(
           `/admin/content/${entry.id}/preview`,
           { method: "POST" },
@@ -333,18 +333,21 @@ function ContentEditor({
                 : kind === "services"
                   ? "/services"
                   : "/";
-        setPreview(`${origin}${path}?preview=${result.token}&preview_language=${language}`);
+        setPreview(
+          `${origin}${path}?preview=${result.token}&preview_language=${language}`,
+        );
         return;
       }
-      const result = type === "publish" ? await publishContent(entry) : await api<{ entry: ContentEntry }>(
-        `/admin/content/${entry.id}/state`,
-        {
-          method: "POST",
-          body: JSON.stringify(
-            { status: type, version: entry.version },
-          ),
-        },
-      );
+      const result =
+        type === "publish"
+          ? await publishContent(entry)
+          : await api<{ entry: ContentEntry }>(
+              `/admin/content/${entry.id}/state`,
+              {
+                method: "POST",
+                body: JSON.stringify({ status: type, version: entry.version }),
+              },
+            );
       setEntry(result.entry);
       setData(result.entry.draft);
       onChange(result.entry);
@@ -453,8 +456,13 @@ function ContentEditor({
           <p>{t("draftIsolation")}</p>
         </div>
         {entry && (
-          <span className={`status-badge status-badge--${entry.published && JSON.stringify(data) !== JSON.stringify(entry.published) ? "draft" : entry.status}`}>
-            {entry.published && JSON.stringify(data) !== JSON.stringify(entry.published) ? t("unpublishedChanges") : t(entry.status)}
+          <span
+            className={`status-badge status-badge--${entry.published && JSON.stringify(data) !== JSON.stringify(entry.published) ? "draft" : entry.status}`}
+          >
+            {entry.published &&
+            JSON.stringify(data) !== JSON.stringify(entry.published)
+              ? t("unpublishedChanges")
+              : t(entry.status)}
           </span>
         )}
       </div>

@@ -11,8 +11,21 @@ import {
   type SettingsContent,
 } from "../../shared/schema";
 
-export const seedEntries: {kind:ContentKind;slug:string;data:ContentData;order:number}[]=[];
-function entry(kind:ContentKind,slug:string,data:ContentData,order:number){contentSchemas[kind].parse(data);seedEntries.push({kind,slug,data,order});}
+export const seedEntries: {
+  kind: ContentKind;
+  slug: string;
+  data: ContentData;
+  order: number;
+}[] = [];
+function entry(
+  kind: ContentKind,
+  slug: string,
+  data: ContentData,
+  order: number,
+) {
+  contentSchemas[kind].parse(data);
+  seedEntries.push({ kind, slug, data, order });
+}
 const bi = (ar: string, en: string) => ({ ar, en });
 const arProjects = getLocalizedProjects("ar");
 for (const [index, en] of getLocalizedProjects("en").entries()) {
@@ -184,7 +197,21 @@ for (const slug of [
   );
 }
 
-export async function seedPostgres(database: import('./database').Database, channel='mashrouak_publication') {
-const records=seedEntries.map(item=>({id:crypto.randomUUID(),kind:item.kind,slug:item.slug,sort_order:item.order,draft:JSON.stringify(item.data)}));
-return database.prepare("WITH inserted AS (INSERT INTO content(id,kind,slug,sort_order,status,draft,published,published_slug,published_sort_order,updated_at) SELECT id,kind,slug,sort_order,'published',draft,draft,slug,sort_order,now() FROM jsonb_to_recordset(?::jsonb) AS source(id TEXT,kind TEXT,slug TEXT,sort_order INTEGER,draft TEXT) ON CONFLICT(kind,slug) DO NOTHING RETURNING id), publication AS (UPDATE publication_state SET revision=revision+1,updated_at=now() WHERE id=1 AND EXISTS(SELECT 1 FROM inserted) RETURNING revision) SELECT (SELECT count(*) FROM inserted) AS inserted_count,(SELECT pg_notify(?,revision::text) FROM publication) AS notification").bind(JSON.stringify(records),channel).first<{inserted_count:number}>();
+export async function seedPostgres(
+  database: import("./database").Database,
+  channel = "mashrouak_publication",
+) {
+  const records = seedEntries.map((item) => ({
+    id: crypto.randomUUID(),
+    kind: item.kind,
+    slug: item.slug,
+    sort_order: item.order,
+    draft: JSON.stringify(item.data),
+  }));
+  return database
+    .prepare(
+      "WITH inserted AS (INSERT INTO content(id,kind,slug,sort_order,status,draft,published,published_slug,published_sort_order,updated_at) SELECT id,kind,slug,sort_order,'published',draft,draft,slug,sort_order,now() FROM jsonb_to_recordset(?::jsonb) AS source(id TEXT,kind TEXT,slug TEXT,sort_order INTEGER,draft TEXT) ON CONFLICT(kind,slug) DO NOTHING RETURNING id), publication AS (UPDATE publication_state SET revision=revision+1,updated_at=now() WHERE id=1 AND EXISTS(SELECT 1 FROM inserted) RETURNING revision) SELECT (SELECT count(*) FROM inserted) AS inserted_count,(SELECT pg_notify(?,revision::text) FROM publication) AS notification",
+    )
+    .bind(JSON.stringify(records), channel)
+    .first<{ inserted_count: number }>();
 }

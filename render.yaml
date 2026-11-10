@@ -1,16 +1,14 @@
-# Prepared deployment proposal. Applying this Blueprint creates PAID resources.
-# Obtain approval first. No domains/DNS are changed by this file.
+# Render Free only. Existing Neon database is supplied through protected env values.
+# Does not create a database, disk, worker, cron service or paid resource.
 services:
   - type: web
     name: mashrouak-api
     runtime: node
     repo: https://github.com/SaadSinan-dev/Mashrouak-website
     branch: main
-    region: frankfurt
-    plan: 0.5c-512mb
     rootDir: .
+    plan: free
     buildCommand: npm ci --include=dev && npm run build -w @mashrouak/backend
-    preDeployCommand: npm run db:migrate:production -w @mashrouak/backend
     startCommand: npm run start -w @mashrouak/backend
     healthCheckPath: /healthz
     autoDeployTrigger: commit
@@ -20,9 +18,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: mashrouak-postgres
-          property: connectionString
+        sync: false
+      - key: DIRECT_DATABASE_URL
+        sync: false
       - key: PUBLIC_ORIGIN
         sync: false
       - key: ADMIN_ORIGIN
@@ -43,13 +41,3 @@ services:
         value: none
       - key: CHAT_RETENTION_DAYS
         value: 90
-databases:
-  - name: mashrouak-postgres
-    databaseName: mashrouak
-    user: mashrouak
-    region: frankfurt
-    plan: 0.1c-256mb
-    postgresMajorVersion: '18'
-    diskSizeGB: 1
-    storageAutoscalingEnabled: false
-    ipAllowList: []

@@ -1,100 +1,1053 @@
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {ArrowDown,ArrowUp,Check,Eye,EyeOff,History,Monitor,MousePointer2,Redo2,Save,Send,Smartphone,Tablet,Undo2,X} from 'lucide-react';
-import type {ContentData,ContentEntry,PageContent,PublicContent,SettingsContent} from '../../shared/schema';
-import {getField,setField,validPath,humanLabel,type FieldRef} from '../../shared/visual';
-import {messages} from '../../src/locales/messages';
-import {api,errorKey} from './api';
-import {useLocale} from './locale-context';
-import {useResource} from './useResource';
-import {FieldEditor} from './FieldEditor';
-import {ResourceError} from '../../shared/ui/ResourceError';
-import {SkeletonRegion,SkeletonText} from '../../shared/ui/Skeleton';
-import './visual.css';
-type Documents=Record<string,ContentData>;
-type Inventory=FieldRef&{section:string;text:string};
-const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
-const sectionNames:Record<string,[string,string]>={hero:['المقدمة','Hero'],services:['الخدمات','Services'],projects:['الأعمال','Projects'],navigation:['التنقل','Navigation'],footer:['التذييل','Footer'],content:['المحتوى','Content'],challenges:['التحديات','Challenges'],why:['لماذا نحن','Why us'],process:['طريقة العمل','Process'],faq:['الأسئلة الشائعة','FAQ'],cta:['دعوة للتواصل','Call to action'],results:['النتائج','Results']};
-function libraryFields(entry:ContentEntry,data:ContentData):Inventory[]{
- const output:Inventory[]=[];
- const visit=(value:unknown,path:(string|number)[])=>{
-  const key=String(path.at(-1)??'');
-  if(/^(seoTitle|seoDescription|defaultLanguage|defaultTheme|chatEnabled|aiEnabled|approvedBy|verification|icon|kind|id|visible|background)$/.test(key))return;
-  if(path.length===1&&key==='translations'){
-   const translations=(data as SettingsContent).translations;
-   for(const name of Object.keys(translations.en))if(/^(hero|home|services?|work|portfolio|case|about|process|step|contact|footer|cta|challenges|faq|why|results|gallery|visual)\./.test(name)&&!/(error|invalid|loading|sending|consent|placeholder|validation)/i.test(name))output.push({entryId:entry.id,path:['translations',name],kind:'text',label:humanLabel(name),section:'library',text:translations.en[name]??''});
-   return;
-  }
-  if(value&&typeof value==='object'&&!Array.isArray(value)){
-   const object=value as Record<string,unknown>;
-   if(typeof object.ar==='string'&&typeof object.en==='string'){output.push({entryId:entry.id,path,kind:key==='body'?'rich':'text',label:humanLabel(key),section:'library',text:object.en});return;}
-   if('url'in object&&'alt'in object){output.push({entryId:entry.id,path,kind:'image',label:humanLabel(key),section:'library',text:'Image / '+entry.slug});return;}
-   for(const[key,item]of Object.entries(object))visit(item,[...path,key]);
-  }else if(Array.isArray(value)){value.forEach((item,index)=>visit(item,[...path,index]));}
-  else if(value===null&&['cover','image'].includes(key))output.push({entryId:entry.id,path,kind:'image',label:humanLabel(key),section:'library',text:'Image / '+entry.slug});
-  else if(typeof value==='string'||typeof value==='number')output.push({entryId:entry.id,path,kind:/url|to|email|whatsapp/i.test(key)?'link':'text',label:humanLabel(key),section:'library',text:String(value)});
- };
- for(const[key,value]of Object.entries(data))visit(value,[key]);return output;
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  Eye,
+  EyeOff,
+  History,
+  Monitor,
+  MousePointer2,
+  Redo2,
+  Save,
+  Send,
+  Smartphone,
+  Tablet,
+  Undo2,
+  X,
+} from "lucide-react";
+import type {
+  ContentData,
+  ContentEntry,
+  PageContent,
+  PublicContent,
+  SettingsContent,
+} from "../../shared/schema";
+import {
+  getField,
+  setField,
+  validPath,
+  humanLabel,
+  type FieldRef,
+} from "../../shared/visual";
+import { messages } from "../../src/locales/messages";
+import { api, errorKey } from "./api";
+import { useLocale } from "./locale-context";
+import { useResource } from "./useResource";
+import { FieldEditor } from "./FieldEditor";
+import { ResourceError } from "../../shared/ui/ResourceError";
+import { SkeletonRegion, SkeletonText } from "../../shared/ui/Skeleton";
+import "./visual.css";
+type Documents = Record<string, ContentData>;
+type Inventory = FieldRef & { section: string; text: string };
+const same = (a: unknown, b: unknown) =>
+  JSON.stringify(a) === JSON.stringify(b);
+const sectionNames: Record<string, [string, string]> = {
+  hero: ["المقدمة", "Hero"],
+  services: ["الخدمات", "Services"],
+  projects: ["الأعمال", "Projects"],
+  navigation: ["التنقل", "Navigation"],
+  footer: ["التذييل", "Footer"],
+  content: ["المحتوى", "Content"],
+  challenges: ["التحديات", "Challenges"],
+  why: ["لماذا نحن", "Why us"],
+  process: ["طريقة العمل", "Process"],
+  faq: ["الأسئلة الشائعة", "FAQ"],
+  cta: ["دعوة للتواصل", "Call to action"],
+  results: ["النتائج", "Results"],
+};
+function libraryFields(entry: ContentEntry, data: ContentData): Inventory[] {
+  const output: Inventory[] = [];
+  const visit = (value: unknown, path: (string | number)[]) => {
+    const key = String(path.at(-1) ?? "");
+    if (
+      /^(seoTitle|seoDescription|defaultLanguage|defaultTheme|chatEnabled|aiEnabled|approvedBy|verification|icon|kind|id|visible|background)$/.test(
+        key,
+      )
+    )
+      return;
+    if (path.length === 1 && key === "translations") {
+      const translations = (data as SettingsContent).translations;
+      for (const name of Object.keys(translations.en))
+        if (
+          /^(hero|home|services?|work|portfolio|case|about|process|step|contact|footer|cta|challenges|faq|why|results|gallery|visual)\./.test(
+            name,
+          ) &&
+          !/(error|invalid|loading|sending|consent|placeholder|validation)/i.test(
+            name,
+          )
+        )
+          output.push({
+            entryId: entry.id,
+            path: ["translations", name],
+            kind: "text",
+            label: humanLabel(name),
+            section: "library",
+            text: translations.en[name] ?? "",
+          });
+      return;
+    }
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      const object = value as Record<string, unknown>;
+      if (typeof object.ar === "string" && typeof object.en === "string") {
+        output.push({
+          entryId: entry.id,
+          path,
+          kind: key === "body" ? "rich" : "text",
+          label: humanLabel(key),
+          section: "library",
+          text: object.en,
+        });
+        return;
+      }
+      if ("url" in object && "alt" in object) {
+        output.push({
+          entryId: entry.id,
+          path,
+          kind: "image",
+          label: humanLabel(key),
+          section: "library",
+          text: "Image / " + entry.slug,
+        });
+        return;
+      }
+      for (const [key, item] of Object.entries(object))
+        visit(item, [...path, key]);
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => visit(item, [...path, index]));
+    } else if (value === null && ["cover", "image"].includes(key))
+      output.push({
+        entryId: entry.id,
+        path,
+        kind: "image",
+        label: humanLabel(key),
+        section: "library",
+        text: "Image / " + entry.slug,
+      });
+    else if (typeof value === "string" || typeof value === "number")
+      output.push({
+        entryId: entry.id,
+        path,
+        kind: /url|to|email|whatsapp/i.test(key) ? "link" : "text",
+        label: humanLabel(key),
+        section: "library",
+        text: String(value),
+      });
+  };
+  for (const [key, value] of Object.entries(data)) visit(value, [key]);
+  return output;
 }
-export function VisualEditor(){
- const resource=useResource<{entries:ContentEntry[]}>('/admin/content');
- const {ar,language,theme,t}=useLocale();
- if(resource.loading&&!resource.data)return <SkeletonRegion label={t('loading')}><SkeletonText heading/><SkeletonText lines={5}/></SkeletonRegion>;
- if(!resource.data)return <ResourceError language={language} onRetry={resource.retry}/>;
- return <Editor key="visual-editor" initial={resource.data.entries.filter(entry=>entry.kind!=='knowledge')} ar={ar} language={language} theme={theme}/>;
+export function VisualEditor() {
+  const resource = useResource<{ entries: ContentEntry[] }>("/admin/content");
+  const { ar, language, theme, t } = useLocale();
+  if (resource.loading && !resource.data)
+    return (
+      <SkeletonRegion label={t("loading")}>
+        <SkeletonText heading />
+        <SkeletonText lines={5} />
+      </SkeletonRegion>
+    );
+  if (!resource.data)
+    return <ResourceError language={language} onRetry={resource.retry} />;
+  return (
+    <Editor
+      key="visual-editor"
+      initial={resource.data.entries.filter(
+        (entry) => entry.kind !== "knowledge",
+      )}
+      ar={ar}
+      language={language}
+      theme={theme}
+    />
+  );
 }
-function Editor({initial,ar,language,theme}:{initial:ContentEntry[];ar:boolean;language:'ar'|'en';theme:'light'|'dark'}){
- const {t}=useLocale(),[entries,setEntries]=useState(initial),[documents,setDocuments]=useState<Documents>(()=>Object.fromEntries(initial.map(entry=>[entry.id,entry.draft])));
- const [publishIds,setPublishIds]=useState<string[]>([]);
- const [past,setPast]=useState<Documents[]>([]),[future,setFuture]=useState<Documents[]>([]),[route,setRoute]=useState('/'),[device,setDevice]=useState('desktop'),[previewLanguage,setLanguage]=useState(language),[previewTheme,setTheme]=useState(theme),[selection,setSelection]=useState<FieldRef|null>(null),[inventory,setInventory]=useState<Inventory[]>([]),[interact,setInteract]=useState(false),[ready,setReady]=useState(false),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[error,setError]=useState(''),[revisions,setRevisions]=useState<{id:string;version:number;created_at:string;actor_name:string}[]|null>(null),[previewLink,setPreviewLink]=useState('');
- const [stageWidth,setStageWidth]=useState(600);const stage=useRef<HTMLElement>(null);
- const frame=useRef<HTMLIFrameElement>(null),[session]=useState(()=>crypto.randomUUID());
- useEffect(()=>{if(!stage.current)return;const observer=new ResizeObserver(([entry])=>{if(entry)setStageWidth(entry.contentRect.width);});observer.observe(stage.current);return()=>observer.disconnect();},[]);
- const targetWidth=device==='mobile'?390:device==='tablet'?768:1440,scale=Math.min(1,Math.max(200,stageWidth-40)/targetWidth);
- const dirty=entries.filter(entry=>!same(entry.draft,documents[entry.id]));
- const unpublished=entries.filter(entry=>!same(entry.published,entry.draft)||entry.status!=='published'||(entry.published_slug!=null&&entry.published_slug!==entry.slug)||(entry.published_sort_order!=null&&entry.published_sort_order!==entry.sort_order));
- const publishEntries=unpublished.filter(entry=>publishIds.includes(entry.id));
- const snapshot=useMemo<PublicContent>(()=>({entries:entries.filter(entry=>entry.status!=='archived').map(entry=>({id:entry.id,kind:entry.kind,slug:entry.slug,sort_order:entry.sort_order,data:documents[entry.id]!})),updatedAt:entries[0]?.updated_at??'1970-01-01T00:00:00.000Z',aiConfigured:false}),[entries,documents]);
- const page=entries.find(entry=>entry.kind==='pages'&&(route==='/'?entry.slug==='home':route===`/${entry.slug}`||route===`/pages/${entry.slug}`));
- const pageData=page?documents[page.id] as PageContent:null;
- const activeEntry=selection?entries.find(entry=>entry.id===selection.entryId):undefined;
- const selectedData=activeEntry?documents[activeEntry.id]:undefined;
- const selectedValue=selection&&selectedData?(selection.path[0]==='translations'?{ar:(selectedData as SettingsContent).translations.ar[String(selection.path[1])]??messages.ar[selection.path[1] as keyof typeof messages.ar]??selection.fallback?.ar??'',en:(selectedData as SettingsContent).translations.en[String(selection.path[1])]??messages.en[selection.path[1] as keyof typeof messages.en]??selection.fallback?.en??''}:getField(selectedData,selection.path)):undefined;
- const commit=useCallback((next:Documents)=>{setPast(previous=>[...previous.slice(-49),documents]);setFuture([]);setDocuments(next);setPublishIds(previous=>[...new Set([...previous,...entries.filter(entry=>!same(documents[entry.id],next[entry.id])).map(entry=>entry.id)])]);setNotice('');},[documents,entries]);
- const edit=(value:unknown)=>{if(!selection||!activeEntry)return;const current=documents[activeEntry.id]!;let next:ContentData;if(selection.path[0]==='translations'){const translations=structuredClone((current as SettingsContent).translations),bi=value as {ar:string;en:string};translations.ar[String(selection.path[1])]=bi.ar;translations.en[String(selection.path[1])]=bi.en;next={...current,translations} as ContentData;}else next=setField(current,selection.path,value);commit({...documents,[activeEntry.id]:next});};
- const merge=(updated:ContentEntry[])=>{setEntries(current=>current.map(entry=>updated.find(item=>item.id===entry.id)??entry));setDocuments(current=>({...current,...Object.fromEntries(updated.map(entry=>[entry.id,entry.draft]))}));};
- const send=useCallback(()=>{frame.current?.contentWindow?.postMessage({type:'state',session,state:{content:snapshot,route,language:previewLanguage,theme:previewTheme,selection,interact}},location.origin);},[snapshot,route,previewLanguage,previewTheme,selection,interact,session]);
- useEffect(()=>{const receive=(event:MessageEvent)=>{if(event.origin!==location.origin||event.source!==frame.current?.contentWindow||event.data?.session!==session)return;if(event.data.type==='ready'){setReady(true);}if(event.data.type==='navigate'&&typeof event.data.route==='string'&&/^\/(?!\/)[a-z0-9/-]*$/.test(event.data.route)){setRoute(event.data.route);setSelection(null);}if(event.data.type==='form-blocked')setNotice(ar?'استخدم الموقع العام لإرسال طلب؛ المعاينة لا ترسل نماذج.':'Use the public website to send an enquiry; preview forms do not submit.');if(event.data.type==='select'&&validPath(event.data.ref?.path)&&entries.some(entry=>entry.id===event.data.ref.entryId)){setSelection(event.data.ref);setRevisions(null);}if(event.data.type==='inventory'&&Array.isArray(event.data.fields)){setInventory(event.data.fields.filter((field:Inventory)=>validPath(field.path)&&entries.some(entry=>entry.id===field.entryId)));}};addEventListener('message',receive);return()=>removeEventListener('message',receive);},[entries,session,ar]);
- useEffect(()=>{if(ready)send();},[ready,send]);
- useEffect(()=>{const before=(event:BeforeUnloadEvent)=>{if(dirty.length)event.preventDefault();};addEventListener('beforeunload',before);return()=>removeEventListener('beforeunload',before);},[dirty.length]);
- const run=async(work:()=>Promise<void>)=>{setBusy(true);setError('');setNotice('');try{await work();}catch(error){setError(t(errorKey(error)));}finally{setBusy(false);}};
- const save=()=>run(async()=>{if(!dirty.length)return;const result=await api<{entries:ContentEntry[]}>('/admin/visual/save',{method:'POST',body:JSON.stringify({entries:dirty.map(entry=>({id:entry.id,kind:entry.kind,slug:entry.slug,sort_order:entry.sort_order,version:entry.version,data:documents[entry.id]}))})});merge(result.entries);setNotice(ar?'حُفظت المسودة الخاصة':'Private draft saved');});
- const publish=()=>run(async()=>{const result=await api<{entries:ContentEntry[];publication:{revision:number}}>('/admin/visual/publish',{method:'POST',body:JSON.stringify({entries:publishEntries.map(({id,version})=>({id,version}))})});merge(result.entries);const publicContent=await api<PublicContent>(`/public/content?min_revision=${result.publication.revision}`,{cache:'no-store'});if(publicContent.revision!<result.publication.revision||result.entries.some(entry=>entry.kind!=='knowledge'&&!publicContent.entries.some(item=>item.id===entry.id&&same(item.data,entry.published)&&item.slug===entry.slug&&item.sort_order===entry.sort_order)))throw new Error('publication_not_verified');setNotice(ar?'نُشرت التغييرات وتم التحقق من النسخة العامة':'Published and public snapshot verified');});
- const preview=()=>run(async()=>{setPreviewLink('');const result=await api<{token:string}>('/admin/visual/preview',{method:'POST',body:JSON.stringify({entries:entries.filter(entry=>entry.status!=='archived').map(({id,version})=>({id,version}))})});setPreviewLink(`${(import.meta.env.VITE_PUBLIC_URL??'http://localhost:5173').replace(/\/$/,'')}${route}?preview=${result.token}&preview_language=${previewLanguage}&preview_theme=${previewTheme}`);});
- const history=()=>run(async()=>{if(!activeEntry)return;setRevisions((await api<{revisions:NonNullable<typeof revisions>}>(`/admin/content/${activeEntry.id}/revisions`)).revisions);});
- const restore=(revisionId:string)=>run(async()=>{if(!activeEntry)return;const result=await api<{entry:ContentEntry}>(`/admin/content/${activeEntry.id}/restore`,{method:'POST',body:JSON.stringify({revisionId,version:activeEntry.version})});merge([result.entry]);setPublishIds(current=>[...new Set([...current,result.entry.id])]);setRevisions(null);setNotice(ar?'استُعيدت المراجعة كمسودة خاصة':'Revision restored as a private draft');});
- const sections=pageData?.sections??[];
- const sectionLabel=(id:string)=>sectionNames[id]?.[ar?0:1]??humanLabel(id);
- const uniqueFields=inventory.filter((field,index,all)=>all.findIndex(item=>item.entryId===field.entryId&&same(item.path,field.path))===index);
- const library=entries.filter(entry=>entry.kind==='settings'||entry.id===page?.id||(entry.kind==='services'&&['/','/services'].includes(route))||(entry.kind==='projects'&&(route==='/'||route==='/work'||route===`/work/${entry.slug}`))||(entry.kind==='results'&&(route==='/'||route==='/results'||route.startsWith('/work/'))));
- const changeSection=(index:number,key:string,value:unknown)=>{if(!page||!pageData)return;commit({...documents,[page.id]:setField(pageData,['sections',index,key],value)});};
- const reorder=(index:number,direction:number)=>{if(!page||!pageData)return;const sections=[...pageData.sections];[sections[index],sections[index+direction]]=[sections[index+direction]!,sections[index]!];commit({...documents,[page.id]:{...pageData,sections}});};
- return <div className="visual-editor">
-  <header className="visual-toolbar"><div><span className="admin-eyebrow">MASHROUAK / STUDIO</span><h1>{ar?'محرر الموقع المرئي':'Visual Website Editor'}</h1><p role="status">{dirty.length?(ar?`${dirty.length} عناصر غير محفوظة`:`${dirty.length} unsaved entries`):unpublished.length?(ar?'تغييرات محفوظة لم تُنشر':'Saved changes awaiting publication'):(ar?'النسخة المنشورة محدّثة':'Published version is current')}</p></div><div className="visual-actions">
-   <button className="icon-button" aria-label={ar?'تراجع':'Undo'} disabled={!past.length||busy} onClick={()=>{setFuture([documents,...future]);setDocuments(past.at(-1)!);setPast(past.slice(0,-1));}}><Undo2 size={17}/></button><button className="icon-button" aria-label={ar?'إعادة':'Redo'} disabled={!future.length||busy} onClick={()=>{setPast([...past,documents]);setDocuments(future[0]!);setFuture(future.slice(1));}}><Redo2 size={17}/></button>
-   <button className="admin-button admin-button--secondary" disabled={busy||!dirty.length} onClick={()=>{if(confirm(ar?'تجاهل التعديلات غير المحفوظة؟':'Discard unsaved edits?')){commit(Object.fromEntries(entries.map(entry=>[entry.id,entry.draft])));}}}>{ar?'تجاهل':'Discard'}</button>
-   <button className="admin-button admin-button--secondary" disabled={busy||!!dirty.length} onClick={preview}><Eye size={16}/>{ar?'معاينة المسودة':'Preview draft'}</button>
-   <button className="admin-button admin-button--secondary" disabled={busy||!dirty.length} onClick={save}><Save size={16}/>{ar?'حفظ المسودة':'Save draft'}</button><button className="admin-button" disabled={busy||!!dirty.length||!publishEntries.length} onClick={publish}><Send size={16}/>{busy?(ar?'جارٍ التحقق…':'Verifying…'):(ar?'نشر التغييرات':'Publish changes')}</button>
-  </div></header>
-  {error&&<p className="admin-error" role="alert">{error}</p>}{notice&&<p className="admin-notice" role="status"><Check size={16}/>{notice}</p>}{previewLink&&<p className="admin-notice"><a href={previewLink} target="_blank" rel="noopener noreferrer">{ar?'فتح المعاينة الخاصة — تنتهي بعد 15 دقيقة':'Open private preview — expires in 15 minutes'}</a><button className="icon-button" aria-label="Close preview link" onClick={()=>setPreviewLink('')}><X size={14}/></button></p>}
-  {!!unpublished.length&&<details className="visual-publish-review"><summary>{ar?'مراجعة نطاق النشر':'Review publication scope'} · {publishEntries.length}/{unpublished.length}</summary><p>{ar?'حدّد المسودات التي تريد نشرها. تبقى المسودات الأخرى خاصة.':'Select the saved drafts to publish. Other drafts stay private.'}</p>{unpublished.map(entry=><label key={entry.id}><input type="checkbox" checked={publishIds.includes(entry.id)} onChange={event=>setPublishIds(current=>event.target.checked?[...current,entry.id]:current.filter(id=>id!==entry.id))}/><span>{entry.kind} / {entry.slug}</span></label>)}</details>}
-  <div className="visual-workspace">
-   <aside className="visual-navigator"><label className="visual-panel-heading">{ar?'الصفحة':'Page'}<select aria-label="Preview page" value={route} onChange={event=>{setRoute(event.target.value);setSelection(null);setInventory([]);}}>{entries.filter(entry=>entry.kind==='pages'||entry.kind==='projects').map(entry=>{const data=documents[entry.id] as PageContent;const path=entry.kind==='projects'?`/work/${entry.slug}`:entry.slug==='home'?'/':['about','services','work','results','process','contact','privacy','terms'].includes(entry.slug)?`/${entry.slug}`:`/pages/${entry.slug}`;return <option key={entry.id} value={path}>{(data.title??(data as unknown as {name:{ar:string;en:string}}).name)?.[ar?'ar':'en']??entry.slug}</option>;})}</select></label>
-    <div className="visual-panel-title">{ar?'الأقسام والعناصر':'Sections & elements'}</div>
-    {[...new Set(['navigation',...sections.map(section=>section.id),...uniqueFields.map(field=>field.section),'footer'])].map(section=>{const index=sections.findIndex(item=>item.id===section),data=sections[index],fields=uniqueFields.filter(field=>field.section===section);if(!data&&!fields.length)return null;return <details key={section} open className="visual-section"><summary>{sectionLabel(section)}{data&&!data.visible&&<EyeOff size={13}/>}</summary>{data&&<div className="visual-section-tools"><button className="icon-button" aria-label={`${data.visible?'Hide':'Show'} ${section}`} onClick={()=>changeSection(index,'visible',!data.visible)}>{data.visible?<Eye size={14}/>:<EyeOff size={14}/>}</button><button className="icon-button" aria-label={`Move ${section} up`} disabled={!index} onClick={()=>reorder(index,-1)}><ArrowUp size={14}/></button><button className="icon-button" aria-label={`Move ${section} down`} disabled={index===sections.length-1} onClick={()=>reorder(index,1)}><ArrowDown size={14}/></button><select aria-label={`${section} background`} value={data.background} onChange={event=>changeSection(index,'background',event.target.value)}>{['default','ivory','mist','petrol'].map(value=><option key={value}>{value}</option>)}</select></div>}{fields.map(field=><button key={field.entryId+JSON.stringify(field.path)} className={`visual-element ${selection?.entryId===field.entryId&&same(selection.path,field.path)?'is-selected':''}`} onClick={()=>{setSelection(field);setRevisions(null);}}><span>{field.text||field.label}</span><small>{field.label}</small></button>)}</details>;})}
-    <details className="visual-section visual-library"><summary>{ar?'مكتبة المحتوى والصور':'Content & images'}</summary><p className="admin-hint">{ar?'حقول الصفحة والخدمات والأعمال المرتبطة بها.':'Fields for this page and its services or projects.'}</p>{library.map(entry=><details key={entry.id}><summary>{entry.kind} / {entry.slug}</summary>{libraryFields(entry,documents[entry.id]!).map(field=><button className="visual-element" key={JSON.stringify(field.path)} onClick={()=>{setSelection(field);setRevisions(null);}}><span>{field.text||field.label}</span><small>{field.label}</small></button>)}</details>)}</details>
-   </aside>
-   <section ref={stage} className="visual-stage" aria-label={ar?'معاينة الموقع الفعلية':'Actual website preview'}><div className="visual-stage-tools"><div>{[['desktop',Monitor],['tablet',Tablet],['mobile',Smartphone]].map(([name,Icon])=>{const Component=Icon as typeof Monitor;return <button key={String(name)} className={`icon-button ${device===name?'is-active':''}`} aria-label={String(name)} aria-pressed={device===name} onClick={()=>setDevice(String(name))}><Component size={17}/></button>;})}</div><div><button className="visual-chip" onClick={()=>setLanguage(previewLanguage==='ar'?'en':'ar')}>{previewLanguage==='ar'?'العربية':'English'}</button><button className="visual-chip" onClick={()=>setTheme(previewTheme==='light'?'dark':'light')}>{previewTheme==='light'?(ar?'فاتح':'Light'):(ar?'داكن':'Dark')}</button><button className={`visual-chip ${interact?'is-active':''}`} onClick={()=>setInteract(!interact)}><MousePointer2 size={14}/>{interact?(ar?'تفاعل':'Interact'):(ar?'تحديد':'Select')}</button></div></div><div className="visual-viewport" data-device={device} style={{width:targetWidth*scale,direction:'ltr'}}><iframe style={{width:targetWidth,height:`${100/scale}%`,transform:`scale(${scale})`,transformOrigin:'top left'}} ref={frame} title={ar?'معاينة الموقع المباشرة':'Live website preview'} src={`/preview/index.html?session=${session}`} onLoad={()=>setReady(true)} sandbox="allow-scripts allow-same-origin"/></div></section>
-   <aside className="visual-inspector"><div className="visual-panel-title">{ar?'خصائص العنصر':'Element properties'}</div>{selection&&activeEntry?<><p className="visual-breadcrumb">{pageData?.title[ar?'ar':'en']??route} › {sectionLabel((selection as Inventory).section??inventory.find(field=>field.entryId===selection.entryId&&same(field.path,selection.path))?.section??'content')} › {selection.label}</p><h2>{selection.label}</h2><p className="visual-source">{activeEntry.kind} / {activeEntry.slug}</p><div className="visual-property" key={selection.entryId+JSON.stringify(selection.path)}>{selectedValue===undefined?<p>{ar?'اختر عنصراً آخر':'Select another element'}</p>:<FieldEditor field={selection.kind==='image'?'image':selection.kind==='rich'?'body':String(selection.path.at(-1))} value={selectedValue} onChange={edit}/>}</div><button className="admin-button admin-button--secondary" disabled={busy} onClick={history}><History size={16}/>{ar?'سجل المراجعات':'Revision history'}</button>{revisions&&<div className="visual-history">{revisions.length?revisions.map(revision=><button key={revision.id} onClick={()=>restore(revision.id)}>{ar?'استعادة مسودة':'Restore draft'} v{revision.version}<small>{new Date(revision.created_at).toLocaleString(language)} · {revision.actor_name}</small></button>):<p>{ar?'لا توجد مراجعات سابقة':'No previous revisions'}</p>}</div>}</>:<div className="visual-empty"><MousePointer2 size={30}/><h2>{ar?'اختر النص من الموقع':'Select text on the website'}</h2><p>{ar?'انقر عنواناً أو فقرة في المعاينة لعرض القيم العربية والإنجليزية هنا.':'Click a heading or paragraph in the preview to edit its Arabic and English values here.'}</p></div>}</aside>
-  </div>
- </div>;
+function Editor({
+  initial,
+  ar,
+  language,
+  theme,
+}: {
+  initial: ContentEntry[];
+  ar: boolean;
+  language: "ar" | "en";
+  theme: "light" | "dark";
+}) {
+  const { t } = useLocale(),
+    [entries, setEntries] = useState(initial),
+    [documents, setDocuments] = useState<Documents>(() =>
+      Object.fromEntries(initial.map((entry) => [entry.id, entry.draft])),
+    );
+  const [publishIds, setPublishIds] = useState<string[]>([]);
+  const [past, setPast] = useState<Documents[]>([]),
+    [future, setFuture] = useState<Documents[]>([]),
+    [route, setRoute] = useState("/"),
+    [device, setDevice] = useState("desktop"),
+    [previewLanguage, setLanguage] = useState(language),
+    [previewTheme, setTheme] = useState(theme),
+    [selection, setSelection] = useState<FieldRef | null>(null),
+    [inventory, setInventory] = useState<Inventory[]>([]),
+    [interact, setInteract] = useState(false),
+    [ready, setReady] = useState(false),
+    [busy, setBusy] = useState(false),
+    [notice, setNotice] = useState(""),
+    [error, setError] = useState(""),
+    [revisions, setRevisions] = useState<
+      | {
+          id: string;
+          version: number;
+          created_at: string;
+          actor_name: string;
+        }[]
+      | null
+    >(null),
+    [previewLink, setPreviewLink] = useState("");
+  const [stageWidth, setStageWidth] = useState(600);
+  const stage = useRef<HTMLElement>(null);
+  const frame = useRef<HTMLIFrameElement>(null),
+    [session] = useState(() => crypto.randomUUID());
+  useEffect(() => {
+    if (!stage.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setStageWidth(entry.contentRect.width);
+    });
+    observer.observe(stage.current);
+    return () => observer.disconnect();
+  }, []);
+  const targetWidth =
+      device === "mobile" ? 390 : device === "tablet" ? 768 : 1440,
+    scale = Math.min(1, Math.max(200, stageWidth - 40) / targetWidth);
+  const dirty = entries.filter(
+    (entry) => !same(entry.draft, documents[entry.id]),
+  );
+  const unpublished = entries.filter(
+    (entry) =>
+      !same(entry.published, entry.draft) ||
+      entry.status !== "published" ||
+      (entry.published_slug != null && entry.published_slug !== entry.slug) ||
+      (entry.published_sort_order != null &&
+        entry.published_sort_order !== entry.sort_order),
+  );
+  const publishEntries = unpublished.filter((entry) =>
+    publishIds.includes(entry.id),
+  );
+  const snapshot = useMemo<PublicContent>(
+    () => ({
+      entries: entries
+        .filter((entry) => entry.status !== "archived")
+        .map((entry) => ({
+          id: entry.id,
+          kind: entry.kind,
+          slug: entry.slug,
+          sort_order: entry.sort_order,
+          data: documents[entry.id]!,
+        })),
+      updatedAt: entries[0]?.updated_at ?? "1970-01-01T00:00:00.000Z",
+      aiConfigured: false,
+    }),
+    [entries, documents],
+  );
+  const page = entries.find(
+    (entry) =>
+      entry.kind === "pages" &&
+      (route === "/"
+        ? entry.slug === "home"
+        : route === `/${entry.slug}` || route === `/pages/${entry.slug}`),
+  );
+  const pageData = page ? (documents[page.id] as PageContent) : null;
+  const activeEntry = selection
+    ? entries.find((entry) => entry.id === selection.entryId)
+    : undefined;
+  const selectedData = activeEntry ? documents[activeEntry.id] : undefined;
+  const selectedValue =
+    selection && selectedData
+      ? selection.path[0] === "translations"
+        ? {
+            ar:
+              (selectedData as SettingsContent).translations.ar[
+                String(selection.path[1])
+              ] ??
+              messages.ar[selection.path[1] as keyof typeof messages.ar] ??
+              selection.fallback?.ar ??
+              "",
+            en:
+              (selectedData as SettingsContent).translations.en[
+                String(selection.path[1])
+              ] ??
+              messages.en[selection.path[1] as keyof typeof messages.en] ??
+              selection.fallback?.en ??
+              "",
+          }
+        : getField(selectedData, selection.path)
+      : undefined;
+  const commit = useCallback(
+    (next: Documents) => {
+      setPast((previous) => [...previous.slice(-49), documents]);
+      setFuture([]);
+      setDocuments(next);
+      setPublishIds((previous) => [
+        ...new Set([
+          ...previous,
+          ...entries
+            .filter((entry) => !same(documents[entry.id], next[entry.id]))
+            .map((entry) => entry.id),
+        ]),
+      ]);
+      setNotice("");
+    },
+    [documents, entries],
+  );
+  const edit = (value: unknown) => {
+    if (!selection || !activeEntry) return;
+    const current = documents[activeEntry.id]!;
+    let next: ContentData;
+    if (selection.path[0] === "translations") {
+      const translations = structuredClone(
+          (current as SettingsContent).translations,
+        ),
+        bi = value as { ar: string; en: string };
+      translations.ar[String(selection.path[1])] = bi.ar;
+      translations.en[String(selection.path[1])] = bi.en;
+      next = { ...current, translations } as ContentData;
+    } else next = setField(current, selection.path, value);
+    commit({ ...documents, [activeEntry.id]: next });
+  };
+  const merge = (updated: ContentEntry[]) => {
+    setEntries((current) =>
+      current.map(
+        (entry) => updated.find((item) => item.id === entry.id) ?? entry,
+      ),
+    );
+    setDocuments((current) => ({
+      ...current,
+      ...Object.fromEntries(updated.map((entry) => [entry.id, entry.draft])),
+    }));
+  };
+  const send = useCallback(() => {
+    frame.current?.contentWindow?.postMessage(
+      {
+        type: "state",
+        session,
+        state: {
+          content: snapshot,
+          route,
+          language: previewLanguage,
+          theme: previewTheme,
+          selection,
+          interact,
+        },
+      },
+      location.origin,
+    );
+  }, [
+    snapshot,
+    route,
+    previewLanguage,
+    previewTheme,
+    selection,
+    interact,
+    session,
+  ]);
+  useEffect(() => {
+    const receive = (event: MessageEvent) => {
+      if (
+        event.origin !== location.origin ||
+        event.source !== frame.current?.contentWindow ||
+        event.data?.session !== session
+      )
+        return;
+      if (event.data.type === "ready") {
+        setReady(true);
+      }
+      if (
+        event.data.type === "navigate" &&
+        typeof event.data.route === "string" &&
+        /^\/(?!\/)[a-z0-9/-]*$/.test(event.data.route)
+      ) {
+        setRoute(event.data.route);
+        setSelection(null);
+      }
+      if (event.data.type === "form-blocked")
+        setNotice(
+          ar
+            ? "استخدم الموقع العام لإرسال طلب؛ المعاينة لا ترسل نماذج."
+            : "Use the public website to send an enquiry; preview forms do not submit.",
+        );
+      if (
+        event.data.type === "select" &&
+        validPath(event.data.ref?.path) &&
+        entries.some((entry) => entry.id === event.data.ref.entryId)
+      ) {
+        setSelection(event.data.ref);
+        setRevisions(null);
+      }
+      if (event.data.type === "inventory" && Array.isArray(event.data.fields)) {
+        setInventory(
+          event.data.fields.filter(
+            (field: Inventory) =>
+              validPath(field.path) &&
+              entries.some((entry) => entry.id === field.entryId),
+          ),
+        );
+      }
+    };
+    addEventListener("message", receive);
+    return () => removeEventListener("message", receive);
+  }, [entries, session, ar]);
+  useEffect(() => {
+    if (ready) send();
+  }, [ready, send]);
+  useEffect(() => {
+    const before = (event: BeforeUnloadEvent) => {
+      if (dirty.length) event.preventDefault();
+    };
+    addEventListener("beforeunload", before);
+    return () => removeEventListener("beforeunload", before);
+  }, [dirty.length]);
+  const run = async (work: () => Promise<void>) => {
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await work();
+    } catch (error) {
+      setError(t(errorKey(error)));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const save = () =>
+    run(async () => {
+      if (!dirty.length) return;
+      const result = await api<{ entries: ContentEntry[] }>(
+        "/admin/visual/save",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            entries: dirty.map((entry) => ({
+              id: entry.id,
+              kind: entry.kind,
+              slug: entry.slug,
+              sort_order: entry.sort_order,
+              version: entry.version,
+              data: documents[entry.id],
+            })),
+          }),
+        },
+      );
+      merge(result.entries);
+      setNotice(ar ? "حُفظت المسودة الخاصة" : "Private draft saved");
+    });
+  const publish = () =>
+    run(async () => {
+      const result = await api<{
+        entries: ContentEntry[];
+        publication: { revision: number };
+      }>("/admin/visual/publish", {
+        method: "POST",
+        body: JSON.stringify({
+          entries: publishEntries.map(({ id, version }) => ({ id, version })),
+        }),
+      });
+      merge(result.entries);
+      const publicContent = await api<PublicContent>(
+        `/public/content?min_revision=${result.publication.revision}`,
+        { cache: "no-store" },
+      );
+      if (
+        publicContent.revision! < result.publication.revision ||
+        result.entries.some(
+          (entry) =>
+            entry.kind !== "knowledge" &&
+            !publicContent.entries.some(
+              (item) =>
+                item.id === entry.id &&
+                same(item.data, entry.published) &&
+                item.slug === entry.slug &&
+                item.sort_order === entry.sort_order,
+            ),
+        )
+      )
+        throw new Error("publication_not_verified");
+      setNotice(
+        ar
+          ? "نُشرت التغييرات وتم التحقق من النسخة العامة"
+          : "Published and public snapshot verified",
+      );
+    });
+  const preview = () =>
+    run(async () => {
+      setPreviewLink("");
+      const result = await api<{ token: string }>("/admin/visual/preview", {
+        method: "POST",
+        body: JSON.stringify({
+          entries: entries
+            .filter((entry) => entry.status !== "archived")
+            .map(({ id, version }) => ({ id, version })),
+        }),
+      });
+      setPreviewLink(
+        `${(import.meta.env.VITE_PUBLIC_URL ?? "http://localhost:5173").replace(/\/$/, "")}${route}?preview=${result.token}&preview_language=${previewLanguage}&preview_theme=${previewTheme}`,
+      );
+    });
+  const history = () =>
+    run(async () => {
+      if (!activeEntry) return;
+      setRevisions(
+        (
+          await api<{ revisions: NonNullable<typeof revisions> }>(
+            `/admin/content/${activeEntry.id}/revisions`,
+          )
+        ).revisions,
+      );
+    });
+  const restore = (revisionId: string) =>
+    run(async () => {
+      if (!activeEntry) return;
+      const result = await api<{ entry: ContentEntry }>(
+        `/admin/content/${activeEntry.id}/restore`,
+        {
+          method: "POST",
+          body: JSON.stringify({ revisionId, version: activeEntry.version }),
+        },
+      );
+      merge([result.entry]);
+      setPublishIds((current) => [...new Set([...current, result.entry.id])]);
+      setRevisions(null);
+      setNotice(
+        ar
+          ? "استُعيدت المراجعة كمسودة خاصة"
+          : "Revision restored as a private draft",
+      );
+    });
+  const sections = pageData?.sections ?? [];
+  const sectionLabel = (id: string) =>
+    sectionNames[id]?.[ar ? 0 : 1] ?? humanLabel(id);
+  const uniqueFields = inventory.filter(
+    (field, index, all) =>
+      all.findIndex(
+        (item) => item.entryId === field.entryId && same(item.path, field.path),
+      ) === index,
+  );
+  const library = entries.filter(
+    (entry) =>
+      entry.kind === "settings" ||
+      entry.id === page?.id ||
+      (entry.kind === "services" && ["/", "/services"].includes(route)) ||
+      (entry.kind === "projects" &&
+        (route === "/" ||
+          route === "/work" ||
+          route === `/work/${entry.slug}`)) ||
+      (entry.kind === "results" &&
+        (route === "/" || route === "/results" || route.startsWith("/work/"))),
+  );
+  const changeSection = (index: number, key: string, value: unknown) => {
+    if (!page || !pageData) return;
+    commit({
+      ...documents,
+      [page.id]: setField(pageData, ["sections", index, key], value),
+    });
+  };
+  const reorder = (index: number, direction: number) => {
+    if (!page || !pageData) return;
+    const sections = [...pageData.sections];
+    [sections[index], sections[index + direction]] = [
+      sections[index + direction]!,
+      sections[index]!,
+    ];
+    commit({ ...documents, [page.id]: { ...pageData, sections } });
+  };
+  return (
+    <div className="visual-editor">
+      <header className="visual-toolbar">
+        <div>
+          <span className="admin-eyebrow">MASHROUAK / STUDIO</span>
+          <h1>{ar ? "محرر الموقع المرئي" : "Visual Website Editor"}</h1>
+          <p role="status">
+            {dirty.length
+              ? ar
+                ? `${dirty.length} عناصر غير محفوظة`
+                : `${dirty.length} unsaved entries`
+              : unpublished.length
+                ? ar
+                  ? "تغييرات محفوظة لم تُنشر"
+                  : "Saved changes awaiting publication"
+                : ar
+                  ? "النسخة المنشورة محدّثة"
+                  : "Published version is current"}
+          </p>
+        </div>
+        <div className="visual-actions">
+          <button
+            className="icon-button"
+            aria-label={ar ? "تراجع" : "Undo"}
+            disabled={!past.length || busy}
+            onClick={() => {
+              setFuture([documents, ...future]);
+              setDocuments(past.at(-1)!);
+              setPast(past.slice(0, -1));
+            }}
+          >
+            <Undo2 size={17} />
+          </button>
+          <button
+            className="icon-button"
+            aria-label={ar ? "إعادة" : "Redo"}
+            disabled={!future.length || busy}
+            onClick={() => {
+              setPast([...past, documents]);
+              setDocuments(future[0]!);
+              setFuture(future.slice(1));
+            }}
+          >
+            <Redo2 size={17} />
+          </button>
+          <button
+            className="admin-button admin-button--secondary"
+            disabled={busy || !dirty.length}
+            onClick={() => {
+              if (
+                confirm(
+                  ar
+                    ? "تجاهل التعديلات غير المحفوظة؟"
+                    : "Discard unsaved edits?",
+                )
+              ) {
+                commit(
+                  Object.fromEntries(
+                    entries.map((entry) => [entry.id, entry.draft]),
+                  ),
+                );
+              }
+            }}
+          >
+            {ar ? "تجاهل" : "Discard"}
+          </button>
+          <button
+            className="admin-button admin-button--secondary"
+            disabled={busy || !!dirty.length}
+            onClick={preview}
+          >
+            <Eye size={16} />
+            {ar ? "معاينة المسودة" : "Preview draft"}
+          </button>
+          <button
+            className="admin-button admin-button--secondary"
+            disabled={busy || !dirty.length}
+            onClick={save}
+          >
+            <Save size={16} />
+            {ar ? "حفظ المسودة" : "Save draft"}
+          </button>
+          <button
+            className="admin-button"
+            disabled={busy || !!dirty.length || !publishEntries.length}
+            onClick={publish}
+          >
+            <Send size={16} />
+            {busy
+              ? ar
+                ? "جارٍ التحقق…"
+                : "Verifying…"
+              : ar
+                ? "نشر التغييرات"
+                : "Publish changes"}
+          </button>
+        </div>
+      </header>
+      {error && (
+        <p className="admin-error" role="alert">
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p className="admin-notice" role="status">
+          <Check size={16} />
+          {notice}
+        </p>
+      )}
+      {previewLink && (
+        <p className="admin-notice">
+          <a href={previewLink} target="_blank" rel="noopener noreferrer">
+            {ar
+              ? "فتح المعاينة الخاصة — تنتهي بعد 15 دقيقة"
+              : "Open private preview — expires in 15 minutes"}
+          </a>
+          <button
+            className="icon-button"
+            aria-label="Close preview link"
+            onClick={() => setPreviewLink("")}
+          >
+            <X size={14} />
+          </button>
+        </p>
+      )}
+      {!!unpublished.length && (
+        <details className="visual-publish-review">
+          <summary>
+            {ar ? "مراجعة نطاق النشر" : "Review publication scope"} ·{" "}
+            {publishEntries.length}/{unpublished.length}
+          </summary>
+          <p>
+            {ar
+              ? "حدّد المسودات التي تريد نشرها. تبقى المسودات الأخرى خاصة."
+              : "Select the saved drafts to publish. Other drafts stay private."}
+          </p>
+          {unpublished.map((entry) => (
+            <label key={entry.id}>
+              <input
+                type="checkbox"
+                checked={publishIds.includes(entry.id)}
+                onChange={(event) =>
+                  setPublishIds((current) =>
+                    event.target.checked
+                      ? [...current, entry.id]
+                      : current.filter((id) => id !== entry.id),
+                  )
+                }
+              />
+              <span>
+                {entry.kind} / {entry.slug}
+              </span>
+            </label>
+          ))}
+        </details>
+      )}
+      <div className="visual-workspace">
+        <aside className="visual-navigator">
+          <label className="visual-panel-heading">
+            {ar ? "الصفحة" : "Page"}
+            <select
+              aria-label="Preview page"
+              value={route}
+              onChange={(event) => {
+                setRoute(event.target.value);
+                setSelection(null);
+                setInventory([]);
+              }}
+            >
+              {entries
+                .filter(
+                  (entry) =>
+                    entry.kind === "pages" || entry.kind === "projects",
+                )
+                .map((entry) => {
+                  const data = documents[entry.id] as PageContent;
+                  const path =
+                    entry.kind === "projects"
+                      ? `/work/${entry.slug}`
+                      : entry.slug === "home"
+                        ? "/"
+                        : [
+                              "about",
+                              "services",
+                              "work",
+                              "results",
+                              "process",
+                              "contact",
+                              "privacy",
+                              "terms",
+                            ].includes(entry.slug)
+                          ? `/${entry.slug}`
+                          : `/pages/${entry.slug}`;
+                  return (
+                    <option key={entry.id} value={path}>
+                      {(data.title ??
+                        (
+                          data as unknown as {
+                            name: { ar: string; en: string };
+                          }
+                        ).name)?.[ar ? "ar" : "en"] ?? entry.slug}
+                    </option>
+                  );
+                })}
+            </select>
+          </label>
+          <div className="visual-panel-title">
+            {ar ? "الأقسام والعناصر" : "Sections & elements"}
+          </div>
+          {[
+            ...new Set([
+              "navigation",
+              ...sections.map((section) => section.id),
+              ...uniqueFields.map((field) => field.section),
+              "footer",
+            ]),
+          ].map((section) => {
+            const index = sections.findIndex((item) => item.id === section),
+              data = sections[index],
+              fields = uniqueFields.filter(
+                (field) => field.section === section,
+              );
+            if (!data && !fields.length) return null;
+            return (
+              <details key={section} open className="visual-section">
+                <summary>
+                  {sectionLabel(section)}
+                  {data && !data.visible && <EyeOff size={13} />}
+                </summary>
+                {data && (
+                  <div className="visual-section-tools">
+                    <button
+                      className="icon-button"
+                      aria-label={`${data.visible ? "Hide" : "Show"} ${section}`}
+                      onClick={() =>
+                        changeSection(index, "visible", !data.visible)
+                      }
+                    >
+                      {data.visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                    </button>
+                    <button
+                      className="icon-button"
+                      aria-label={`Move ${section} up`}
+                      disabled={!index}
+                      onClick={() => reorder(index, -1)}
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      className="icon-button"
+                      aria-label={`Move ${section} down`}
+                      disabled={index === sections.length - 1}
+                      onClick={() => reorder(index, 1)}
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                    <select
+                      aria-label={`${section} background`}
+                      value={data.background}
+                      onChange={(event) =>
+                        changeSection(index, "background", event.target.value)
+                      }
+                    >
+                      {["default", "ivory", "mist", "petrol"].map((value) => (
+                        <option key={value}>{value}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {fields.map((field) => (
+                  <button
+                    key={field.entryId + JSON.stringify(field.path)}
+                    className={`visual-element ${selection?.entryId === field.entryId && same(selection.path, field.path) ? "is-selected" : ""}`}
+                    onClick={() => {
+                      setSelection(field);
+                      setRevisions(null);
+                    }}
+                  >
+                    <span>{field.text || field.label}</span>
+                    <small>{field.label}</small>
+                  </button>
+                ))}
+              </details>
+            );
+          })}
+          <details className="visual-section visual-library">
+            <summary>
+              {ar ? "مكتبة المحتوى والصور" : "Content & images"}
+            </summary>
+            <p className="admin-hint">
+              {ar
+                ? "حقول الصفحة والخدمات والأعمال المرتبطة بها."
+                : "Fields for this page and its services or projects."}
+            </p>
+            {library.map((entry) => (
+              <details key={entry.id}>
+                <summary>
+                  {entry.kind} / {entry.slug}
+                </summary>
+                {libraryFields(entry, documents[entry.id]!).map((field) => (
+                  <button
+                    className="visual-element"
+                    key={JSON.stringify(field.path)}
+                    onClick={() => {
+                      setSelection(field);
+                      setRevisions(null);
+                    }}
+                  >
+                    <span>{field.text || field.label}</span>
+                    <small>{field.label}</small>
+                  </button>
+                ))}
+              </details>
+            ))}
+          </details>
+        </aside>
+        <section
+          ref={stage}
+          className="visual-stage"
+          aria-label={ar ? "معاينة الموقع الفعلية" : "Actual website preview"}
+        >
+          <div className="visual-stage-tools">
+            <div>
+              {[
+                ["desktop", Monitor],
+                ["tablet", Tablet],
+                ["mobile", Smartphone],
+              ].map(([name, Icon]) => {
+                const Component = Icon as typeof Monitor;
+                return (
+                  <button
+                    key={String(name)}
+                    className={`icon-button ${device === name ? "is-active" : ""}`}
+                    aria-label={String(name)}
+                    aria-pressed={device === name}
+                    onClick={() => setDevice(String(name))}
+                  >
+                    <Component size={17} />
+                  </button>
+                );
+              })}
+            </div>
+            <div>
+              <button
+                className="visual-chip"
+                onClick={() =>
+                  setLanguage(previewLanguage === "ar" ? "en" : "ar")
+                }
+              >
+                {previewLanguage === "ar" ? "العربية" : "English"}
+              </button>
+              <button
+                className="visual-chip"
+                onClick={() =>
+                  setTheme(previewTheme === "light" ? "dark" : "light")
+                }
+              >
+                {previewTheme === "light"
+                  ? ar
+                    ? "فاتح"
+                    : "Light"
+                  : ar
+                    ? "داكن"
+                    : "Dark"}
+              </button>
+              <button
+                className={`visual-chip ${interact ? "is-active" : ""}`}
+                onClick={() => setInteract(!interact)}
+              >
+                <MousePointer2 size={14} />
+                {interact
+                  ? ar
+                    ? "تفاعل"
+                    : "Interact"
+                  : ar
+                    ? "تحديد"
+                    : "Select"}
+              </button>
+            </div>
+          </div>
+          <div
+            className="visual-viewport"
+            data-device={device}
+            style={{ width: targetWidth * scale, direction: "ltr" }}
+          >
+            <iframe
+              style={{
+                width: targetWidth,
+                height: `${100 / scale}%`,
+                transform: `scale(${scale})`,
+                transformOrigin: "top left",
+              }}
+              ref={frame}
+              title={ar ? "معاينة الموقع المباشرة" : "Live website preview"}
+              src={`/preview/index.html?session=${session}`}
+              onLoad={() => setReady(true)}
+              sandbox="allow-scripts allow-same-origin"
+            />
+          </div>
+        </section>
+        <aside className="visual-inspector">
+          <div className="visual-panel-title">
+            {ar ? "خصائص العنصر" : "Element properties"}
+          </div>
+          {selection && activeEntry ? (
+            <>
+              <p className="visual-breadcrumb">
+                {pageData?.title[ar ? "ar" : "en"] ?? route} ›{" "}
+                {sectionLabel(
+                  (selection as Inventory).section ??
+                    inventory.find(
+                      (field) =>
+                        field.entryId === selection.entryId &&
+                        same(field.path, selection.path),
+                    )?.section ??
+                    "content",
+                )}{" "}
+                › {selection.label}
+              </p>
+              <h2>{selection.label}</h2>
+              <p className="visual-source">
+                {activeEntry.kind} / {activeEntry.slug}
+              </p>
+              <div
+                className="visual-property"
+                key={selection.entryId + JSON.stringify(selection.path)}
+              >
+                {selectedValue === undefined ? (
+                  <p>{ar ? "اختر عنصراً آخر" : "Select another element"}</p>
+                ) : (
+                  <FieldEditor
+                    field={
+                      selection.kind === "image"
+                        ? "image"
+                        : selection.kind === "rich"
+                          ? "body"
+                          : String(selection.path.at(-1))
+                    }
+                    value={selectedValue}
+                    onChange={edit}
+                  />
+                )}
+              </div>
+              <button
+                className="admin-button admin-button--secondary"
+                disabled={busy}
+                onClick={history}
+              >
+                <History size={16} />
+                {ar ? "سجل المراجعات" : "Revision history"}
+              </button>
+              {revisions && (
+                <div className="visual-history">
+                  {revisions.length ? (
+                    revisions.map((revision) => (
+                      <button
+                        key={revision.id}
+                        onClick={() => restore(revision.id)}
+                      >
+                        {ar ? "استعادة مسودة" : "Restore draft"} v
+                        {revision.version}
+                        <small>
+                          {new Date(revision.created_at).toLocaleString(
+                            language,
+                          )}{" "}
+                          · {revision.actor_name}
+                        </small>
+                      </button>
+                    ))
+                  ) : (
+                    <p>
+                      {ar ? "لا توجد مراجعات سابقة" : "No previous revisions"}
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="visual-empty">
+              <MousePointer2 size={30} />
+              <h2>
+                {ar ? "اختر النص من الموقع" : "Select text on the website"}
+              </h2>
+              <p>
+                {ar
+                  ? "انقر عنواناً أو فقرة في المعاينة لعرض القيم العربية والإنجليزية هنا."
+                  : "Click a heading or paragraph in the preview to edit its Arabic and English values here."}
+              </p>
+            </div>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
 }

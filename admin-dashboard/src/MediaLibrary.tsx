@@ -136,8 +136,8 @@ export function MediaLibrary() {
           revision: editing.revision,
         }),
       });
-      setEditing(null);
       await reload();
+      setEditing(null);
       setNotice(t("mediaSaved"));
     } catch (err) {
       setActionError(t(errorKey(err)));

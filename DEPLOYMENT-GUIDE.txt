@@ -1,219 +1,51 @@
-دليل نشر مشروعك.net — 9 نوفمبر 2026
-==================================
+MASHROUAK.NET — دليل التسليم الحالي — 10 نوفمبر 2026
 
-الحالة التي تم التحقق منها
-- المشروع العام الموجود: mashrouak-net، ورابطه https://mashrouak-net.pages.dev
-- المستودع: https://github.com/SaadSinan-dev/Mashrouak-website ، والفرع main.
-- آخر commit منشور للموقع العام عند الفحص: d7ce37a16aeaca8758d575d0d81df7a256eb490b.
-- تم إنشاء مشروع مستقل مرتبط بـ GitHub باسم mashrouak-admin. عنوانه المحجوز mashrouak-admin.pages.dev، ولا يوجد له نشر ناجح بعد.
-- لم تتغير إعدادات المشروع العام أو نطاقاته أو ارتباطه بالمستودع عند إنشاء مشروع الإدارة.
-- تعمل النسخة المحلية الآن بـ Node.js/Hono وPostgreSQL، وليس Workers/D1. تبقى Cloudinary للصور.
-- ملفات الترقية لم تُرفع إلى GitHub بعد. Render وDNS والنطاقات الثلاثة لم تُنشر أو تُختبر إنتاجياً.
-- لا تنفذ إنشاء الموارد المدفوعة أو Git push أو تغيير بيانات الإنتاج أو DNS قبل الموافقة المطلوبة في طلب العمل.
+ابدأ بفتح docs/FINAL_DEPLOYMENT_HANDOFF.md.
+نتائج الاختبارات وحالة الجاهزية الفعلية: docs/PRODUCTION_READINESS_REPORT.md.
 
-A — الموقع العام الموجود على Cloudflare Pages
-----------------------------------------------
-1. افتح Workers & Pages ثم المشروع الموجود mashrouak-net. لا تنشئ مشروعاً عاماً بديلاً.
-2. راجع Settings > Builds & deployments:
-   Git provider: GitHub
-   Owner: SaadSinan-dev
-   Repository: Mashrouak-website
-   Production branch: main
-   Root directory: repository root، أي حقل فارغ.
-   Build command: npm run build
-   Build output directory: dist
-   أمر البناء الموجود في الحساب يحتوي مسافة tab قبله؛ لم نغيره، وهو ينفذ الأمر نفسه.
-3. احتفظ بالنشر الآلي من main. لا تضف مرشحات ملفات حالياً؛ الملفات المشتركة والـ lockfile تؤثر في التطبيقين.
-4. في متغيرات بيئة الإنتاج، اترك VITE_API_URL فارغاً لاستخدام /api من النطاق نفسه.
-   أضف إلى Pages، وليس إلى حزمة المتصفح:
-   API_PROXY_URL = عنوان HTTPS الفعلي لخدمة Render بعد إنشائها.
-   PAGES_PROXY_SECRET = قيمة عشوائية سرية بطول 32 حرفاً على الأقل، مشتركة مع Render ومشروع الإدارة.
-   هذه المتغيرات خادمية؛ لا تبدأ أسماءها بـ VITE_.
-   SITE_URL في الخادم وVITE_SITE_URL في بناء الموقع يشيران إلى النطاق العام الفعلي المستخدم حالياً.
-5. مشكلة مؤكدة في النشر القديم: /api/public/content يعيد HTML للـ SPA بحالة 200، ولا يعيد JSON. مسار Pages Functions الجديد يرسل /api إلى Render ويمنع نجاحاً وهمياً إذا غاب إعداد الاتصال.
-6. بعد الموافقة ومراجعة التغييرات والأسرار، تكون أوامر النشر من جذر المستودع:
+البنية المعتمدة:
+Cloudflare Pages: mashrouak-net للموقع و mashrouak-admin للوحة الإدارة.
+Render Free: خدمة Node.js/Hono الحالية فقط.
+Neon Free PostgreSQL: قاعدة البيانات الحالية.
+Cloudinary: التكامل الحالي للصور.
+لا تنشئ موارد مدفوعة أو قاعدة Render أو قرصاً أو خدمة بديلة، ولا تعدّل DNS.
+المقترحات القديمة المدفوعة ملغاة.
 
-   git status --short
-   git diff
-   git add .
-   git commit -m "Update website"
-   git push origin main
+1. غيّر كلمة مرور دور Neon المكشوفة. احتفظ بالروابط الجديدة في إعدادات سرية فقط.
+   DATABASE_URL للاتصال المجمّع و DIRECT_DATABASE_URL للاتصال المباشر؛ كلاهما مدعوم فعلياً.
+   لا ترسل أي رابط أو كلمة مرور في المحادثة. لا تستخدم كلمة المرور القديمة.
 
-   هذه أمثلة للتنفيذ بعد الموافقة، ولم تُنفذ ضمن العمل الحالي. راجع جميع التغييرات الموجودة مسبقاً قبل git add.
-7. راقب سجل Deployments للمشروع العام. تحقق من نجاح البناء ومن commit المنشور، ثم افتح رابط النشر الذي يعرضه Cloudflare. نجاح البناء المحلي ليس دليلاً على نشر الإنتاج.
-
-B — لوحة الإدارة المستقلة على Cloudflare Pages
------------------------------------------------
-تم إنشاء mashrouak-admin فعلياً والتحقق من ارتباطه بالمستودع نفسه والفرع main. إعداداته المستقلة:
-   Root directory: repository root، حقل فارغ.
-   Build command: npm run build -w @mashrouak/admin
-   Build output directory: admin-dashboard/dist
-   NODE_VERSION: 24.19.0
-   VITE_API_URL: فارغ عند استخدام proxy من النطاق نفسه.
-   VITE_PUBLIC_URL: https://mashrouak-net.pages.dev حالياً؛ يصبح https://mashrouak.net بعد تفعيل النطاق والتحقق منه.
-   API_PROXY_URL: عنوان خدمة Render الفعلي، وليس عنوان مشروع Pages.
-   PAGES_PROXY_SECRET: السر الخادمي نفسه الذي في Render.
-
-يملك المشروع ارتباط GitHub وسجل نشر ومتغيرات بيئة منفصلة. يبني أمره ملفات الإدارة داخل admin-dashboard/dist، بينما يبني المشروع العام dist. لذلك لا يستبدل بناء الإدارة ملفات المشروع العام أو سجل نشره. تبقى المعاينة داخل preview/index.html في مخرجات الإدارة، وهي تستورد مكونات الموقع العام الفعلية؛ ليست نسخة تقريبية للموقع.
-
-لا تستخدم admin-dashboard كجذر بناء مع هذا المستودع؛ التثبيت يعتمد على workspaces وpackage-lock.json الموجودين في الجذر. اترك النشر الآلي من main مفعلاً في المشروعين.
-
-بعد رفع المصدر الموافق عليه، تحقق من أول نشر ناجح للإدارة ومن commit المنشور. عند فتح التطبيق دون جلسة يجب أن تظهر صفحة الدخول، وتبقى واجهات الإدارة البرمجية محمية بالمصادقة والصلاحيات. لا توجد كلمات مرور افتراضية.
-
-ربط admin.mashrouak.net يتم من Custom domains داخل مشروع mashrouak-admin نفسه. لا توجه نطاق الإدارة إلى Render. إضافة النطاق أو تغيير DNS تتطلب الموافقة قبل التنفيذ.
-
-C — Backend وPostgreSQL على Render
-----------------------------------
-الملف render.yaml جاهز ونجح فحصه مقابل JSON schema الرسمية الحالية. تطبيقه ينشئ موارد مدفوعة؛ لم يُطبق.
-
-إعداد الخدمة المقترحة:
-   Type: Web Service / Node
-   Repository: SaadSinan-dev/Mashrouak-website عبر Git provider متصل، لتمكين النشر الآلي.
-   Branch: main
-   Root directory: repository root (.)
-   Region: Frankfurt، للخدمة وقاعدة البيانات معاً.
-   Plan: 0.5c-512mb
-   Build: npm ci --include=dev && npm run build -w @mashrouak/backend
-   Pre-deploy: npm run db:migrate:production -w @mashrouak/backend
-   Start: npm run start -w @mashrouak/backend
-   Health check: /healthz
-   Auto-deploy: On Commit
-   NODE_VERSION: 24.19.0
-   NODE_ENV: production
-
-لا تضبط PORT على رقم محلي في Render؛ تستخدم الخدمة القيمة التي يزودها Render وتستمع على 0.0.0.0. لا تستخدم wrangler dev أو Worker bindings لتشغيل هذا الخادم.
-
-قاعدة البيانات المقترحة:
-   Name: mashrouak-postgres
-   PostgreSQL: 18، بترميز UTF8.
-   Database / user: mashrouak
-   Region: Frankfurt
-   Plan: 0.1c-256mb
-   Disk: 1 GB، وstorage autoscaling معطل في المقترح.
-   الاتصالات الخارجية معطلة مبدئياً في render.yaml عبر ipAllowList: [].
-
-ضع Internal Database URL الفعلي في DATABASE_URL للخدمة؛ يربطه الـ Blueprint تلقائياً. لا تضع عنوان قاعدة البيانات أو كلمة مرورها في VITE_ أو في أي متصفح.
-
-متغيرات Render المطلوبة:
-   DATABASE_URL
-   NODE_ENV=production
-   PUBLIC_ORIGIN=<عنوان الموقع العام الفعلي، دون مسار أو slash إضافي>
-   ADMIN_ORIGIN=<عنوان لوحة الإدارة الفعلي، دون مسار>
-   SITE_URL=<عنوان الموقع العام الفعلي>
-   PAGES_PROXY_SECRET=<سر عشوائي خادمي بطول 32 حرفاً أو أكثر>
-   CLOUDINARY_CLOUD_NAME
-   CLOUDINARY_API_KEY
-   CLOUDINARY_API_SECRET
-   CLOUDINARY_FOLDER=mashrouak
-   CHAT_RETENTION_DAYS=90
-   AI_PROVIDER=none
-
-لا يوجد متغير CORS_ORIGINS؛ الخادم يستخدم PUBLIC_ORIGIN وADMIN_ORIGIN فعلياً. تفعيل مزود AI لاحقاً يحتاج AI_API_KEY وAI_BASE_URL وAI_MODEL وفق المزود؛ مفتاحه خادمي أيضاً.
-
-قبل تفعيل النطاقات المخصصة، استخدم عنواني Pages الفعليين كـ PUBLIC_ORIGIN وADMIN_ORIGIN مع proxy من النطاق نفسه. بعد التفعيل، حدّثهما إلى:
-   https://mashrouak.net
-   https://admin.mashrouak.net
-
-الكوكيز HttpOnly وSecure في الإنتاج وSameSite=Strict وPath=/api، دون Domain واسع. المتصفح يتعامل مع /api على نطاق تطبيقه، ويقوم Pages proxy بنقل الطلب والكوكيز إلى Render. لذلك لا يعتمد تسجيل الدخول على كوكيز طرف ثالث بين pages.dev وonrender.com. تبقى الطلبات التي تغير البيانات محمية بفحص Origin وترويسة الطلب والمصادقة والصلاحيات.
-
-نقل البيانات بأمان:
-1. اختر المصدر الصحيح قبل أي import. D1 الإنتاجية كانت خالية من جميع بيانات التطبيق عند التصدير. المصدر المحلي المحفوظ يحتوي البيانات الفعلية: مستخدمان، 18 سجل محتوى، 12 مراجعة، 36 سجل تدقيق، محادثتان، 6 رسائل وصورة واحدة، مع جداول الجلسات والمعاينات وحدود الطلبات. لا تستبدل مصدراً مليئاً بنسخة فارغة.
-2. أوقف الكتابة إلى المصدر عند القطع النهائي فقط وبعد الموافقة. تبقى D1 والملفات القديمة سليمة. النسخة المحلية محفوظة هنا، ومهملة بواسطة Git:
+2. احفظ نسخة من PostgreSQL المحلية قبل تغيير إعداداتها، واحتفظ بملفي المصدر:
    backend/.local/migration/source-local.json
    backend/.local/migration/source-local.json.sqlite
-   توجد نسخة SQL وJSON خاصة من D1 البعيدة داخل backend/.local/migration.
-3. لتصدير مصدر D1 دون تغييره:
-   npm run db:export:d1 -w @mashrouak/backend
-   npm run db:export:d1 -w @mashrouak/backend -- --remote
-   JSON البعيد مشتق من نسخة SQL نفسها، وليس من قراءات مختلفة لاحقة.
-4. شغّل migrations على قاعدة PostgreSQL المستهدفة أولاً. أداة import لا تطبق migrations ضمن dry run.
-   npm run db:migrate -w @mashrouak/backend
-5. لاستيراد المصدر المحلي إلى PostgreSQL المحلي، من جذر المستودع:
-   npm run db:import:d1 -w @mashrouak/backend -- .local/migration/source-local.json
-   npm run db:import:d1 -w @mashrouak/backend -- .local/migration/source-local.json --apply
-   الأول فحص دون كتابة بيانات. الثاني يستورد في transaction واحدة، ويتحقق من أعداد الصفوف وSHA-256 لكل جدول قبل commit. يرفض أي هدف غير فارغ يختلف عن المصدر، ولا يمسح أو يستبدل سجلاته. إعادة استيراد النسخة المطابقة لا تغير شيئاً.
-6. للاستيراد الموافق عليه إلى Render، استخدم External Database URL فقط لعملية النقل من جهازك. اسمح مؤقتاً بعنوان IP الإداري المحدد في إعدادات الشبكة، ثم أغلقه بعد النقل. لا تسمح بـ 0.0.0.0/0.
-   مثال PowerShell، لا يطبع كلمة المرور ولا يكتبها في المستودع:
+   لا تستبدلهما بالمصدر البعيد الفارغ، ولا تستورد فوق بيانات مختلفة.
+   يتضمن دليل التسليم أوامر فحص الاتصال ومقارنة البيانات دون استيراد.
+   تنفيذ ترحيل مخطط Neon أو الاستيراد أو تصحيح المحتوى البعيد يتطلب موافقتك الصريحة.
 
-   $env:DATABASE_URL = Read-Host "Paste the intended Render external database URL" -MaskInput
-   npm run db:migrate -w @mashrouak/backend
-   npm run db:import:d1 -w @mashrouak/backend -- .local/migration/source-local.json --allow-remote
-   npm run db:import:d1 -w @mashrouak/backend -- .local/migration/source-local.json --allow-remote --apply
-   npm run content:audit-services -w @mashrouak/backend -- --allow-remote
-   Remove-Item Env:DATABASE_URL
+3. افتح خدمة Render الحالية وتحقق من Free و main و Node 24.19.0.
+   Root: repository root
+   Build: npm ci --include=dev && npm run build -w @mashrouak/backend
+   Start: npm run start -w @mashrouak/backend
+   Health: /healthz
+   لا تستخدم pre-deploy job في الخطة المجانية.
+   يحتوي دليل التسليم على جدول كل المتغيرات ومسار Environment Group.
 
-   الاستيراد البعيد وتعديل محتوى الإنتاج يتطلبان الموافقة. نفّذ تصحيح الخدمات بعد إثبات تطابق الاستيراد الخام؛ فهو يسجل تغييرات مقصودة مستقلة للمسودة والمنشور ولا ينشر مسودات أخرى.
-7. لا تشغّل seed قبل استيراد بيانات موجودة. seed مخصص للبدء من قاعدة فارغة، ولا يغير سجلات موجودة ولا ينشئ حسابات افتراضية.
-8. النسخ الاحتياطي لـ PostgreSQL:
-   npm run db:backup -w @mashrouak/backend
-   ينتج JSON خاصاً ومتسقاً مع counts/hashes في backend/.local/backups. استخدم كذلك النسخ المنطقية وPITR التي يوفرها Render، وجرّب الاسترجاع في قاعدة منفصلة قبل الاعتماد عليه. لا تضع ملفات النسخ أو محتواها في Git أو المحادثات العامة.
+4. اضبط Pages بشكل مستقل:
+   الموقع: npm run build — output dist
+   الإدارة: npm run build -w @mashrouak/admin — output admin-dashboard/dist
+   كلاهما من جذر المستودع وعلى main.
+   API_PROXY_URL: أصل HTTPS الفعلي لخدمة Render، دون /api.
+   PAGES_PROXY_SECRET: القيمة السرية نفسها في Render ومشروعي Pages.
+   VITE_API_URL: فارغ للحفاظ على /api من الأصل نفسه.
+   VITE_PUBLIC_URL في الإدارة: أصل الموقع العام الفعلي.
+   لا تضع أي أسرار في متغير يبدأ بـ VITE_.
 
-الصور:
-قيم Cloudinary الحقيقية الحالية موجودة محلياً فقط في backend/.env. يجب إدخالها كأسرار في Render أيضاً. تم الحفاظ على معرفات الصور وروابط /api/media وبياناتها الوصفية عند النقل. يستخدم المتصفح proxy للصور المحمية، ولا يحصل على مفاتيح API أو روابط الأصل الخاصة. الصور العامة يمكن أن تعيد 304 بعد فحص بياناتها، والصور الخاصة تبقى no-store ومحمية بالصلاحيات. يظل Cloudinary CDN يخزن النسخ المحسنة.
-إذا بقيت صور قديمة بلا بيانات Cloudinary، راجع:
-   npm run media:audit -w @mashrouak/backend
-   npm run media:migrate -w @mashrouak/backend
-الأداة تقرأ الملفات والمصدر القديمين فقط وتحدث PostgreSQL بمعاملة آمنة بعد التحقق من SHA-256 للأصل، ولا تحذف المصدر.
+5. راجع التغييرات كاملة قبل الموافقة على Git Push؛ قد يطلق نشر التطبيقات الثلاثة تلقائياً.
+   بعد النشر، نفّذ فحص /healthz وتسجيل الدخول وثلاث عمليات نشر متتالية لنفس العنوان.
+   تحقق من API والنافذة المفتوحة ونافذة خاصة والتحديث، ومن بقاء المسودة غير المنشورة خاصة.
+   اختبر خدماتنا بالعربية والإنجليزية والصور والجوال وإيقاظ Render بعد الخمول.
 
-المهام المجدولة:
-انتقلت أعمال التنظيف إلى الخادم الأصلي. يفحص كل دقيقة استحقاق التنظيف، وينفذه مرة في الساعة مع catch-up بعد إعادة التشغيل. يحفظ آخر نجاح في scheduled_jobs ويستخدم PostgreSQL advisory lock لمنع تكرار التنفيذ بين النسخ. يشمل الجلسات والمعاينات والحدود والمحادثات حسب الاحتفاظ ومحاولات حذف أصول Cloudinary المؤجلة. لا توجد مهمة Worker فعالة مطلوبة. لا تحتاج الخطة المقترحة إلى Cron Service إضافية. خدمة Free النائمة لا تضمن توقيت أعمال الخلفية؛ لذلك لا نوصي بها للإنتاج.
-
-النطاقات وDNS — خطوات بعد الموافقة فقط:
-- أضف mashrouak.net من Custom domains داخل مشروع Pages العام الموجود؛ اتبع التحقق الذي يعرضه Cloudflare مع الحفاظ على البريد والسجلات الأخرى.
-- أضف admin.mashrouak.net إلى مشروع mashrouak-admin. عند طلب CNAME، تكون الوجهة المؤكدة لهذا المشروع mashrouak-admin.pages.dev، ويجب إكمال ربط النطاق داخل Pages أولاً.
-- أضف api.mashrouak.net إلى Custom Domains لخدمة Render. انسخ CNAME الهدف الفعلي الذي يعرضه Render بعد إنشاء الخدمة. لم يُنشأ هذا الهدف بعد؛ لا تستخدم اسماً تخمينياً.
-- عند استخدام Cloudflare، ابدأ بوجهة API على DNS only لإصدار الشهادة، وراجع إرشادات Render الرسمية قبل تفعيل proxy. لا توجه root أو admin إلى Render.
-- انتظر التحقق والشهادة ثم اختبر النطاقات الثلاثة فعلياً عبر HTTPS. لم تُنفذ هذه التغييرات حالياً.
-
-D — اختبارات الإنتاج بعد النشر
-------------------------------
-قبل القطع النهائي، من جذر المستودع:
-   npm ci
-   npm run test
-   npm run typecheck:all
-   npm run test:integration
-   npm run test:publishing
-   npm run test:publishing:browser
-   npm run test:visual:browser
-   npm run test:media:browser
-   npm run test:devices:browser
-   npm run build:all
-تحتاج اختبارات التكامل إلى PostgreSQL محلي قابل للاتصال عبر TEST_DATABASE_URL أو backend/.env. تنشئ schemas اختبار منفصلة، وترفض تعديل أي قاعدة بعيدة. اختبارات Cloudinary الآلية تستخدم محاكاة المزود، ولا تثبت حالة حساب الإنتاج.
-
-تحقق عملياً من:
-- /healthz يعيد PostgreSQL جاهزاً، و/api/public/content يعيد JSON لا HTML.
-- دخول الإدارة وخروجها وأدوار owner/editor/support؛ طلبات المجهول إلى الإدارة والصور الخاصة مرفوضة.
-- ثلاث عمليات تعديل وحفظ ونشر متتالية للعنوان نفسه؛ بعد كل واحدة تحقق من API، وجلسة عامة مفتوحة، وجلسة خاصة جديدة، وإعادة التحميل. لا يلزم Git push أو إعادة بناء لتغييرات CMS.
-- المسودة غير المنشورة غير ظاهرة للعامة. لا تظهر رسالة نجاح قبل تأكيد commit والتحقق من revision والنسخة العامة.
-- المحرر: تحديد النص الصحيح، القيم العربية والإنجليزية، المعاينة الفورية، undo/redo، ترتيب الأقسام وإخفاؤها، الصور والنص البديل، النص الغني، نطاق النشر وسجل المراجعات والمعاينة المنتهية الصلاحية.
-- الصور: رفع واستبدال وحذف غير المستخدم، رفض الخاص للعامة، والحفاظ على سجلات التدقيق والبيانات بعد إعادة تشغيل الخدمة.
-- المحفظة والنتائج دون اختراع نتائج لعملاء؛ المحادثة والرد من صندوق الدعم؛ العربية والإنجليزية والوضعان الفاتح والداكن والهاتف.
-- المشهد ثلاثي الأبعاد: الشعاران الأصليان دون تمديد، ألفا حقيقية، عدم ظهور fallback تحت canvas، fallback للفشل أو reduced motion فقط.
-- Console وNetwork: لا أخطاء مخفية، وSSE أو فحص revision يجلب آخر منشور. الأصول ذات الأسماء المجزأة تحت /assets تبقى immutable؛ سياسة محتوى CMS محددة ولا تعطل التخزين المؤقت لجميع الموقع.
-
-راجع النتائج المحلية الفعلية والتفاصيل في docs/PRODUCTION_UPGRADE_REPORT.md وdocs/PUBLISHING_ROOT_CAUSE.md. النتائج المحلية لا تعني اكتمال تحقق النطاقات أو نشر Render.
-
-استكشاف الأخطاء:
-- HTML بدلاً من JSON: راجع نشر Pages Functions وAPI_PROXY_URL، ولا تعتمد على SPA fallback بحالة 200.
-- 503 api_proxy_not_configured: أكمل عنوان Render وسر proxy الخادمي في مشروع Pages المعني.
-- فشل الدخول: راجع الأصل الفعلي وHTTPS وSecure/SameSite واستخدم /api من نطاق التطبيق. لا تستخدم wildcard CORS مع credentials.
-- version_conflict: توجد نسخة أحدث؛ احفظ نسخة من التعديل وراجع أحدث مسودة قبل الدمج. لا تتجاوز حماية الإصدارات.
-- migration/import failure: لا تفرغ القاعدة. راجع الهدف وUTF8 وmanifest والنسخة الاحتياطية؛ المعاملة تتراجع عند عدم التطابق.
-- فشل النشر الآلي: افحص commit وroot وworkspace command ومجلد الإخراج وسجل كل مشروع على حدة.
-
-E — التكاليف والقيود، حسب المصادر الرسمية في 9 نوفمبر 2026
-----------------------------------------------------------
-Render المقترح: 7 دولارات شهرياً لحوسبة Web Service و6 دولارات لحوسبة PostgreSQL، أي 13 دولاراً أساسياً قبل التخزين الإضافي والضرائب والاستخدام. تسعير التخزين المعلن 0.30 دولار لكل GB؛ تحقق من الإجمالي في شاشة الإنشاء، وضعنا diskSizeGB=1 لتجنب سعة افتراضية أكبر. ميزانية الأساس المقترحة حتى 14 دولاراً شهرياً، ولا تشمل رسوم تجاوز الاستخدام. لم تُنشأ موارد مدفوعة.
-الخطة Free للويب تنام بعد 15 دقيقة من الخمول، وقد تحتاج قرابة دقيقة للاستيقاظ؛ توجد حصة تشغيل شهرية. PostgreSQL Free تنتهي بعد 30 يوماً ولا توفر مزايا النسخ الاحتياطي المدفوعة. ليست استضافة إنتاج دائمة مجانية.
-Cloudflare Pages Free لها حدود، منها 500 عملية بناء شهرياً وبناء واحد متزامن على الحساب. Pages Functions تخضع لحصص Workers؛ proxy ليس دليلاً على طلبات API غير محدودة.
-Cloudinary Free تعرض 25 رصيداً شهرياً مشتركة بين التحويل والتخزين والنقل، وليست سعة غير محدودة. لا نغيّر اشتراك الحساب ولا نفترض أن الأسرار المحلية منشورة تلقائياً.
-مصادر رسمية:
-https://render.com/pricing
-https://render.com/docs/free
-https://render.com/docs/blueprint-spec
-https://render.com/docs/postgresql-creating-connecting
-https://render.com/docs/custom-domains
-https://developers.cloudflare.com/pages/configuration/monorepos/
-https://developers.cloudflare.com/pages/platform/limits/
-https://developers.cloudflare.com/pages/functions/pricing/
-https://cloudinary.com/pricing
+الحالة الفعلية: أصلح عطل startup search_path محلياً واختبرت الشيفرة والبناء والتكامل والمتصفح.
+لم أستخدم بيانات Neon القديمة ولم أنفذ نشر الإصلاح أو ترحيل Neon أو الاستيراد البعيد.
+الفحوصات المستضافة ما زالت معلّقة على خطوات حساباتك وموافقتك على الكتابات المحددة.
+التفاصيل والأوامر القابلة للنسخ موجودة في ملفي التسليم والجاهزية أعلاه.

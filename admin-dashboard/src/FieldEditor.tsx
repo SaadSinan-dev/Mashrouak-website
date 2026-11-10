@@ -63,7 +63,13 @@ export function ImagePicker({
           </button>
         )}
       </div>
-      {value&&<FieldEditor field="alt" value={value.alt} onChange={alt=>onChange({...value,alt})}/>}
+      {value && (
+        <FieldEditor
+          field="alt"
+          value={value.alt}
+          onChange={(alt) => onChange({ ...value, alt })}
+        />
+      )}
       {open && (
         <MediaChoices
           onSelect={(item) => {
@@ -98,7 +104,14 @@ function MediaChoices({ onSelect }: { onSelect: (item: MediaItem) => void }) {
     );
   return (
     <div className="media-choices">
-      <div className="media-choices__tools"><a href="/media" target="_blank" rel="noopener noreferrer">{t('upload')}</a><button type="button" onClick={retry}>{t('retry')}</button></div>
+      <div className="media-choices__tools">
+        <a href="/media" target="_blank" rel="noopener noreferrer">
+          {t("upload")}
+        </a>
+        <button type="button" onClick={retry}>
+          {t("retry")}
+        </button>
+      </div>
       {data.media.map((item) => (
         <div className="media-choice" key={item.id}>
           <MediaPreview

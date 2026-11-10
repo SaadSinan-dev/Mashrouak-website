@@ -160,11 +160,13 @@ media.get("/:id", async (c) => {
     throw new HTTPException(503, { message: "media_migration_required" });
   // Revalidate stable public IDs before reusing bytes; visibility changes still
   // perform authorization above and replacements have a new revision/ETag.
-  const etag=`"media-${row.id}-${row.revision}"`;
-  if(row.visibility==='public'){
-    c.header('Cache-Control','private, no-cache, must-revalidate');
-    c.header('CDN-Cache-Control','no-store');c.header('ETag',etag);c.header('Vary','Cookie, Origin');
-    if(c.req.header('If-None-Match')===etag)return c.body(null,304);
+  const etag = `"media-${row.id}-${row.revision}"`;
+  if (row.visibility === "public") {
+    c.header("Cache-Control", "private, no-cache, must-revalidate");
+    c.header("CDN-Cache-Control", "no-store");
+    c.header("ETag", etag);
+    c.header("Vary", "Cookie, Origin");
+    if (c.req.header("If-None-Match") === etag) return c.body(null, 304);
   }
   const response = await cloudinaryDelivery(
     c.env,
@@ -186,7 +188,12 @@ media.get("/:id", async (c) => {
   c.header("Content-Type", type);
   c.header("Content-Disposition", `inline; filename="${row.filename}"`);
   // Stable IDs change visibility/bytes: caches must not bypass authorization.
-  c.header("Cache-Control", row.visibility==='public'?'private, no-cache, must-revalidate':'private, no-store');
+  c.header(
+    "Cache-Control",
+    row.visibility === "public"
+      ? "private, no-cache, must-revalidate"
+      : "private, no-store",
+  );
   c.header("Cross-Origin-Resource-Policy", "same-site");
   c.header("Vary", "Cookie, Origin");
   if (row.visibility === "private")
@@ -357,8 +364,9 @@ media.put("/:id", authorize(["owner", "editor"]), async (c) => {
   const visibility = input.visibility ?? row.visibility;
   const ref = reference(row.id);
   const result = await c.env.DB.prepare(
-      "WITH changed AS (UPDATE media SET alt_ar=?,alt_en=?,visibility=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND (?='public' OR NOT EXISTS(SELECT 1 FROM content WHERE status='published' AND strpos(coalesce(published,''),?)>0)) RETURNING id), audited AS (INSERT INTO audit_logs(id,actor_id,action,target_id,detail,created_at) SELECT ?,?,'media.edit',id,'',? FROM changed) SELECT id FROM changed",
-    ).bind(
+    "WITH changed AS (UPDATE media SET alt_ar=?,alt_en=?,visibility=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND (?='public' OR NOT EXISTS(SELECT 1 FROM content WHERE status='published' AND strpos(coalesce(published,''),?)>0)) RETURNING id), audited AS (INSERT INTO audit_logs(id,actor_id,action,target_id,detail,created_at) SELECT ?,?,'media.edit',id,'',? FROM changed) SELECT id FROM changed",
+  )
+    .bind(
       input.alt_ar,
       input.alt_en,
       visibility,
@@ -367,8 +375,11 @@ media.put("/:id", authorize(["owner", "editor"]), async (c) => {
       input.revision ?? row.revision,
       visibility,
       ref,
-      id(), c.get("user").id, now(),
-    ).all();
+      id(),
+      c.get("user").id,
+      now(),
+    )
+    .all();
   if (!result.results.length) {
     if (
       visibility === "private" &&
@@ -390,8 +401,20 @@ media.delete("/:id", authorize(["owner", "editor"]), async (c) => {
   const ref = reference(row.id);
   const noUsage = `NOT (${usageCondition})`;
   const removed = await c.env.DB.prepare(
-      `WITH removed AS (DELETE FROM media WHERE id=? AND revision=? AND ${noUsage} RETURNING id,cloudinary_public_id), queued AS (INSERT INTO media_cleanup(public_id,not_before) SELECT cloudinary_public_id,? FROM removed ON CONFLICT(public_id) DO NOTHING), audited AS (INSERT INTO audit_logs(id,actor_id,action,target_id,detail,created_at) SELECT ?,?,'media.delete',id,'',? FROM removed) SELECT id FROM removed`,
-    ).bind(row.id, row.revision, ref, ref, ref, Date.now(), id(), c.get("user").id, now()).all();
+    `WITH removed AS (DELETE FROM media WHERE id=? AND revision=? AND ${noUsage} RETURNING id,cloudinary_public_id), queued AS (INSERT INTO media_cleanup(public_id,not_before) SELECT cloudinary_public_id,? FROM removed ON CONFLICT(public_id) DO NOTHING), audited AS (INSERT INTO audit_logs(id,actor_id,action,target_id,detail,created_at) SELECT ?,?,'media.delete',id,'',? FROM removed) SELECT id FROM removed`,
+  )
+    .bind(
+      row.id,
+      row.revision,
+      ref,
+      ref,
+      ref,
+      Date.now(),
+      id(),
+      c.get("user").id,
+      now(),
+    )
+    .all();
   if (!removed.results.length)
     throw new HTTPException(409, { message: "media_in_use" });
   return c.json({

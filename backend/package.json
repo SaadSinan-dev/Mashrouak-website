@@ -17,7 +17,9 @@
     "db:migrate:production": "node dist/migrate.js",
     "db:export:d1": "tsx scripts/d1-export.ts",
     "db:import:d1": "tsx scripts/d1-import.ts",
-    "content:audit-services": "tsx scripts/audit-services.ts"
+    "content:audit-services": "tsx scripts/audit-services.ts",
+    "db:check": "tsx scripts/check-database.ts",
+    "test:neon": "cd .. && tsx tests/neon.integration.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.6",

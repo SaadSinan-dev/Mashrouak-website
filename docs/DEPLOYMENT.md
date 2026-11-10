@@ -1,5 +1,11 @@
 # Deployment
 
+**Current deployment authority — 10 November 2026:** use [FINAL_DEPLOYMENT_HANDOFF.md](FINAL_DEPLOYMENT_HANDOFF.md) for exact settings, variables, protected PowerShell commands and chronological acceptance; use [PRODUCTION_READINESS_REPORT.md](PRODUCTION_READINESS_REPORT.md) for actual results. Target: existing `mashrouak-net` and `mashrouak-admin` Pages, existing **Render Free** Node/Hono service, **Neon Free PostgreSQL**, existing Cloudinary. No paid services, pre-deploy jobs or DNS changes. The startup defect is fixed locally; fresh Neon and hosted verification remain pending owner account steps. No push/remote migration/import was performed in this pass.
+
+## Historical Worker deployment notes — superseded
+
+The remaining text records the earlier Cloudinary-only architecture; its Worker/D1 deployment commands are not the current deployment workflow.
+
 Public app, independent dashboard, Worker and D1 keep their existing architecture. Uploaded media now uses Cloudinary; no storage bucket or subscription is required. Start with [Cloudinary setup](CLOUDINARY_SETUP.md) for the prepared `backend/.env`, historical local transfer, verified account IDs and secret workflow.
 
 ## Existing resources and first Worker deployment

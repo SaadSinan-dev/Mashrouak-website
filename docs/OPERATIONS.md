@@ -1,5 +1,13 @@
 # Operations and recovery
 
+**Current runtime — 10 November 2026:** existing Render Free Node.js/Hono, Neon Free UTF8 PostgreSQL and Cloudinary. The exact current workflow is [FINAL_DEPLOYMENT_HANDOFF.md](FINAL_DEPLOYMENT_HANDOFF.md); actual verification is in [PRODUCTION_READINESS_REPORT.md](PRODUCTION_READINESS_REPORT.md). D1 remains an intact migration source. `npm run db:backup -w @mashrouak/backend` creates a consistent private PostgreSQL JSON backup over the direct endpoint. Preserve it and original sources; no paid PITR feature is assumed. Imports verify source counts/hashes transactionally and refuse different nonempty targets. Dry runs perform no migration/import. Never reset or seed over existing records.
+
+Publication snapshots, routes, order, audit, revision and notification commit together. The dashboard verifies the public snapshot. Undo/redo changes only document data; server version metadata stays authoritative. Visual publication scope is reviewed explicitly. Preview tokens are hashed, expire after 15 minutes and preserve the selected language/theme.
+
+Cleanup now runs in the native service: a minute timer checks hourly eligibility, a PostgreSQL advisory lock prevents duplicate replicas, and the last success is persisted for restart catch-up. It expires sessions/previews/rate limits, enforces conversation retention and retries provider cleanup. No Worker cron is required. Production cookies remain HttpOnly/Secure/Strict, and the same-origin Pages proxy preserves authentication without third-party cookies. Static hashed assets remain immutable; public image bytes revalidate with ETags after metadata checks, and private bytes remain no-store.
+
+## Historical Worker operations — superseded runtime commands
+
 ## Access
 
 Owner manages users, access and audits. Editor manages CMS/media. Support manages conversations. The API enforces these permissions independently of navigation. There is no public registration. Provision the first owner from a trusted terminal; use separate named accounts afterwards. Password changes revoke all that user’s sessions. Disabled users cannot authenticate.

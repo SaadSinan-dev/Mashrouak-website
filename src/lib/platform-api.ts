@@ -20,7 +20,9 @@ export async function api<T>(
   const response = await fetch(`${apiOrigin}/api${path}`, {
     ...options,
     credentials: "include",
-    signal: options.signal?AbortSignal.any([options.signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000),
+    signal: options.signal
+      ? AbortSignal.any([options.signal, AbortSignal.timeout(90000)])
+      : AbortSignal.timeout(90000),
     headers: {
       Accept: "application/json",
       ...(options.body && !(options.body instanceof FormData)
@@ -31,7 +33,8 @@ export async function api<T>(
     },
   });
   const body = await response.json().catch(() => null);
-  if (!body || typeof body !== "object") throw new ApiError("invalid_api_response", 502);
+  if (!body || typeof body !== "object")
+    throw new ApiError("invalid_api_response", 502);
   if (!response.ok) {
     if (
       response.status === 401 &&

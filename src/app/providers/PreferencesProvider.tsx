@@ -18,9 +18,12 @@ import {
 } from "./preferences-context";
 function readStoredLanguage(): Language | null {
   try {
-    const query=new URLSearchParams(window.location.search);
-    const previewLanguage=query.has('preview')?query.get('preview_language'):null;
-    if(previewLanguage==='ar'||previewLanguage==='en')return previewLanguage;
+    const query = new URLSearchParams(window.location.search);
+    const previewLanguage = query.has("preview")
+      ? query.get("preview_language")
+      : null;
+    if (previewLanguage === "ar" || previewLanguage === "en")
+      return previewLanguage;
     const stored = window.localStorage.getItem("mashrouak-language");
     return stored === "en" || stored === "ar" ? stored : null;
   } catch {
@@ -30,9 +33,12 @@ function readStoredLanguage(): Language | null {
 
 function readStoredTheme(): Theme | null {
   try {
-    const query=new URLSearchParams(window.location.search);
-    const previewTheme=query.has('preview')?query.get('preview_theme'):null;
-    if(previewTheme==='light'||previewTheme==='dark')return previewTheme;
+    const query = new URLSearchParams(window.location.search);
+    const previewTheme = query.has("preview")
+      ? query.get("preview_theme")
+      : null;
+    if (previewTheme === "light" || previewTheme === "dark")
+      return previewTheme;
     const stored = window.localStorage.getItem("mashrouak-theme");
     return stored === "dark" || stored === "light" ? stored : null;
   } catch {
@@ -60,7 +66,10 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     const skipLink = document.querySelector<HTMLAnchorElement>(".skip-link");
     if (skipLink) skipLink.textContent = messages[language]["a11y.skip"];
     try {
-      if (selectedLanguage&&!new URLSearchParams(window.location.search).has('preview'))
+      if (
+        selectedLanguage &&
+        !new URLSearchParams(window.location.search).has("preview")
+      )
         window.localStorage.setItem("mashrouak-language", selectedLanguage);
     } catch {
       /* Storage may be unavailable in private contexts. */
@@ -77,7 +86,10 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     if (themeColor)
       themeColor.content = theme === "dark" ? "#102733" : "#142B3A";
     try {
-      if (selectedTheme&&!new URLSearchParams(window.location.search).has('preview'))
+      if (
+        selectedTheme &&
+        !new URLSearchParams(window.location.search).has("preview")
+      )
         window.localStorage.setItem("mashrouak-theme", selectedTheme);
     } catch {
       /* Storage may be unavailable in private contexts. */

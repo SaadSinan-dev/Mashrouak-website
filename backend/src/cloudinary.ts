@@ -75,7 +75,11 @@ async function signedForm(
   form.set("signature", await cloudinarySignature(params, config.secret));
   return { config, form };
 }
-async function providerFetch(env: CloudinaryEnv, url: string, options: RequestInit) {
+async function providerFetch(
+  env: CloudinaryEnv,
+  url: string,
+  options: RequestInit,
+) {
   try {
     const response = await (env.CLOUDINARY_FETCH ?? fetch)(url, {
       ...options,

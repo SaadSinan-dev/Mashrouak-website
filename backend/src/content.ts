@@ -146,10 +146,38 @@ cms.post("/:id/publish", async (c) => {
   }
   const rowResult = await c.env.DB.prepare(
     "WITH changed AS (UPDATE content SET published=draft,published_slug=slug,published_sort_order=sort_order,status='published',version=version+1,updated_at=? WHERE id=? AND version=? AND NOT EXISTS(SELECT 1 FROM media WHERE visibility='private' AND strpos(content.draft,'/api/media/'||media.id)>0) RETURNING *), publication AS (UPDATE publication_state SET revision=revision+1,updated_at=? WHERE id=1 AND EXISTS(SELECT 1 FROM changed) RETURNING revision,updated_at), audited AS (INSERT INTO audit_logs(id,actor_id,action,target_id,detail,created_at) SELECT ?,?,'content.publish',id,'',? FROM changed) SELECT changed.*,publication.revision AS publication_revision,publication.updated_at AS publication_updated_at,pg_notify(?,publication.revision::text) AS notification FROM changed CROSS JOIN publication",
-  ).bind(now(),row.id,version,now(),id(),c.get("user").id,now(),c.env.PUBLICATION_EVENTS?.channel ?? "mashrouak_publication").first<Row & {publication_revision:number;publication_updated_at:string;notification:string}>();
+  )
+    .bind(
+      now(),
+      row.id,
+      version,
+      now(),
+      id(),
+      c.get("user").id,
+      now(),
+      c.env.PUBLICATION_EVENTS?.channel ?? "mashrouak_publication",
+    )
+    .first<
+      Row & {
+        publication_revision: number;
+        publication_updated_at: string;
+        notification: string;
+      }
+    >();
   if (!rowResult) throw new HTTPException(409, { message: "version_conflict" });
-  const {publication_revision,publication_updated_at,notification: _notification,...committed} = rowResult;
-  return c.json({ entry: decodeEntry(committed), publication:{revision:publication_revision,updatedAt:publication_updated_at} });
+  const {
+    publication_revision,
+    publication_updated_at,
+    notification: _notification,
+    ...committed
+  } = rowResult;
+  return c.json({
+    entry: decodeEntry(committed),
+    publication: {
+      revision: publication_revision,
+      updatedAt: publication_updated_at,
+    },
+  });
 });
 cms.post("/:id/state", async (c) => {
   const input = z
@@ -161,10 +189,40 @@ cms.post("/:id/state", async (c) => {
     .parse(await c.req.json());
   const result = await c.env.DB.prepare(
     "WITH changed AS (UPDATE content SET status=?,published=NULL,published_slug=NULL,published_sort_order=NULL,version=version+1,updated_at=? WHERE id=? AND version=? RETURNING *), publication AS (UPDATE publication_state SET revision=revision+1,updated_at=? WHERE id=1 AND EXISTS(SELECT 1 FROM changed) RETURNING revision,updated_at), audited AS (INSERT INTO audit_logs(id,actor_id,action,target_id,detail,created_at) SELECT ?,?,?,id,'',? FROM changed) SELECT changed.*,publication.revision AS publication_revision,publication.updated_at AS publication_updated_at,pg_notify(?,publication.revision::text) AS notification FROM changed CROSS JOIN publication",
-  ).bind(input.status,now(),c.req.param("id"),input.version,now(),id(),c.get("user").id,`content.${input.status}`,now(),c.env.PUBLICATION_EVENTS?.channel ?? "mashrouak_publication").first<Row & {publication_revision:number;publication_updated_at:string;notification:string}>();
+  )
+    .bind(
+      input.status,
+      now(),
+      c.req.param("id"),
+      input.version,
+      now(),
+      id(),
+      c.get("user").id,
+      `content.${input.status}`,
+      now(),
+      c.env.PUBLICATION_EVENTS?.channel ?? "mashrouak_publication",
+    )
+    .first<
+      Row & {
+        publication_revision: number;
+        publication_updated_at: string;
+        notification: string;
+      }
+    >();
   if (!result) throw new HTTPException(409, { message: "version_conflict" });
-  const {publication_revision,publication_updated_at,notification: _notification,...committed}=result;
-  return c.json({entry:decodeEntry(committed),publication:{revision:publication_revision,updatedAt:publication_updated_at}});
+  const {
+    publication_revision,
+    publication_updated_at,
+    notification: _notification,
+    ...committed
+  } = result;
+  return c.json({
+    entry: decodeEntry(committed),
+    publication: {
+      revision: publication_revision,
+      updatedAt: publication_updated_at,
+    },
+  });
 });
 cms.delete("/:id", async (c) => {
   const version = z.coerce.number().int().parse(c.req.query("version"));

@@ -6,7 +6,7 @@ import { Container } from "../../components/ui/Container";
 import { ManagedSection } from "./ManagedSection";
 import { NotFoundPage } from "../not-found/NotFoundPage";
 import { PublicPageSkeleton } from "../../components/shared/PublicPageSkeleton";
-import {CmsValue} from './Editable';
+import { CmsValue } from "./Editable";
 export function ContentPage() {
   const { slug = "" } = useParams();
   const page = usePage(slug);
@@ -27,12 +27,25 @@ export function ContentPage() {
     <>
       <section className="page-hero page-hero--light">
         <Container>
-          <h1><CmsValue kind="pages" slug={slug} path={['title']}>{page.title[language]}</CmsValue></h1>
-          <p><CmsValue kind="pages" slug={slug} path={['description']}>{page.description[language]}</CmsValue></p>
+          <h1>
+            <CmsValue kind="pages" slug={slug} path={["title"]}>
+              {page.title[language]}
+            </CmsValue>
+          </h1>
+          <p>
+            <CmsValue kind="pages" slug={slug} path={["description"]}>
+              {page.description[language]}
+            </CmsValue>
+          </p>
         </Container>
       </section>
-      {page.sections.map((section,index) => (
-        <ManagedSection key={section.id} section={section} pageSlug={slug} index={index}/>
+      {page.sections.map((section, index) => (
+        <ManagedSection
+          key={section.id}
+          section={section}
+          pageSlug={slug}
+          index={index}
+        />
       ))}
     </>
   );

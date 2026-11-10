@@ -49,7 +49,11 @@ export function createResourceCache(
     const controller = record.controller;
     record.promise = fetcher(path, { signal: controller.signal })
       .then((data) => {
-        if (record.active && generation === record.generation && !controller.signal.aborted)
+        if (
+          record.active &&
+          generation === record.generation &&
+          !controller.signal.aborted
+        )
           record.snapshot = {
             data,
             error: null,
@@ -58,7 +62,11 @@ export function createResourceCache(
           };
       })
       .catch((error) => {
-        if (record.active && generation === record.generation && !controller.signal.aborted)
+        if (
+          record.active &&
+          generation === record.generation &&
+          !controller.signal.aborted
+        )
           record.snapshot = { ...record.snapshot, error, pending: false };
       })
       .finally(() => {

@@ -1,1 +1,2 @@
-/* /index.html 200
+# Cloudflare Pages automatically falls back to index.html for SPA navigation.
+# API routes are served by Pages Functions and must never rewrite to HTML.

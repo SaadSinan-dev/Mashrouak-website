@@ -1,6 +1,6 @@
 # Cloudinary QA inventory
 
-Provider calls are mocked. The browser uses an isolated Worker and disposable D1 on port 8789; it never uses the development or production media database.
+The 26 media browser regression checks now use native Node.js/Hono and an isolated real PostgreSQL schema, with mocked provider calls. They never mutate the development or production media database. A separate read-only live Cloudinary verification confirmed the preserved original SHA-256 and signed optimized delivery. See the current [upgrade report](PRODUCTION_UPGRADE_REPORT.md).
 
 | Claim / control          | Functional check                                                                                                | Visual state / evidence                                 |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |

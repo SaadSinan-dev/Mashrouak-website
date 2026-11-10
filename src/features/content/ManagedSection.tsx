@@ -7,7 +7,7 @@ import { SmartImage } from "../../components/shared/SmartImage";
 import { mediaUrl } from "../../lib/platform-api";
 import { lazy, Suspense } from "react";
 import { SkeletonRegion, SkeletonText } from "../../../shared/ui/Skeleton";
-import {CmsValue} from './Editable';
+import { CmsValue } from "./Editable";
 const RichText = lazy(() =>
   import("../../components/shared/RichText").then((module) => ({
     default: module.RichText,
@@ -16,10 +16,12 @@ const RichText = lazy(() =>
 
 export function ManagedSection({
   section,
-  pageSlug,index=0,
+  pageSlug,
+  index = 0,
 }: {
   section: z.infer<typeof sectionSchema>;
-  pageSlug?:string;index?:number;
+  pageSlug?: string;
+  index?: number;
 }) {
   const { language, t } = useLocale();
   if (!section.visible) return null;
@@ -31,7 +33,18 @@ export function ManagedSection({
     >
       <Container>
         <div className="managed-section__text">
-          {section.title[language] && <h2><CmsValue kind="pages" slug={pageSlug} path={['sections',index,'title']} label="Section heading">{section.title[language]}</CmsValue></h2>}
+          {section.title[language] && (
+            <h2>
+              <CmsValue
+                kind="pages"
+                slug={pageSlug}
+                path={["sections", index, "title"]}
+                label="Section heading"
+              >
+                {section.title[language]}
+              </CmsValue>
+            </h2>
+          )}
           {section.body[language] && (
             <Suspense
               fallback={
@@ -48,22 +61,45 @@ export function ManagedSection({
                 </SkeletonRegion>
               }
             >
-              <CmsValue kind="pages" slug={pageSlug} path={['sections',index,'body']} label="Section body" rich><RichText>{section.body[language]}</RichText></CmsValue>
+              <CmsValue
+                kind="pages"
+                slug={pageSlug}
+                path={["sections", index, "body"]}
+                label="Section body"
+                rich
+              >
+                <RichText>{section.body[language]}</RichText>
+              </CmsValue>
             </Suspense>
           )}
           {section.buttonUrl && section.buttonLabel[language] && (
             <ButtonLink to={section.buttonUrl}>
-              <CmsValue kind="pages" slug={pageSlug} path={['sections',index]} label="Section button and destination">{section.buttonLabel[language]}</CmsValue>
+              <CmsValue
+                kind="pages"
+                slug={pageSlug}
+                path={["sections", index]}
+                label="Section button and destination"
+              >
+                {section.buttonLabel[language]}
+              </CmsValue>
             </ButtonLink>
           )}
         </div>
         {section.image && (
-          <CmsValue kind="pages" slug={pageSlug} path={['sections',index,'image']} label="Section image" image><SmartImage
-            src={mediaUrl(section.image.url)}
-            alt={section.image.alt[language]}
-            width={1200}
-            height={750}
-          /></CmsValue>
+          <CmsValue
+            kind="pages"
+            slug={pageSlug}
+            path={["sections", index, "image"]}
+            label="Section image"
+            image
+          >
+            <SmartImage
+              src={mediaUrl(section.image.url)}
+              alt={section.image.alt[language]}
+              width={1200}
+              height={750}
+            />
+          </CmsValue>
         )}
       </Container>
     </section>
