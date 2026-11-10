@@ -11,6 +11,7 @@ import { createResourceCache } from "../../shared/resource-cache";
 import type { Conversation, Message } from "../../shared/schema";
 import { api } from "../lib/platform-api";
 import { SiteHeader } from "../components/layout/SiteHeader";
+import { PublicAtmosphere } from "../components/layout/PublicAtmosphere";
 import { SiteFooter } from "../components/layout/SiteFooter";
 import { ScrollToTop } from "../components/layout/ScrollToTop";
 import { CompanyChatbot } from "../components/shared/CompanyChatbot";
@@ -197,6 +198,7 @@ export function AppRouter() {
 export function PublicRouteTree() {
   return (
     <>
+      <PublicAtmosphere />
       <ScrollToTop />
       <Routes>
         <Route path="/contact/chat" element={<ChatRoute />} />

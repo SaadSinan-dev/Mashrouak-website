@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="edge" x1="0" x2="1" y1="0" y2=".12">
+      <stop stop-color="white" stop-opacity=".12"/>
+      <stop offset=".3" stop-color="white" stop-opacity=".5"/>
+      <stop offset="1" stop-color="white"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#edge)" stroke-width="1">
+    <path d="M815 -42 955 98 Q982 125 1020 125 H1254 Q1322 125 1370 173 L1480 283"/>
+    <path d="M879 -42 993 72 Q1014 93 1044 93 H1263 Q1342 93 1397 148 L1480 231"/>
+    <g transform="translate(1440 900) rotate(180)">
+      <path d="M992 -44 1051 15 Q1090 54 1145 54 H1268 Q1337 54 1384 101 L1475 192"/>
+      <path d="M1036 -46 1081 -1 Q1108 26 1152 26 H1274 Q1356 26 1404 74 L1478 148"/>
+    </g>
+  </g>
+</svg>
