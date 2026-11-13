@@ -1,6 +1,6 @@
 import {CmsText,CmsCopy,CmsValue} from '../../features/content/Editable';
 import { useServices } from '../../app/providers/content-context';
-import { ArrowUpLeft, ArrowUpRight, Instagram, Mail, MessageCircle } from 'lucide-react';
+import { ArrowUpLeft, ArrowUpRight, Github, Instagram, Mail, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLocale } from '../../app/providers/preferences-context';
 import { Logo } from '../shared/Logo';
@@ -30,6 +30,15 @@ export function SiteFooter() {
             <div className="site-footer__contact-channels" aria-label={isArabic ? 'قنوات التواصل الرسمية' : 'Official contact channels'}>
               <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label={isArabic ? 'تواصل عبر واتساب' : 'Contact us on WhatsApp'}><MessageCircle size={15} /><span><CmsCopy copyKey="visual.SiteFooter.0027d82c4a" ar="واتساب" en="WhatsApp"/></span></a>
               <a href={`mailto:${contact.email}`} aria-label={isArabic ? 'راسلنا عبر البريد' : 'Email us'}><Mail size={15} /><span><CmsCopy copyKey="visual.SiteFooter.8681cda7f8" ar="البريد" en="Email"/></span></a>
+<a
+  href="https://github.com/Mashrouak-net"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={isArabic ? 'زيارة GitHub' : 'Visit our GitHub'}
+>
+  <Github size={15} />
+  <span>GitHub</span>
+</a>
               <a href={contact.instagram} target="_blank" rel="noopener noreferrer" aria-label={isArabic ? 'زيارة حساب إنستغرام' : 'Visit Instagram'}><Instagram size={15} /><span><CmsCopy copyKey="visual.SiteFooter.662b3435d2" ar="إنستغرام" en="Instagram"/></span></a>
             </div>
           </div>
