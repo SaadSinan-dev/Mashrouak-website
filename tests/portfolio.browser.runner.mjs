@@ -20,6 +20,7 @@ try {
     page.on('pageerror', (error) => console.error('Browser error:', error.message));
     if (process.env.PORTFOLIO_FEED_FIXTURE) page.on('response', (response) => { if (response.request().resourceType() === 'image' && !response.ok()) console.error('Image status:', response.status(), new URL(response.url()).hostname); });
     if (process.env.PORTFOLIO_FEED_FIXTURE) page.on('requestfailed', (request) => { if (request.resourceType() === 'image') console.error('Image failed:', request.failure()?.errorText, new URL(request.url()).hostname); });
+    await page.route(/firestore\.googleapis\.com|127\.0\.0\.1:8188/, route => route.abort());
     await page.route('**/api/public/content*', (route) => route.fulfill({ json: content }));
     await page.route('**/api/public/revision', (route) => route.fulfill({ json: { revision: 1 } }));
     await page.route('**/api/public/events', (route) => route.fulfill({ status: 204, body: '' }));
@@ -32,8 +33,8 @@ try {
     if (overflow) throw new Error(`Horizontal overflow at ${width}px`);
     if (await page.locator('.showcase-card').count() !== feed.projects.length) throw new Error(`Project count mismatch at ${width}px`);
     if (process.env.PORTFOLIO_FEED_FIXTURE) {
-      try { await page.locator('.showcase-card .smart-image__asset.is-loaded').first().waitFor({ timeout: 20000 }); }
-      catch (error) { console.error('First image:', (await page.locator('.showcase-card .smart-image').first().evaluate((node) => node.outerHTML)).slice(0, 700)); throw error; }
+      try { await page.locator('.showcase-card .device-shell img').first().waitFor({ timeout: 20000 }); }
+      catch (error) { console.error('First image:', (await page.locator('.showcase-card .device-stage').first().evaluate((node) => node.outerHTML)).slice(0, 700)); throw error; }
       for (const card of await page.locator('.showcase-card').all()) await card.scrollIntoViewIfNeeded();
       await page.waitForTimeout(800);
       await page.evaluate(() => window.scrollTo(0, 0));
@@ -48,6 +49,7 @@ try {
   for (const scenario of ['empty', 'error']) {
     const context = await browser.newContext({ viewport: { width: 390, height: 800 }, reducedMotion: 'reduce' });
     const page = await context.newPage();
+    await page.route(/firestore\.googleapis\.com|127\.0\.0\.1:8188/, route => route.abort());
     await page.route('**/api/public/content*', (route) => route.fulfill({ json: content }));
     await page.route('**/api/public/revision', (route) => route.fulfill({ json: { revision: 1 } }));
     await page.route('**/api/public/events', (route) => route.fulfill({ status: 204, body: '' }));
@@ -64,13 +66,13 @@ try {
     const context = await browser.newContext({ viewport: { width: 390, height: 800 }, reducedMotion: 'reduce' });
     const page = await context.newPage();
     let unavailable = false;
+    await page.route(/firestore\.googleapis\.com|127\.0\.0\.1:8188/, route => route.abort());
     await page.route('**/api/public/content*', (route) => route.fulfill({ json: content }));
     await page.route('**/api/public/revision', (route) => route.fulfill({ json: { revision: 1 } }));
     await page.route('**/api/public/events', (route) => route.fulfill({ status: 204, body: '' }));
     await page.route('**/.netlify/functions/public-projects', (route) => unavailable ? route.fulfill({ status: 503, json: { error: 'Unavailable' } }) : route.fulfill({ json: feed }));
     await page.goto(`${base}/work`);
     await page.locator('.showcase-card').first().waitFor();
-    await page.evaluate(() => { for (const key of Object.keys(localStorage)) if (key.startsWith('mashrouak:portfolio-projects:v1:')) { const saved = JSON.parse(localStorage.getItem(key)); saved.fetchedAt = 0; localStorage.setItem(key, JSON.stringify(saved)); } });
     unavailable = true;
     await page.reload();
     await page.getByText('تعذّر التحديث. تُعرض آخر نسخة محفوظة.').waitFor({ timeout: 20000 });

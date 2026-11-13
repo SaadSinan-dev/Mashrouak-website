@@ -1,72 +1,39 @@
-# Portfolio projects integration
+# Live portfolio projects
 
-## Source
+## How publishing works
 
-The Portfolio admin is the only project editor. It writes Firestore `projects`. The public Portfolio exposes a read-only JSON feed at `https://saad-dev-portfolio.netlify.app/.netlify/functions/public-projects` (or the deployed Portfolio Netlify domain). Its implementation is `portfolio/netlify/functions/public-projects.mjs` in the separate `portfolio-new` repository. It reads through the Portfolio's public Firestore rules, returns only public project fields, and excludes records marked private, draft, archived or unpublished. It returns no Firebase configuration or private metadata.
+Portfolio Admin is the editor. Firestore `projects/{id}` holds the complete record. The dashboard finishes Cloudinary uploads first, then commits the source and its `publicProjects/{id}` projection together. A failed commit leaves the previous publication intact. Updating an existing project reads its current source in a transaction. A concurrent change requires reopening the editor. The success notice follows Firestore acknowledgement.
 
-The response format is `{ "version": 1, "projects": [...] }`. Records include Firestore `id`, bilingual text, category, featured flag, sort order, technology list, HTTPS images, and optional HTTPS live/GitHub links. Legacy image keys resolve to stable image files generated from the Portfolio's existing registry at build time. No project records are copied into Mashrouak.
+The projection contains the document ID, bilingual titles, descriptions, engineering focus and features, category, order, featured flag, technologies, HTTPS gallery URLs and optional HTTPS demo and repository URLs. The first image is the cover. Legacy image keys resolve to the Portfolio’s public image directory. Private, draft, archived and unpublished projects have no public document. Historical visibility flags are checked during migration. Publishing overwrites the whole projection, so removed fields do not linger.
 
-Mashrouak fetches and validates the feed in `src/features/portfolio/project-feed.ts`. Its home showcase, `/work`, and `/work/:id` all read that data. Every successful response replaces the full list, so creation, edits, and deletion synchronize. Browser local storage retains the last valid response during a later outage; a successful empty response clears old projects. A first-time failure displays a retry state. Old Mashrouak CMS project entries are excluded from public content and editing. Historical database rows remain for preservation but are not used.
+Both public sites subscribe to the public collection through the Firestore SDK. An open detail view looks up the current record by ID. Featured projects sort first, followed by display order and ID. The personal site retains its category tabs. The Mashrouak homepage displays the first three projects. Its homepage, work page and detail pages share one listener per mounted application. The SDK reconnects after interruptions. Consumers retain their last result while disconnected. Mashrouak also retains its last validated result in browser storage. Cached copies and previously downloaded screenshots cannot be recalled from offline browsers. Reconnected clients remove withdrawn work on the authoritative snapshot.
 
-## Caching and visibility
+Mashrouak can read the existing Netlify JSON endpoint when the initial listener is delayed or fails. The endpoint returns a version 1 snapshot of the same public documents with `Cache-Control: no-store`. A late fallback cannot override a newer server snapshot. There is no periodic feed refresh. Each active client incurs ordinary Firestore listener reads.
 
-- Netlify/CDN caches a successful feed for 60 seconds.
-- Mashrouak checks every five minutes and on tab visibility, with one shared request for concurrent sections.
-- Changes normally appear within five minutes on an open tab, or roughly six minutes if a request reaches a CDN copy just before it expires. A browser reload does not bypass a fresh five-minute browser cache. Failed refreshes show the last valid list until recovery.
-- Firestore public read rules must allow the existing public Portfolio project subscription. The feed uses the same public access, never an admin token or service account. Existing records have no explicit publication switch and are public unless a supported private/unpublished flag is set. The Portfolio public view uses the same filter.
+## Production rollout
 
-## Deployment
+1. In the Firebase Console for `portfolio-4b886`, compare the deployed Firestore rules with `portfolio-new/firestore.rules`. Preserve rules for other applications and remove overlapping public grants on the raw projects path. Close old dashboard tabs. During the cutover, apply the merged rules from the Portfolio repository root with `firebase deploy --only firestore:rules --project portfolio-4b886`. The old readers may show an unavailable state until steps 2–4 are complete. For an uninterrupted rollout, stage the public projection rule first and apply the final raw-project restriction as soon as the readers switch. Existing raw collection access under that staged approach depends on the previous rules.
+2. Deploy the Portfolio Admin Netlify site from the complete `portfolio-new` repository, base directory `portfolio-admin`, build command `npm run build`, publish directory `dist`. Keep the existing Firebase web settings and Cloudinary cloud name and upload preset. When legacy images are hosted on a different Portfolio domain, set optional `VITE_PUBLIC_PORTFOLIO_URL` to its absolute HTTPS origin. Log into the new dashboard, open **Existing project migration**, and select **Synchronize existing projects** once. Wait for “Existing projects synchronized.” Rerunning the migration safely rereads each source.
+3. Deploy the personal Portfolio Netlify site from the same repository, base directory `portfolio`, command `npm run build`, publish `dist`. Keep the site's `netlify.toml` and functions directory. Retain `VITE_FIREBASE_*` and any existing server-side `FIREBASE_WEB_API_KEY`. Check `https://saad-dev-portfolio.netlify.app/.netlify/functions/public-projects` for version 1 and the expected project count. For staging consumers, add the exact origin to `PUBLIC_PROJECTS_ORIGINS`.
+4. Deploy the Mashrouak public Cloudflare Pages site from the Mashrouak repository root with `npm run build`, output `dist`. The build generates the Firestore connection permission in `_headers`. The public defaults are project ID `portfolio-4b886` and the Portfolio Netlify feed. Override `VITE_PORTFOLIO_FIREBASE_PROJECT_ID` and `VITE_PORTFOLIO_PROJECTS_URL` together for staging. Mashrouak Admin and the Render API have no changes to deploy for this upgrade.
+5. In already-open tabs, create a temporary public project in the new dashboard. Check the Portfolio category tab, Mashrouak homepage, work page and detail. Change its title, cover and order. Set it private and verify it disappears, then delete the temporary source. Future edits use just the dashboard. Direct writes from Firebase Console, imports or retired dashboard builds bypass the dashboard transaction.
 
-1. Deploy the **public Portfolio** Netlify site from `C:\Users\saads\Desktop\Saad\portfolio-new\portfolio` with `npm run build`, publish `dist`, and include `netlify.toml` so Netlify deploys `netlify/functions/public-projects.mjs`. Retain the existing `VITE_FIREBASE_*` settings. Set `FIREBASE_WEB_API_KEY` for Functions if the browser key has HTTP referrer restrictions. This key is never returned by the feed.
-2. Request the feed URL and confirm HTTP 200, `version: 1`, and the expected count. A request with `Origin: https://mashrouak.net` must receive `Access-Control-Allow-Origin: https://mashrouak.net`. For staging origins, set `PUBLIC_PROJECTS_ORIGINS` as a comma-separated list in the Portfolio Netlify site and redeploy.
-3. Deploy **Mashrouak public Cloudflare Pages** with `npm run build`, publish `dist`. The build includes the Portfolio origin in its content security policy. The default feed URL is built in; set `VITE_PORTFOLIO_PROJECTS_URL` only if the Portfolio domain changes or for staging, then rebuild.
-4. Deploy **Mashrouak admin Cloudflare Pages** with `npm run build -w @mashrouak/admin`, publish `admin-dashboard/dist`. Deploy the **Mashrouak Render API** with `npm run build -w @mashrouak/backend`, start `npm run start -w @mashrouak/backend`. These changes remove and reject the old project editing workflow. Retain all existing database and service settings. No migration or paid service is needed.
-5. Open Mashrouak `/work` and a project detail page. Add, edit and delete a temporary project using only the Portfolio admin. Confirm the feed and Mashrouak reflect each change within the cache window.
+## Repeat the browser verification
 
-## Files changed
+Use the official Firebase CLI and Java 21. Run `npm ci` in both Portfolio application directories and the Mashrouak root. Install Chromium from the Mashrouak root with `npx playwright install chromium`. These commands run in separate PowerShell terminals.
 
-**Portfolio public repository** (`portfolio-new/portfolio`): `.env.example`, `.gitignore`, `README.md`, `package.json`, `netlify.toml`, `netlify/functions/public-projects.mjs`, `netlify/functions/project-assets.mjs` (generated manifest), `scripts/prepare-project-images.mjs`, `src/services/projects/projectService.js`, and `tests/publicProjects.test.mjs`. `public/project-images/` is generated at build time and ignored by Git. The sibling `portfolio-admin` application was not changed.
+1. At the Portfolio repository root, run `firebase emulators:start --only 'firestore,auth' --project demo-projects`.
+2. In each Portfolio application terminal set the variables below, then start the dashboard in `portfolio-admin` with `npm run dev -- --host 127.0.0.1 --port 7281 --strictPort`. Start the public site in `portfolio` with the same command using port 7282.
 
-**Mashrouak public**:
-
-```text
-.env.example
-README.md
-package.json
-scripts/security-headers.mjs
-src/app/providers/content-context.ts
-src/components/shared/SpecialPageSkeleton.tsx
-src/data/projects.ts (removed)
-src/features/home/sections/ProjectsSection.tsx
-src/features/portfolio/CaseStudyPage.tsx
-src/features/portfolio/PortfolioPage.tsx
-src/features/portfolio/ProjectFeedStatus.tsx
-src/features/portfolio/ProjectShowcaseCard.tsx
-src/features/portfolio/project-feed.ts
-src/features/portfolio/usePortfolioProjects.ts
-src/features/results/ResultsSection.tsx
-src/locales/content.ts
-src/locales/messages.ts
-src/styles/globals.css
+```powershell
+$env:VITE_FIREBASE_PROJECT_ID='demo-projects'
+$env:VITE_FIREBASE_API_KEY='demo-key'
+$env:VITE_FIREBASE_AUTH_DOMAIN='demo-projects.firebaseapp.com'
+$env:VITE_FIREBASE_APP_ID='demo-app'
+$env:VITE_CLOUDINARY_CLOUD_NAME='demo'
+$env:VITE_CLOUDINARY_UPLOAD_PRESET='demo'
 ```
 
-**Mashrouak admin/API and checks**:
-
-```text
-admin-dashboard/src/App.tsx
-admin-dashboard/src/VisualEditor.tsx
-backend/src/content.ts
-backend/src/index.ts
-backend/src/seed-content.ts
-tests/content.test.ts
-tests/localization.test.ts
-tests/portfolio-feed.test.ts
-tests/portfolio.browser.runner.mjs
-docs/PORTFOLIO_PROJECTS_INTEGRATION.md
-```
-
-An unrelated pre-existing edit to `URL.TXT` was left untouched.
-
-## Verification and limits
-
-A local read of real Firestore returned 13 public records, all with image URLs. Automated tests cover add/update/delete snapshots, optional fields, private flags, unsafe links, CORS, source failure, normalization, and duplicate IDs. Local builds, type checks, 56 Mashrouak unit tests, 18 Portfolio tests, and desktop/tablet/mobile layout checks pass. Lint reports two existing admin warnings. The PostgreSQL integration suite could not run because no local PostgreSQL URL/service was available; it refuses to use a remote database. The new Netlify function and Mashrouak Pages output still need to be deployed. Historical Mashrouak project rows are retained but no longer shown or editable. Results linked to obsolete project slugs no longer render broken detail links.
+3. At the Mashrouak root set `$env:VITE_PORTFOLIO_FIREBASE_PROJECT_ID='demo-projects'` and run `npm run dev -- --host 127.0.0.1 --port 7283 --strictPort`.
+4. In a separate Mashrouak terminal run `npm run test:portfolio:live`. If the checkouts are elsewhere set `PORTFOLIO_ASSETS_DIR` to the Portfolio’s `src/assets/projects` directory. The test uses real dashboard forms, authentication, Firestore commits and listeners. Cloudinary response and unrelated Mashrouak CMS requests use fixtures. The test writes captures to `artifacts/live-work/`.
+5. For independent fallback checks set `$env:SITE_URL='http://127.0.0.1:7283'` and run `npm run test:portfolio:browser`. The suite disconnects the live transport and exercises the JSON fallback, detail navigation, empty, error, and last-saved states.

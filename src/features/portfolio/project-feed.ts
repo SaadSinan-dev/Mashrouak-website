@@ -14,10 +14,10 @@ const projectSchema = z.object({
   liveUrl: z.union([safeUrl, z.literal('')]).default(''),
   githubUrl: z.union([safeUrl, z.literal('')]).default(''),
 });
-const feedSchema = z.object({ version: z.literal(1), projects: z.array(projectSchema).max(500) });
+const feedSchema = z.object({ version: z.literal(1), projects: z.array(projectSchema) });
 export type PortfolioProject = z.infer<typeof projectSchema>;
 export const FEED_URL = import.meta.env.VITE_PORTFOLIO_PROJECTS_URL?.trim() || 'https://saad-dev-portfolio.netlify.app/.netlify/functions/public-projects';
-export const REFRESH_MS = 5 * 60 * 1000;
+
 
 export function normalizeFeed(input: unknown): PortfolioProject[] {
   const feed = feedSchema.parse(input);
@@ -26,7 +26,7 @@ export function normalizeFeed(input: unknown): PortfolioProject[] {
     if (seen.has(project.id)) return false;
     seen.add(project.id);
     return true;
-  }).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+  }).sort((a, b) => Number(b.featured) - Number(a.featured) || a.order - b.order || a.id.localeCompare(b.id));
 }
 
 let inFlight: Promise<PortfolioProject[]> | null = null;

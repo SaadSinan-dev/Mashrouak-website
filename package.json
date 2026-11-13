@@ -28,6 +28,7 @@
     "test:publishing": "tsx tests/publishing.integration.ts",
     "test:visual:browser": "tsx tests/visual.browser.runner.mjs",
     "test:devices:browser": "tsx tests/devices.browser.runner.mjs",
+    "test:portfolio:live": "node tests/live-projects.browser.mjs",
     "test:portfolio:browser": "node tests/portfolio.browser.runner.mjs",
     "test:scene:browser": "tsx tests/scene.browser.runner.mjs"
   },
@@ -47,7 +48,9 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "three": "^0.187.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "@firebase/app": "0.16.2",
+    "@firebase/firestore": "4.17.2"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

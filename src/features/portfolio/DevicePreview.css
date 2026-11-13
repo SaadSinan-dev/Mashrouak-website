@@ -1,0 +1,136 @@
+.device-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: clamp(280px, 34vw, 510px);
+  padding: 30px 5% 48px;
+  background:
+    radial-gradient(ellipse at 46% 28%, #ffffff47, transparent 62%),
+    var(--device-field, #d4e2dc);
+  isolation: isolate;
+  overflow: hidden;
+}
+.device-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  max-width: 100%;
+  min-width: 0;
+  max-height: 100%;
+  background: #233139;
+  border: 1px solid #84918f;
+  border-radius: 9px;
+  padding: 3px;
+  box-shadow: 0 15px 30px #102e3429;
+  overflow: hidden;
+}
+.device-shell img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: clamp(184px, 24vw, 370px);
+  object-fit: contain;
+  border-radius: 3px;
+  margin: auto;
+}
+.device-chrome {
+  height: 17px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding-inline: 6px;
+}
+.device-chrome i {
+  width: 4px;
+  height: 4px;
+  border-radius: 100%;
+  background: #b7c4bf;
+}
+[data-shape='phone'] > .device-shell {
+  position: relative;
+  border-radius: 21px;
+  padding: 5px;
+  box-shadow:
+    0 0 0 2px #657170,
+    2px 0 0 3px #243239,
+    0 16px 28px #102e3430;
+}
+[data-shape='phone'] > .device-shell img {
+  border-radius: 16px;
+  max-height: clamp(197px, 26vw, 398px);
+}
+[data-shape='phone'] > .device-shell > .device-chrome {
+  height: 5px;
+  justify-content: center;
+  padding: 0;
+}
+[data-shape='phone'] > .device-shell > .device-chrome i {
+  display: none;
+}
+[data-shape='phone'] > .device-shell > .device-chrome i:first-child {
+  display: block;
+  width: 22%;
+  height: 2px;
+  background: #627274;
+}
+[data-shape='canvas'] > .device-shell > .device-chrome {
+  display: none;
+}
+.device-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: absolute;
+  bottom: 5px;
+  color: #193237;
+}
+.device-controls button {
+  width: 44px;
+  height: 40px;
+  color: inherit;
+  border: 0;
+  background: transparent;
+  font-size: 21px;
+  cursor: pointer;
+}
+.device-controls output {
+  font: 500 12px monospace;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .device-shell {
+    transition: transform 0.24s ease;
+  }
+  .device-stage:hover > .device-shell {
+    transform: translateY(-2px);
+  }
+}
+
+@media (min-width: 900px) {
+  .showcase-grid--page .showcase-card--prominent {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    align-items: center;
+    gap: clamp(24px, 4vw, 70px);
+    padding-block: 20px;
+  }
+  .showcase-detail-hero .device-stage {
+    height: clamp(400px, 40vw, 620px);
+  }
+}
+.showcase-card__content {
+  overflow-wrap: anywhere;
+}
+.projects-section .device-stage {
+  --device-field: #315251;
+}
+
+.projects-section .device-controls {
+  color: #eff8f3;
+}
+.device-controls button:focus-visible,
+.device-stage > button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
+}

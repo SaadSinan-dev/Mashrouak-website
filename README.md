@@ -1,6 +1,6 @@
 # Mashrouak.net
 
-Arabic-first public website, independent admin application, and a native Node.js/Hono API backed by PostgreSQL and Cloudinary. The official logos and six service offerings are preserved. Public projects now come from the separate Portfolio Firestore collection through its read-only Netlify feed. Manage projects only in the Portfolio admin; see [integration and deployment](docs/PORTFOLIO_PROJECTS_INTEGRATION.md).
+Arabic-first public website, independent admin application, and a native Node.js/Hono API backed by PostgreSQL and Cloudinary. The official logos and six service offerings are preserved. Both public websites subscribe to the sanitized publicProjects collection in Portfolio Firestore. The Netlify feed provides a fallback. Manage projects only in the Portfolio admin; see [integration and deployment](docs/PORTFOLIO_PROJECTS_INTEGRATION.md).
 
 ## Current state
 

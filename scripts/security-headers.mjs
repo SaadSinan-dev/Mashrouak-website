@@ -16,6 +16,7 @@ const origins = new Set();
 for (const value of [
   process.env.VITE_API_URL ?? env.VITE_API_URL,
   process.env.VITE_CONTACT_API_URL ?? env.VITE_CONTACT_API_URL,
+  'https://firestore.googleapis.com',
   portfolioFeed,
 ].filter(Boolean)) {
   const url = new URL(value);

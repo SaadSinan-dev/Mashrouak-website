@@ -1,41 +1,141 @@
-import { useCallback, useEffect, useState } from 'react';
-import { FEED_URL, REFRESH_MS, fetchProjectFeed, normalizeFeed, type PortfolioProject } from './project-feed';
+import { useSyncExternalStore } from 'react';
+import {
+  FEED_URL,
+  fetchProjectFeed,
+  normalizeFeed,
+  type PortfolioProject,
+} from './project-feed';
 
-const key = `mashrouak:portfolio-projects:v1:${FEED_URL}`;
-type State = { projects: PortfolioProject[]; loading: boolean; error: boolean; stale: boolean; fetchedAt: number; hasData: boolean };
-function savedState(): State {
-  try {
-    const saved = JSON.parse(localStorage.getItem(key) || 'null');
-    if (saved && Number.isFinite(saved.fetchedAt)) return { projects: normalizeFeed(saved.feed), loading: false, error: false, stale: false, fetchedAt: saved.fetchedAt, hasData: true };
-  } catch { /* Ignore invalid or blocked storage. */ }
-  return { projects: [], loading: true, error: false, stale: false, fetchedAt: 0, hasData: false };
+const projectId =
+  import.meta.env.VITE_PORTFOLIO_FIREBASE_PROJECT_ID || 'portfolio-4b886';
+const cacheKey = 'portfolio-live:v2:' + projectId + ':' + FEED_URL;
+type State = {
+  projects: PortfolioProject[];
+  loading: boolean;
+  error: boolean;
+  stale: boolean;
+};
+const listeners = new Set<() => void>();
+let state: State = { projects: [], loading: true, error: false, stale: false };
+let generation = 0;
+let stop: (() => void) | undefined;
+let timer: ReturnType<typeof setTimeout>;
+let initialTimer: ReturnType<typeof setTimeout>;
+let hasData = false;
+try {
+  const projects = normalizeFeed(
+    JSON.parse(localStorage.getItem(cacheKey) || 'null'),
+  );
+  state = { projects, loading: false, error: false, stale: true };
+  hasData = true;
+} catch {
+  /* No verified snapshot yet. */
 }
 
+function notify(next: State) {
+  state = next;
+  listeners.forEach((fn) => fn());
+}
+function accept(projects: PortfolioProject[], stale = false) {
+  hasData = true;
+  notify({ projects, loading: false, error: stale, stale });
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ version: 1, projects }));
+  } catch {
+    /* Optional cache. */
+  }
+}
+async function connect() {
+  const token = ++generation;
+  clearTimeout(timer);
+  stop?.();
+  clearTimeout(initialTimer);
+  let revision = 0;
+  let readingFallback = false;
+  const fallback = async () => {
+    if (readingFallback) return;
+    readingFallback = true;
+    const started = revision;
+    try {
+      const projects = await fetchProjectFeed();
+      if (token === generation && revision === started) accept(projects);
+    } catch {
+      if (token === generation && revision === started)
+        notify({ ...state, loading: false, error: true, stale: hasData });
+    } finally {
+      readingFallback = false;
+    }
+  };
+  initialTimer = setTimeout(fallback, 4000);
+  const failed = async () => {
+    clearTimeout(initialTimer);
+    if (token !== generation) return;
+    notify({ ...state, loading: !hasData, error: hasData, stale: hasData });
+    await fallback();
+    if (token === generation) timer = setTimeout(connect, 15000);
+  };
+  try {
+    const [
+      { initializeApp, getApps },
+      { getFirestore, collection, onSnapshot, connectFirestoreEmulator },
+    ] = await Promise.all([
+      import('@firebase/app'),
+      import('@firebase/firestore'),
+    ]);
+    if (token !== generation) return;
+    const existing = getApps().find((app) => app.name === 'portfolio');
+    const db = getFirestore(
+      existing || initializeApp({ projectId }, 'portfolio'),
+    );
+    if (!existing && import.meta.env.DEV && projectId === 'demo-projects')
+      connectFirestoreEmulator(db, '127.0.0.1', 8188);
+    stop = onSnapshot(
+      collection(db, 'publicProjects'),
+      { includeMetadataChanges: true },
+      (snapshot) => {
+        if (token !== generation) return;
+        if (snapshot.metadata.fromCache && snapshot.empty) {
+          if (hasData) notify({ ...state, stale: true, error: true });
+          return;
+        }
+        try {
+          const projects = normalizeFeed({
+            version: 1,
+            projects: snapshot.docs.map((doc) => ({
+              ...doc.data(),
+              id: doc.id,
+            })),
+          });
+          if (!snapshot.metadata.fromCache) {
+            revision++;
+            clearTimeout(initialTimer);
+          }
+          accept(projects, snapshot.metadata.fromCache);
+        } catch {
+          notify({ ...state, loading: false, error: true, stale: hasData });
+        }
+      },
+      failed,
+    );
+  } catch {
+    await failed();
+  }
+}
+function subscribe(fn: () => void) {
+  listeners.add(fn);
+  if (listeners.size === 1) void connect();
+  return () => {
+    listeners.delete(fn);
+    if (!listeners.size) {
+      generation++;
+      stop?.();
+      stop = undefined;
+      clearTimeout(timer);
+      clearTimeout(initialTimer);
+    }
+  };
+}
+const current = () => state;
 export function usePortfolioProjects() {
-  const [state, setState] = useState<State>(savedState);
-  const [attempt, setAttempt] = useState(0);
-  const retry = useCallback(() => setAttempt((value) => value + 1), []);
-  useEffect(() => {
-    let active = true;
-    let pending = false;
-    const refresh = async (force = false) => {
-      if (pending || (!force && Date.now() - state.fetchedAt < REFRESH_MS)) return;
-      pending = true;
-      try {
-        const projects = await fetchProjectFeed();
-        if (!active) return;
-        const fetchedAt = Date.now();
-        setState({ projects, loading: false, error: false, stale: false, fetchedAt, hasData: true });
-        try { localStorage.setItem(key, JSON.stringify({ fetchedAt, feed: { version: 1, projects } })); } catch { /* Storage is optional. */ }
-      } catch {
-        if (active) setState((current) => ({ ...current, loading: false, error: true, stale: current.hasData }));
-      } finally { pending = false; }
-    };
-    void refresh(attempt > 0);
-    const timer = window.setInterval(() => { void refresh(); }, REFRESH_MS);
-    const visible = () => { if (document.visibilityState === 'visible') void refresh(); };
-    document.addEventListener('visibilitychange', visible);
-    return () => { active = false; window.clearInterval(timer); document.removeEventListener('visibilitychange', visible); };
-  }, [attempt, state.fetchedAt]);
-  return { ...state, retry };
+  return { ...useSyncExternalStore(subscribe, current), retry: connect };
 }
