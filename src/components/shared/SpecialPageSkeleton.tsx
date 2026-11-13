@@ -1,7 +1,7 @@
 import {CmsText} from '../../features/content/Editable';
 import { useLocation } from "react-router-dom";
 import { useLocale } from "../../app/providers/preferences-context";
-import { useProjects } from "../../app/providers/content-context";
+import { usePortfolioProjects } from "../../features/portfolio/usePortfolioProjects";
 import {
   Skeleton,
   SkeletonImage,
@@ -23,10 +23,8 @@ export function SpecialPageSkeleton({
   label: string;
 }) {
   const { pathname } = useLocation();
-  const { t, language, isArabic: ar } = useLocale();
-  const project = useProjects(language).find(
-    (project) => project.slug === pathname.split("/").pop(),
-  );
+  const { t, isArabic: ar } = useLocale();
+  const project = usePortfolioProjects().projects.find((item) => item.id === pathname.split("/").pop());
   if (kind === "case")
     return (
       <SkeletonRegion label={label} className="sk-public-page sk-page--case">
@@ -35,30 +33,30 @@ export function SpecialPageSkeleton({
             <div className="breadcrumbs">
               <Copy>
                 <CmsText k="case.breadcrumbHome"/> / <CmsText k="case.breadcrumbWork"/> /{" "}
-                {project?.name ?? "Project"}
+                {project?.title ?? "Project"}
               </Copy>
             </div>
             <div className="case-hero__heading">
               <div>
                 <p className="eyebrow">
                   <Copy>
-                    {project?.categoryLabel ?? t("case.label")} /{" "}
+                    {project?.category ?? t("case.label")} /{" "}
                     <CmsText k="case.label"/>
                   </Copy>
                 </p>
                 <h1 dir="ltr">
-                  <Copy>{project?.name ?? (ar ? "المشروع" : "Project")}</Copy>
+                  <Copy>{project?.title ?? (ar ? "المشروع" : "Project")}</Copy>
                 </h1>
                 <p>
                   <Copy>
-                    {project?.tagline ?? t("case.notFoundDescription")}
+                    {project?.shortDescription ?? t("case.notFoundDescription")}
                   </Copy>
                 </p>
               </div>
               <div>
                 <span className="case-hero__index">
                   <Copy>
-                    <CmsText k="case.indexPrefix"/> / {project?.slug.toUpperCase()}
+                    <CmsText k="case.indexPrefix"/> / {project?.id.toUpperCase()}
                   </Copy>
                 </span>
                 <span className="text-link">

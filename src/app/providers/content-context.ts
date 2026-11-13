@@ -2,19 +2,15 @@ import { createContext, useContext } from "react";
 import type {
   ContentKind,
   PageContent,
-  ProjectContent,
   PublicContent,
   PublicEntry,
   ResultContent,
   ServiceContent,
   SettingsContent,
 } from "../../../shared/schema";
-import {
-  getLocalizedProjects,
-  getLocalizedServices,
-} from "../../locales/content";
+import { getLocalizedServices } from "../../locales/content";
 import type { Language } from "../../locales/messages";
-import type { Project, Service } from "../../types/content";
+import type { Service } from "../../types/content";
 export const ContentContext = createContext<{
   content: PublicContent | null;
   unavailable: boolean;
@@ -41,32 +37,6 @@ export function useSettings() {
 }
 export function usePage(slug: string) {
   return useEntries<PageContent>("pages")?.find((e) => e.slug === slug)?.data;
-}
-export function useProjects(language: Language): Project[] {
-  const entries = useEntries<ProjectContent>("projects");
-  if (!entries) return getLocalizedProjects(language);
-  return entries.map(({ slug, data }) => ({
-    slug,
-    name: data.name[language],
-    category: data.category,
-    categoryLabel: data.categoryLabel[language],
-    tagline: data.tagline[language],
-    overview: data.overview[language],
-    challenge: data.challenge[language],
-    solution: data.solution[language],
-    designApproach: data.designApproach[language],
-    features: data.features.map((v) => v[language]),
-    developmentHighlights: data.developmentHighlights.map((v) => v[language]),
-    visualLabel: data.illustrative
-      ? language === "ar"
-        ? "تصوّر واجهة توضيحي"
-        : "Illustrative concept"
-      : language === "ar"
-        ? "صور المشروع"
-        : "Project images",
-    accent: data.accent,
-    cms: data,
-  }));
 }
 export function useServices(language: Language): Service[] {
   const entries = useEntries<ServiceContent>("services");

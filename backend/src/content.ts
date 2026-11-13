@@ -26,7 +26,7 @@ export const decodeEntry = (row: Row): ContentEntry => ({
 });
 export async function publicEntries(c: Ctx): Promise<PublicEntry[]> {
   const rows = await c.env.DB.prepare(
-    "SELECT id,kind,COALESCE(published_slug,slug) AS slug,COALESCE(published_sort_order,sort_order) AS sort_order,published FROM content WHERE published IS NOT NULL AND status='published' AND kind!='knowledge' ORDER BY sort_order,slug",
+    "SELECT id,kind,COALESCE(published_slug,slug) AS slug,COALESCE(published_sort_order,sort_order) AS sort_order,published FROM content WHERE published IS NOT NULL AND status='published' AND kind NOT IN ('knowledge','projects') ORDER BY sort_order,slug",
   ).all<{
     id: string;
     kind: ContentKind;
@@ -43,6 +43,7 @@ export const cms = new Hono<AppEnv>();
 cms.use("*", authorize(["owner", "editor"]));
 cms.get("/", async (c) => {
   const kind = z.enum(kinds).optional().parse(c.req.query("kind"));
+  if (kind === "projects") return c.json({ entries: [] });
   const rows = kind
     ? await c.env.DB.prepare(
         "SELECT * FROM content WHERE kind=? ORDER BY sort_order,slug",
@@ -50,12 +51,13 @@ cms.get("/", async (c) => {
         .bind(kind)
         .all<Row>()
     : await c.env.DB.prepare(
-        "SELECT * FROM content ORDER BY kind,sort_order,slug",
+        "SELECT * FROM content WHERE kind!='projects' ORDER BY kind,sort_order,slug",
       ).all<Row>();
   return c.json({ entries: rows.results.map(decodeEntry) });
 });
 cms.post("/", async (c) => {
   const input = entryInput.parse(await c.req.json());
+  if (input.kind === "projects") throw new HTTPException(410, { message: "projects_managed_in_portfolio" });
   const data = contentSchemas[input.kind].parse(input.data);
   if (input.kind === "settings" && input.slug !== "global")
     throw new HTTPException(400, { message: "settings_slug_must_be_global" });
@@ -91,6 +93,7 @@ cms.put("/:id", async (c) => {
     .bind(entryId)
     .first<Row>();
   if (!previous) throw new HTTPException(404, { message: "not_found" });
+  if (previous.kind === "projects") throw new HTTPException(410, { message: "projects_managed_in_portfolio" });
   if (
     input.kind !== previous.kind ||
     (previous.kind === "settings" && input.slug !== "global")
@@ -114,6 +117,7 @@ cms.put("/:id", async (c) => {
   ]);
   const row = result[1]?.results[0] as unknown as Row | undefined;
   if (!row) throw new HTTPException(409, { message: "version_conflict" });
+  if (row.kind === "projects") throw new HTTPException(410, { message: "projects_managed_in_portfolio" });
   await auditStatement(c, "content.save", entryId).run();
   return c.json({ entry: decodeEntry(row) });
 });
@@ -180,6 +184,8 @@ cms.post("/:id/publish", async (c) => {
   });
 });
 cms.post("/:id/state", async (c) => {
+  const kind = await c.env.DB.prepare("SELECT kind FROM content WHERE id=?").bind(c.req.param("id")).first<{kind:string}>();
+  if (kind?.kind === "projects") throw new HTTPException(410, { message: "projects_managed_in_portfolio" });
   const input = z
     .object({
       status: z.enum(["draft", "archived"]),
@@ -227,7 +233,7 @@ cms.post("/:id/state", async (c) => {
 cms.delete("/:id", async (c) => {
   const version = z.coerce.number().int().parse(c.req.query("version"));
   const result = await c.env.DB.prepare(
-    "DELETE FROM content WHERE id=? AND version=? AND published IS NULL AND kind!='settings'",
+    "DELETE FROM content WHERE id=? AND version=? AND published IS NULL AND kind NOT IN ('settings','projects')",
   )
     .bind(c.req.param("id"), version)
     .run();
@@ -261,6 +267,7 @@ cms.post("/:id/restore", async (c) => {
     .first<{ data: string }>();
   if (!previous || !revision)
     throw new HTTPException(409, { message: "version_conflict" });
+  if (previous.kind === "projects") throw new HTTPException(410, { message: "projects_managed_in_portfolio" });
   contentSchemas[previous.kind].parse(JSON.parse(revision.data));
   const results = await c.env.DB.batch([
     c.env.DB.prepare(

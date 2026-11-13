@@ -1,7 +1,4 @@
-import {
-  getLocalizedProjects,
-  getLocalizedServices,
-} from "../../src/locales/content";
+import { getLocalizedServices } from "../../src/locales/content";
 import { messages } from "../../src/locales/messages";
 import { pageLayouts } from "../../shared/page-layouts";
 import {
@@ -27,43 +24,6 @@ function entry(
   seedEntries.push({ kind, slug, data, order });
 }
 const bi = (ar: string, en: string) => ({ ar, en });
-const arProjects = getLocalizedProjects("ar");
-for (const [index, en] of getLocalizedProjects("en").entries()) {
-  const ar = arProjects[index]!;
-  const values = (a: string[], e: string[]) =>
-    a.map((v, i) => bi(v, e[i] ?? ""));
-  entry(
-    "projects",
-    ar.slug,
-    {
-      name: bi(ar.name, en.name),
-      category: ar.category,
-      categoryLabel: bi(ar.categoryLabel, en.categoryLabel),
-      tagline: bi(ar.tagline, en.tagline),
-      overview: bi(ar.overview, en.overview),
-      challenge: bi(ar.challenge, en.challenge),
-      solution: bi(ar.solution, en.solution),
-      designApproach: bi(ar.designApproach, en.designApproach),
-      features: values(ar.features, en.features),
-      developmentHighlights: values(
-        ar.developmentHighlights,
-        en.developmentHighlights,
-      ),
-      goals: [],
-      technologies: [],
-      services: [],
-      cover: null,
-      gallery: [],
-      externalUrl: "",
-      illustrative: true,
-      featured: index === 0,
-      accent: ar.accent,
-      seoTitle: bi(ar.name, en.name),
-      seoDescription: bi(ar.overview, en.overview),
-    },
-    index,
-  );
-}
 const arServices = getLocalizedServices("ar");
 for (const [index, en] of getLocalizedServices("en").entries()) {
   const ar = arServices[index]!;

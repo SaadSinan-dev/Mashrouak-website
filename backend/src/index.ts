@@ -224,9 +224,6 @@ app.get("/api/sitemap.xml", async (c) => {
     "/privacy",
     "/terms",
     ...entries
-      .filter((e) => e.kind === "projects")
-      .map((e) => `/work/${e.slug}`),
-    ...entries
       .filter(
         (e) =>
           e.kind === "pages" &&

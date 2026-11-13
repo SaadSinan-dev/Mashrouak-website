@@ -28,6 +28,7 @@
     "test:publishing": "tsx tests/publishing.integration.ts",
     "test:visual:browser": "tsx tests/visual.browser.runner.mjs",
     "test:devices:browser": "tsx tests/devices.browser.runner.mjs",
+    "test:portfolio:browser": "node tests/portfolio.browser.runner.mjs",
     "test:scene:browser": "tsx tests/scene.browser.runner.mjs"
   },
   "dependencies": {

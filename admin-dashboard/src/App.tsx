@@ -23,7 +23,6 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  FolderOpen,
   Image,
   Layers3,
   LayoutDashboard,
@@ -317,12 +316,6 @@ function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
       roles: ["owner", "editor"],
     },
     {
-      to: "/content/projects",
-      label: "projects",
-      icon: FolderOpen,
-      roles: ["owner", "editor"],
-    },
-    {
       to: "/content/results",
       label: "results",
       icon: ChartNoAxesCombined,
@@ -437,6 +430,7 @@ function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
         <main id="admin-main" className="admin-main">
           <Routes>
             <Route index element={<Overview user={user} />} />
+            <Route path="content/projects" element={<Navigate to="/" replace />} />
             <Route path="visual" element={allowed(['owner','editor'])?<VisualEditor/>:<Navigate to="/"/>}/>
             <Route
               path="content/:kind"

@@ -11,10 +11,12 @@ const hashes = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
       `'sha256-${createHash("sha256").update(match[2]).digest("base64")}'`,
   );
 const env = loadEnv("production", process.cwd(), "VITE_");
+const portfolioFeed = (process.env.VITE_PORTFOLIO_PROJECTS_URL ?? env.VITE_PORTFOLIO_PROJECTS_URL ?? '').trim() || 'https://saad-dev-portfolio.netlify.app/.netlify/functions/public-projects';
 const origins = new Set();
 for (const value of [
   process.env.VITE_API_URL ?? env.VITE_API_URL,
   process.env.VITE_CONTACT_API_URL ?? env.VITE_CONTACT_API_URL,
+  portfolioFeed,
 ].filter(Boolean)) {
   const url = new URL(value);
   if (url.protocol !== "https:")

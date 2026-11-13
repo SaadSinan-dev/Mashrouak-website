@@ -1,13 +1,8 @@
 import { services } from '../data/services';
-import { projects } from '../data/projects';
-import { projectTranslations, serviceTranslations, type Language } from './messages';
+import { serviceTranslations, type Language } from './messages';
 
 export function getLocalizedServices(language: Language) {
   return services.map((service, index) => ({ ...service, ...serviceTranslations[language][String(index + 1)]! }));
-}
-
-export function getLocalizedProjects(language: Language) {
-  return projects.map((project) => ({ ...project, ...projectTranslations[language][project.slug]! }));
 }
 
 export function getLocalizedProjectCategories(language: Language) {

@@ -14,10 +14,12 @@ import { useResults } from "../../app/providers/content-context";
 import { Container } from "../../components/ui/Container";
 import { Reveal } from "../../components/shared/Reveal";
 import { mediaUrl } from "../../lib/platform-api";
+import { usePortfolioProjects } from "../portfolio/usePortfolioProjects";
 
 export function ResultsSection({ full = false,projectSlug }: { full?: boolean;projectSlug?:string }) {
   const { language, isArabic } = useLocale();
   const results = useResults().filter(entry=>!projectSlug||entry.data.projectSlug===projectSlug);
+  const projectIds = new Set(usePortfolioProjects().projects.map((project) => project.id));
   const Arrow = isArabic ? ArrowUpLeft : ArrowUpRight;
   const format = (v: number) =>
     new Intl.NumberFormat(language, { maximumFractionDigits: 2 }).format(v);
@@ -100,7 +102,7 @@ export function ResultsSection({ full = false,projectSlug }: { full?: boolean;pr
                       </span>
                       <h3><CmsValue entryId={id} path={['title']}>{data.title[language]}</CmsValue></h3>
                       <p><CmsValue entryId={id} path={['description']}>{data.description[language]}</CmsValue></p>
-                      {data.projectSlug && (
+                      {data.projectSlug && projectIds.has(data.projectSlug) && (
                         <Link
                           className="text-link"
                           to={`/work/${data.projectSlug}`}

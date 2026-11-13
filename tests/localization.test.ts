@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getLocalizedProjects, getLocalizedServices } from '../src/locales/content';
+import { getLocalizedServices } from '../src/locales/content';
 import { messages } from '../src/locales/messages';
 
 describe('bilingual content system', () => {
@@ -18,11 +18,4 @@ describe('bilingual content system', () => {
     expect(arabic[0]?.title).toBe('تصميم وتطوير المواقع');
   });
 
-  it('localizes all portfolio case study content without changing project identity', () => {
-    const arabic = getLocalizedProjects('ar');
-    const english = getLocalizedProjects('en');
-    expect(english.map((project) => project.slug)).toEqual(['syrian-menu', 'pet-corner', 'mashwarak']);
-    expect(english.every((project) => project.overview.length > 0 && project.challenge.length > 0 && project.solution.length > 0 && project.features.length > 0)).toBe(true);
-    expect(english[0]?.tagline).not.toBe(arabic[0]?.tagline);
-  });
 });

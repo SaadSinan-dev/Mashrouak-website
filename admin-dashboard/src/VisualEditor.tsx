@@ -533,10 +533,6 @@ function Editor({
       entry.kind === "settings" ||
       entry.id === page?.id ||
       (entry.kind === "services" && ["/", "/services"].includes(route)) ||
-      (entry.kind === "projects" &&
-        (route === "/" ||
-          route === "/work" ||
-          route === `/work/${entry.slug}`)) ||
       (entry.kind === "results" &&
         (route === "/" || route === "/results" || route.startsWith("/work/"))),
   );
@@ -847,8 +843,8 @@ function Editor({
             </summary>
             <p className="admin-hint">
               {ar
-                ? "حقول الصفحة والخدمات والأعمال المرتبطة بها."
-                : "Fields for this page and its services or projects."}
+                ? "حقول الصفحة والخدمات المرتبطة بها. تُدار المشاريع من ملف الأعمال."
+                : "Fields for this page and its services. Projects are managed in the Portfolio."}
             </p>
             {library.map((entry) => (
               <details key={entry.id}>
