@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-/** Hand off the static bootstrap wireframe as soon as React owns the page. */
+import { useLayoutEffect } from 'react';
+/** Remove the pre-JavaScript shell before the first React frame is painted. */
 export function AppLoader(){
- useEffect(()=>{document.getElementById('app-loader')?.remove();},[]);
+ useLayoutEffect(()=>{document.getElementById('app-loader')?.remove();},[]);
  return null;
 }

@@ -32,6 +32,14 @@ export async function sceneChecks(
         localStorage.setItem("mashrouak-language", language);
         localStorage.setItem("mashrouak-theme", theme);
         window.sceneStates = [];
+        const contexts = new Set();
+        const getContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+          const context = getContext.call(this, type, ...args);
+          if (type === "webgl2" && context) contexts.add(context);
+          window.acquiredDeviceContexts = contexts.size;
+          return context;
+        };
         new MutationObserver(() => {
           const host = document.querySelector("[data-scene-state]");
           if (host)
@@ -132,10 +140,12 @@ export async function sceneChecks(
           check(
             states.every(
               (s) =>
-                s.canvases <= 1 && (s.phase === "loading" || s.skeletons === 0),
+                s.canvases <= 1 && s.skeletons === 0,
             ),
             `${language}/${theme}/${width}: no stacked placeholders or canvases`,
           );
+          check(await page.evaluate(() => window.acquiredDeviceContexts === 1),
+            `${language}/${theme}/${width}: exactly one WebGL context acquired from first mount through ready`);
           check(
             await page.evaluate(
               () => document.documentElement.scrollWidth <= innerWidth + 1,
@@ -193,15 +203,23 @@ export async function sceneChecks(
       await moduleGate;
       await route.continue();
     });
+    let releaseContent;
+    const contentGate = new Promise(resolve => { releaseContent = resolve; });
+    await loadingPage.route("**/api/public/content*", async route => {
+      await contentGate;
+      await route.fallback();
+    });
     await open(loadingPage);
-    await loadingPage
-      .locator(
-        ".hero-visual[data-scene-state=loading] .hero-scene-skeleton svg",
-      )
-      .waitFor();
+    const reserved = loadingPage.locator(".sk-public-page .hero-exhibit .hero-visual");
+    await reserved.waitFor();
+    const reservedHeight = (await reserved.boundingBox()).height;
+    check(await reserved.locator("canvas, svg, .hero-node").count() === 0,
+      "Route loading reserves the figure without drawing any devices");
+    releaseContent();
+    await loadingPage.locator(".hero-visual[data-scene-state=loading]").waitFor();
     check(
       (await loadingPage.locator(".product-scene canvas").count()) === 0,
-      "Model preparation displays one complete structural placeholder before WebGL loads",
+      "Waiting for the scene module does not draw a second copy of the devices",
     );
     await loadingPage
       .locator(".hero-visual")
@@ -213,8 +231,8 @@ export async function sceneChecks(
     releaseModule();
     await idle(loadingPage);
     check(
-      (await loadingPage.locator(".hero-scene-skeleton").count()) === 0,
-      "The placeholder is removed after real rendering begins",
+      (await loadingPage.locator(".hero-visual").boundingBox()).height === reservedHeight,
+      "The device viewport keeps its reserved height through the reveal",
     );
 
     onProgress("Checking failed assets and context recovery");

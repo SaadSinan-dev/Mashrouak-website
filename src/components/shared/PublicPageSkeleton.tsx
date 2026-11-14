@@ -14,7 +14,6 @@ import {
 import type { TranslationKey } from "../../locales/messages";
 import type { ReactNode } from "react";
 import { SpecialPageSkeleton } from "./SpecialPageSkeleton";
-import { ProductSceneSkeleton } from "./ProductSceneSkeleton";
 import { HeroHorizon } from "../../features/home/sections/HeroHorizon";
 
 // The real typography and layout classes reserve each page's geometry.
@@ -108,9 +107,8 @@ export function PublicPageSkeleton({
                   <Copy><CmsText k="hero.footnote"/></Copy>
                 </span>
               </div>
-              <div className="hero-visual sk-product-visual">
-                <ProductSceneSkeleton />
-              </div>
+              {/* Reserve the final footprint. Only the live scene draws devices. */}
+              <div className="hero-visual hero-visual--reserved" />
             </div>
           </div>
           <div className="hero-section__bottomline">

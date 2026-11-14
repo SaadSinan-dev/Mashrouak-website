@@ -21,16 +21,17 @@ export function ProductScene({
     controller.current?.update(language, theme);
   }, [language, theme]);
   useEffect(() => {
-    if (!host.current) return;
-    const scene = createProductScene(
-      host.current,
-      preferences.current,
-      onStatus,
-    );
-    controller.current = scene;
+    const element = host.current;
+    if (!element) return;
+    // Acquire WebGL on the next paint. A cancelled mount (including Strict
+    // Mode's effect probe) must never allocate a second context or fetch assets.
+    const frame = requestAnimationFrame(() => {
+      controller.current = createProductScene(element, preferences.current, onStatus);
+    });
     return () => {
+      cancelAnimationFrame(frame);
+      controller.current?.dispose();
       controller.current = null;
-      scene.dispose();
     };
   }, [onStatus]);
   return <div className="product-scene" ref={host} aria-hidden="true" />;

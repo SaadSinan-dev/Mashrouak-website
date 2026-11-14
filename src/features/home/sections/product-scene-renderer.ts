@@ -622,8 +622,7 @@ export function createProductScene(
           textures.delete(texture);
           texture.dispose();
         });
-        // Compilation is actual preparation work; the placeholder remains until
-        // a successful frame, with no minimum loading delay.
+        // Reveal these same surfaces on their first successful frame.
         if (!assetsReady) await engine.compileAsync(scene, camera);
         if (resources.disposed || version !== loadVersion) return;
         assetsReady = true;

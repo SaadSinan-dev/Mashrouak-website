@@ -15,8 +15,15 @@
     <link rel="icon" type="image/svg+xml" href="/brand/instagram-avatar.svg" />
     <title>Mashrouak.net — Digital products for your business</title>
     <style>
-      #app-loader{position:fixed;inset:0;z-index:9999;background:#F6F4EE;color:#142B3A;overflow:hidden} .boot-header{height:84px;border-bottom:1px solid #d8e0dc;display:flex;align-items:center;justify-content:space-between;padding-inline:max(32px,calc((100vw - 1240px)/2));gap:25px}.app-loader__logo{width:174px;height:52px;object-fit:contain}.boot-nav{display:flex;gap:22px}.boot-line{display:block;position:relative;overflow:hidden;background:#dce3df;border-radius:3px;height:12px;width:100%}.boot-line:after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent,#f6f4ee88,transparent);transform:translateX(-100%);animation:boot-shimmer 1.9s ease-in-out infinite}.boot-nav .boot-line{width:48px;height:9px}.boot-actions{width:110px;height:42px}.boot-main{max-width:1240px;width:calc(100% - 64px);margin:auto;padding-block:60px;display:grid;grid-template-columns:1.1fr .9fr;gap:65px;align-items:center}.boot-copy{display:grid;gap:18px}.boot-copy>.boot-line:first-child{height:10px;width:125px;margin-bottom:12px}.boot-copy>.boot-line:nth-child(2),.boot-copy>.boot-line:nth-child(3){height:62px}.boot-copy>.boot-line:nth-child(3){width:76%;margin-bottom:15px}.boot-copy>.boot-line:nth-child(5){width:85%}.boot-copy>.boot-line:nth-child(6){width:60%}.boot-copy>.boot-line:last-child{width:160px;height:52px;margin-top:20px}.boot-visual{aspect-ratio:1;min-height:350px;position:relative;background:#e9efec;border:1px solid #d8e0dc;padding:30px;display:grid;align-content:center;gap:20px}.boot-visual>.boot-line:first-child{height:180px}.boot-visual>.boot-line:last-child{width:65%}.boot-bottom{max-width:1240px;width:calc(100% - 64px);margin:35px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}.boot-bottom>.boot-line{height:130px}.app-loader__label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.app-loader__retry{min-height:44px;padding:8px 20px;background:#0b625d;color:#f6f4ee;border:0;cursor:pointer}.app-loader__retry[hidden]{display:none}#app-loader[data-route=inner] .boot-visual{aspect-ratio:auto;min-height:180px;background:none;border:0}#app-loader[data-route=inner] .boot-visual>.boot-line:first-child{height:12px}#app-loader[data-route=chat] .boot-main{padding-block:32px}#app-loader[data-route=chat] .boot-visual{height:calc(100dvh - 150px);min-height:300px}#app-loader[data-route=chat] .boot-bottom{display:none}:root[data-theme=dark] #app-loader{background:#102733;color:#eaf0ec}:root[data-theme=dark] .boot-line{background:#264451}:root[data-theme=dark] .boot-line:after{background:linear-gradient(100deg,transparent,#31525d88,transparent)}:root[data-theme=dark] .boot-header,:root[data-theme=dark] .boot-visual{border-color:#eaf0ec26}:root[data-theme=dark] .boot-visual{background:#193744}
-      @keyframes boot-shimmer{to{transform:translateX(100%)}}@media(max-width:900px){.boot-nav{display:none}.boot-main{grid-template-columns:1fr}.boot-visual{min-height:320px;aspect-ratio:1.4}.boot-copy>.boot-line:nth-child(2),.boot-copy>.boot-line:nth-child(3){height:50px}#app-loader[data-route=chat] .boot-copy{display:none}}@media(max-width:640px){.boot-header{height:68px;padding-inline:20px}.app-loader__logo{width:145px}.boot-actions{width:65px;height:38px}.boot-main{width:calc(100% - 40px);padding-block:38px;gap:32px}.boot-copy{gap:14px}.boot-copy>.boot-line:nth-child(2),.boot-copy>.boot-line:nth-child(3){height:42px}.boot-bottom{width:calc(100% - 40px);grid-template-columns:1fr}.boot-visual{min-height:300px}#app-loader[data-route=inner] .boot-visual{min-height:100px;padding:0}}@media(prefers-reduced-motion:reduce){.boot-line:after{animation:none;transform:none;opacity:.12}}
+      #app-loader { position:fixed; inset:0; z-index:9999; background:#F6F4EE; color:#142B3A; }
+      .boot-header { box-sizing:border-box; height:84px; border-bottom:1px solid #d8e0dc; display:flex; align-items:center; padding-inline:max(24px,calc((100vw - 1240px)/2)); }
+      .app-loader__logo { width:160px; height:52px; object-fit:contain; }
+      .app-loader__label { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+      .app-loader__retry { min-height:44px; margin-inline:24px; padding:8px 20px; border:0; background:#0b625d; color:#fff; cursor:pointer; }
+      :root[data-theme=dark] #app-loader { background:#102733; color:#eaf0ec; }
+      :root[data-theme=dark] .boot-header { border-color:#eaf0ec26; }
+      @media(max-width:1100px) { .boot-header { height:99px; } }
+      @media(max-width:640px) { .boot-header { justify-content:center; } .app-loader__logo { width:146px; } }
     </style>
     <script>
       (() => {
@@ -50,14 +57,13 @@
     <script>if (document.documentElement.lang === 'en') document.querySelector('.skip-link').textContent = 'Skip to main content';</script>
     <div id="root"></div>
     <div id="app-loader" role="status" aria-live="polite" aria-busy="true">
-      <div class="boot-header"><img id="app-loader-logo" class="app-loader__logo" alt="مشروعك.net" width="174" height="52" decoding="async" fetchpriority="high"/><div class="boot-nav" aria-hidden="true"><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i></div><i class="boot-line boot-actions" aria-hidden="true"></i></div>
+      <div class="boot-header"><img id="app-loader-logo" class="app-loader__logo" alt="" width="160" height="52" decoding="async" fetchpriority="high"/></div>
       <span id="app-loader-label" class="app-loader__label">جارٍ تحميل المحتوى</span>
-      <div class="boot-main" aria-hidden="true"><div class="boot-copy"><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i></div><div class="boot-visual"><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i></div></div><div class="boot-bottom" aria-hidden="true"><i class="boot-line"></i><i class="boot-line"></i><i class="boot-line"></i></div><button id="app-loader-retry" class="app-loader__retry" type="button" hidden>إعادة المحاولة</button>
+      <button id="app-loader-retry" class="app-loader__retry" type="button" hidden>إعادة المحاولة</button>
     </div>
     <script>
       (() => {
         const root = document.documentElement;
-        document.getElementById('app-loader').dataset.route = location.pathname === '/contact/chat' ? 'chat' : location.pathname === '/' ? 'home' : 'inner';
         const language = root.lang === 'en' ? 'en' : 'ar';
         const theme = root.dataset.theme === 'dark' ? 'dark' : 'light';
         const logo = document.getElementById('app-loader-logo');
@@ -70,14 +76,12 @@
         }
         if (label) label.textContent = language === 'ar' ? 'جارٍ تجهيز الموقع' : 'Preparing your experience';
         const retry = document.getElementById('app-loader-retry');
-        const track = document.querySelector('.boot-main');
         if (retry) {
           retry.textContent = language === 'ar' ? 'إعادة المحاولة' : 'Try again';
           retry.addEventListener('click', () => window.location.reload());
         }
         const showStartupError = () => {
           if (label) { label.textContent = language === 'ar' ? 'تعذّر تحميل الموقع' : 'The website could not be loaded'; label.style.cssText='position:static;display:block;width:auto;height:auto;padding:24px;clip:auto'; }
-          if (track) track.hidden = true;
           if (retry) retry.hidden = false;
         };
         window.addEventListener('error', (event) => {

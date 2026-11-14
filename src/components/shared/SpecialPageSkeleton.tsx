@@ -1,7 +1,7 @@
 import {CmsText} from '../../features/content/Editable';
 import { useLocation } from "react-router-dom";
 import { useLocale } from "../../app/providers/preferences-context";
-import { usePortfolioProjects } from "../../features/portfolio/usePortfolioProjects";
+import { peekPortfolioProject } from "../../features/portfolio/usePortfolioProjects";
 import {
   Skeleton,
   SkeletonImage,
@@ -24,8 +24,8 @@ export function SpecialPageSkeleton({
 }) {
   const { pathname } = useLocation();
   const { t, isArabic: ar } = useLocale();
-  const project = usePortfolioProjects().projects.find((item) => item.id === pathname.split("/").pop());
-  if (kind === "case")
+  if (kind === "case") {
+    const project = peekPortfolioProject(pathname.split("/").pop());
     return (
       <SkeletonRegion label={label} className="sk-public-page sk-page--case">
         <div className="case-hero">
@@ -78,6 +78,7 @@ export function SpecialPageSkeleton({
         </div>
       </SkeletonRegion>
     );
+  }
   if (kind === "legal")
     return (
       <SkeletonRegion label={label} className="sk-public-page sk-page--legal">

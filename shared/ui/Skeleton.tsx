@@ -97,7 +97,7 @@ export function SkeletonStatCard({ label }: { label?: string }) {
     <article className="sk-stat">
       <div className="sk-stat__label">
         {label ? (
-          <span className="sk-label-copy">{label}</span>
+          <span className="skeleton sk-label-copy">{label}</span>
         ) : (
           <Skeleton className="sk-caption" />
         )}

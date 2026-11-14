@@ -677,7 +677,11 @@ img { display: block; }
 }
 
 @media (max-width: 640px) {
-  :root { --header-height: 68px; --section-space: 74px; }
+  :root {
+    --header-height: 68px;
+    --section-space: clamp(80px, calc(64px + 5vw), 96px);
+    --section-inset: calc(var(--section-space) / 2);
+  }
   .container-shell { width: calc(100% - 40px); }
   body { font-size: 15px; }
   .site-header__inner { min-height: var(--header-height); gap: 12px; }
@@ -773,14 +777,14 @@ img { display: block; }
   .faq-section__layout { grid-template-columns: 1fr; gap: 28px; }
   .faq-item__trigger { min-height: 65px; font-size: 13px; }
   .faq-item__answer { font-size: 11px; }
-  .cta-section__inner { grid-template-columns: 1fr; align-items: start; gap: 26px; min-height: 0; padding-block: 60px 72px; }
+  .cta-section__inner { grid-template-columns: 1fr; align-items: start; gap: 26px; min-height: 0; padding-block: var(--section-space); }
   .cta-section__copy h2 { font-size: clamp(48px, 12vw, 66px); }
   .cta-section__copy > p:last-child { max-width: 340px; font-size: 12px; }
   .cta-section__button { min-width: 190px; }
   .cta-section__mark { inset-block-start: 20px; inset-inline-start: 5%; width: 130px; }
   .cta-section__index { inset-block-end: 22px; font-size: 7px; }
   .cta-section__decor { inset-block-start: 26px; }
-  .site-footer { padding-block: 55px 20px; }
+  .site-footer { padding-block: var(--section-space) 20px; }
   .site-footer__main { grid-template-columns: 1fr 1fr; gap: 35px 20px; padding-bottom: 38px; }
   .site-footer__contact-channels { margin-top: 17px; }
   .site-footer__brand-column { grid-column: 1 / -1; }
@@ -793,7 +797,7 @@ img { display: block; }
   .site-footer__note-column p { font-size: 14px; }
   .site-footer__bottom { align-items: flex-start; flex-direction: column; gap: 10px; padding-top: 18px; font-size: 9px; }
   .site-footer__signature { display: none; }
-  .page-hero { padding-block: 62px 58px; }
+  .page-hero { padding-block: calc(var(--section-space) - 12px) var(--section-space); }
   .page-hero__layout { grid-template-columns: 1fr; gap: 30px; }
   .page-hero h1 { font-size: clamp(51px, 13vw, 72px); }
   .page-hero__aside { max-width: 440px; }
@@ -872,6 +876,7 @@ img { display: block; }
   .form-field textarea { min-height: 100px; }
   .contact-form__submit { align-items: flex-start; flex-direction: column; gap: 10px; }
   .contact-bottom .container-shell { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .contact-bottom { padding-block: var(--section-inset); }
   .contact-bottom p { font-size: 12px; }
   .contact-bottom span { font-size: 11px; }
   .privacy-page h1 { font-size: 42px; }
@@ -1284,6 +1289,9 @@ html[lang="en"] .mobile-menu-panel__note { font-family: "IBM Plex Sans", "IBM Pl
 .showcase-grid--home .showcase-grid__lead { grid-column: auto; grid-row: span 2; }
 .showcase-grid--home .showcase-card--prominent .showcase-card__image .smart-image { aspect-ratio: 4 / 4.1 !important; }
 .showcase-detail-hero { padding: 36px 0 60px; background: var(--page-paper, var(--ivory)); }
+@media (max-width: 640px) {
+  .showcase-detail-hero { padding-block: var(--section-inset) var(--section-space); }
+}
 .showcase-detail-crumb { display: flex; flex-wrap: wrap; gap: 10px; color: var(--steel); font-size: 12px; }
 .showcase-detail-crumb a:hover { color: var(--teal); }
 .showcase-detail-hero__heading { display: flex; justify-content: space-between; gap: 30px; align-items: end; margin: 55px 0 45px; }

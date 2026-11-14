@@ -343,6 +343,9 @@
 .contact-channels {
   margin-block-end: 16px;
 }
+@media (max-width: 640px) {
+  .contact-channels { margin-block: 0; padding-block: var(--section-inset); }
+}
 .contact-channels > .container-shell {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1068,7 +1071,12 @@
   color: transparent !important;
 }
 .sk-copy:after {
+  /* A single absolutely positioned strip cannot follow wrapped inline text. */
   display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sk-copy { animation: sk-copy-breathe 1.9s ease-in-out infinite alternate; }
+  @keyframes sk-copy-breathe { from { opacity: .55; } to { opacity: 1; } }
 }
 .sk-public-page .page-hero--dark {
   --mist: #284451;
@@ -1099,47 +1107,12 @@
 .sk-public-page .contact-channels h2 {
   margin-block: 20px 12px;
 }
-.sk-product-visual {
-  padding: 35px;
-  position: relative;
-}
-.sk-product-desktop {
-  position: absolute;
-  width: 65%;
-  inset-inline-start: 12%;
-  top: 23%;
-  border: 1px solid var(--line);
-  padding: 20px;
-  background: var(--panel, var(--ivory));
-}
-.sk-product-mobile {
-  position: absolute;
-  width: 24%;
-  inset-inline-end: 7%;
-  bottom: 15%;
-  padding: 10px;
-  border: 1px solid var(--line);
-  background: var(--panel, var(--ivory));
-}
-.sk-product-visual > .sk-caption:last-child {
-  position: absolute;
-  bottom: 30px;
-}
 .sk-public-page .hero-section__footnote {
   min-height: 17px;
 }
 @media (max-width: 640px) {
   .sk-portfolio-image {
     height: 285px;
-  }
-  .sk-product-visual {
-    min-height: 340px;
-  }
-  .sk-product-desktop {
-    padding: 15px;
-  }
-  .sk-product-mobile {
-    padding: 7px;
   }
 }
 .skeleton.sk-copy {
@@ -1266,73 +1239,6 @@
 .sk-public-page .hero-section__footnote .sk-copy:before {
   display: none;
 }
-@media (max-width: 640px) {
-  .sk-product-visual {
-    min-height: 390px;
-  }
-}
-
-/* One composition for page loading and model preparation; it never mirrors in RTL. */
-.hero-scene-skeleton {
-  position: absolute;
-  inset: 38px 0 32px;
-  --scene-surface: #193744;
-  --scene-screen: #2f4b57;
-  --scene-edge: #8fc6bc50;
-  --scene-detail: #5f7880;
-}
-.hero-scene-skeleton svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke-width: 1;
-}
-.scene-placeholder__surface {
-  fill: var(--scene-surface);
-  stroke: var(--scene-edge);
-}
-.scene-placeholder__screen {
-  fill: var(--scene-screen);
-  stroke: var(--scene-edge);
-  animation: scene-placeholder-pulse 1.9s ease-in-out infinite alternate;
-}
-.scene-placeholder__detail {
-  stroke: var(--scene-detail);
-  stroke-width: 4;
-}
-.hero-scene-skeleton path {
-  transition:
-    fill 250ms ease,
-    stroke 250ms ease;
-}
-:root[data-theme="light"] .hero-scene-skeleton {
-  --scene-surface: #e8ebe5;
-  --scene-screen: #c7d7d0;
-  --scene-edge: #518b85;
-  --scene-detail: #6f9589;
-}
-:root[data-theme="light"] .sk-product-visual {
-  background-color: transparent;
-}
-.sk-product-visual {
-  transition: background-color 250ms ease;
-}
-@keyframes scene-placeholder-pulse {
-  from {
-    fill-opacity: 0.72;
-  }
-  to {
-    fill-opacity: 1;
-  }
-}
-.hero-visual--loading .product-scene {
-  opacity: 0;
-}
-.hero-visual--rendering .product-scene,
-.hero-visual--ready .product-scene {
-  opacity: 1;
-}
 .product-scene-error {
   position: absolute;
   z-index: 4;
@@ -1356,15 +1262,6 @@
   background: transparent;
   color: var(--teal);
   cursor: pointer;
-}
-@media (prefers-reduced-motion: reduce) {
-  .sk-product-visual,
-  .hero-scene-skeleton path {
-    transition: none;
-  }
-  .scene-placeholder__screen {
-    animation: none;
-  }
 }
 /* Preserve the page background, lighting and approved final dark appearance. */
 .hero-visual--ready,

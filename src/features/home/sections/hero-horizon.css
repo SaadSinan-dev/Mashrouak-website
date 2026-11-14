@@ -91,8 +91,8 @@ html[lang="ar"] .hero-section--horizon h1 { line-height: 1.34; letter-spacing: n
 }
 .hero-exhibit .hero-section__footnote > span:first-child { color: var(--hero-accent); white-space: nowrap; font-size: 10px; }
 .hero-exhibit .hero-section__footnote > span:last-child::before { display: none; }
-.hero-exhibit .hero-visual { width: min(100%, 710px); min-height: 340px; margin: auto; }
-.hero-exhibit .hero-visual:is(.hero-visual--fallback, .hero-visual--error) { min-height: 420px; }
+.hero-exhibit .hero-visual { width: min(100%, 710px); min-height: 420px; margin: auto; }
+.hero-exhibit .hero-visual.hero-visual--reserved { background: transparent; }
 .hero-exhibit .hero-visual__grid { opacity: .065; mask-image: radial-gradient(ellipse, black, transparent 74%); }
 .hero-exhibit .hero-visual::before { border: 0; }
 .hero-exhibit .hero-visual__topline { inset-block-start: 10px; }
@@ -102,7 +102,7 @@ html[lang="ar"] .hero-section--horizon h1 { line-height: 1.34; letter-spacing: n
 .hero-section--horizon .hero-section__bottomline .container-shell { color: var(--hero-copy); }
 @media (max-width: 640px) {
   .hero-horizon__plate { width: 780px; top: -4px; }
-  .hero-section--horizon .hero-section__copy { padding: 69px 0 32px; }
+  .hero-section--horizon .hero-section__copy { padding: 69px 0 var(--section-inset); }
   .hero-kicker { margin-bottom: 16px; gap: 7px; }
   html[lang="en"] .hero-kicker { letter-spacing: .08em; font-size: 10px; }
   .hero-kicker::before, .hero-kicker::after { width: 12px; flex-shrink: 0; }
@@ -113,9 +113,9 @@ html[lang="ar"] .hero-section--horizon h1 { line-height: 1.34; letter-spacing: n
   .hero-section--horizon .hero-section__description { margin-top: 17px; font-size: 15px; }
   .hero-section--horizon .hero-section__actions { gap: 10px 16px; margin-top: 20px; }
   .hero-section--horizon .hero-section__actions .button { padding-inline: 14px; font-size: 13px; }
-  .hero-exhibit .hero-visual { min-height: 300px; }
-  .hero-exhibit .hero-visual:is(.hero-visual--fallback, .hero-visual--error) { min-height: 360px; }
-  .hero-exhibit .hero-section__footnote { font-size: 11px; padding: 12px 0; }
+  .hero-exhibit { padding-block-end: var(--section-inset); }
+  .hero-exhibit .hero-visual { min-height: clamp(360px, 86vw, 420px); }
+  .hero-exhibit .hero-section__footnote { font-size: 11px; padding: 20px 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-horizon__plate { transform: translateX(-50%); }

@@ -20,7 +20,6 @@ import {
   useState,
   type ComponentType,
 } from "react";
-import { ProductSceneSkeleton } from "../../../components/shared/ProductSceneSkeleton";
 import { withModuleDeadline } from "../../../../shared/loadable";
 import type { SceneStatus } from "../../../lib/scene-lifecycle";
 import { HeroHorizon } from "./HeroHorizon";
@@ -162,7 +161,6 @@ function HeroVisual() {
           </div>
         </>
       )}
-      {state === "loading" && <ProductSceneSkeleton />}
       <div className="hero-visual__legend">
         <CircleDot size={13} />
         <span>

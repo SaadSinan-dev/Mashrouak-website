@@ -136,6 +136,10 @@ function subscribe(fn: () => void) {
   };
 }
 const current = () => state;
+/** A route placeholder may borrow existing copy; it must never open a live feed. */
+export function peekPortfolioProject(id?: string) {
+  return state.projects.find(project => project.id === id);
+}
 export function usePortfolioProjects() {
   return { ...useSyncExternalStore(subscribe, current), retry: connect };
 }
