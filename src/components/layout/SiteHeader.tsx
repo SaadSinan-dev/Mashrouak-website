@@ -84,9 +84,7 @@ export function SiteHeader() {
             <ThemeToggle />
             <LanguageToggle />
           </div>
-          <ButtonLink className="site-header__cta" to="/contact" size="sm">
-            <CmsText k={'common.discuss'}/> <Arrow size={16} aria-hidden="true" />
-          </ButtonLink>
+
         </div>
       </div>
     </header>
