@@ -32,7 +32,8 @@
     "test:portfolio:browser": "node tests/portfolio.browser.runner.mjs",
     "test:scene:browser": "tsx tests/scene.browser.runner.mjs",
     "test:network:browser": "tsx tests/network.browser.runner.mjs",
-    "test:preferences:browser": "tsx tests/public-preferences.browser.mjs"
+    "test:preferences:browser": "tsx tests/public-preferences.browser.mjs",
+    "test:wireframes:browser": "npm run build && tsx tests/public-wireframes.browser.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

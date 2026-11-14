@@ -80,9 +80,8 @@ export function PublicPageSkeleton({
                 <Copy><CmsText k="hero.eyebrow"/></Copy>
               </p>
               <h1>
-                <Copy>
-                  <CmsText k="hero.title"/> <em><CmsText k="hero.emphasis"/></em>
-                </Copy>
+                <Copy><CmsText k="hero.title"/></Copy>{" "}
+                <em><Copy><CmsText k="hero.emphasis"/></Copy></em>
               </h1>
               <p className="hero-section__description">
                 <Copy><CmsText k="hero.description"/></Copy>

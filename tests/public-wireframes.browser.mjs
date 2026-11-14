@@ -60,10 +60,25 @@ try {
     assert.equal(await figure.locator("canvas").count(),1);
     assert.equal(await figure.locator("canvas").getAttribute("data-reveal"),"1.000");
     assert.equal((await figure.boundingBox()).height,heightBefore);
-    await page.locator(".hero-exhibit").screenshot({path:dir+"/fig01-"+width+"-"+language+".png"});
+    // Centre the exhibit inside the readable area between the sticky header
+    // and floating contact link (the default screenshot scroll ignores both).
+    const exhibit = page.locator(".hero-exhibit");
+    await exhibit.evaluate(el => {
+      const header = document.querySelector(".site-header").getBoundingClientRect().bottom;
+      const bottom = document.querySelector(".support-launcher").getBoundingClientRect().top;
+      const box = el.getBoundingClientRect();
+      scrollTo({top:scrollY + box.top - (header + bottom - box.height) / 2, behavior:"instant"});
+    });
+    const labels=await figure.evaluate(el=>[".hero-visual__edge",".hero-visual__legend"].map(s=>{
+      const r=el.querySelector(s).getBoundingClientRect();
+      return {top:r.top,bottom:r.bottom,left:r.left,right:r.right};
+    }));
+    const [edge,legend]=labels;
+    assert.ok(edge.top>=legend.bottom || legend.top>=edge.bottom || edge.left>=legend.right || legend.left>=edge.right,"figure labels overlap at "+width);
+    await exhibit.screenshot({path:dir+"/fig01-"+width+"-"+language+".png"});
     figures.push({width,language,height:heightBefore});
     if(width<=640) {
-      for(const path of ["/","/services","/about","/process","/contact","/results","/work","/work/sample","/privacy","/terms"]) {
+      for(const path of ["/","/services","/about","/process","/contact","/results","/work","/work/sample","/privacy","/terms","/pages/about","/missing-section-review"]) {
         if(path !== "/") await page.goto(origin+path,{waitUntil:"domcontentloaded"});
         await page.locator("html[data-app-route-ready=true]").waitFor();
         await page.evaluate(()=>document.fonts.ready);

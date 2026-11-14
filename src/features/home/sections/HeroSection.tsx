@@ -90,7 +90,9 @@ function HeroVisual() {
         <span>
           <CmsText k="hero.visual.topline" />
         </span>
-        <span dir="ltr">01 — 03</span>
+        {state === "loading"
+          ? <span className="hero-visual__loading-label">{t("common.loading")}</span>
+          : <span dir="ltr">01 — 03</span>}
       </div>
       {(state === "fallback" || state === "error") && (
         <>

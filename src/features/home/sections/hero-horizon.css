@@ -98,6 +98,11 @@ html[lang="ar"] .hero-section--horizon h1 { line-height: 1.34; letter-spacing: n
 .hero-exhibit .hero-visual__topline { inset-block-start: 10px; }
 .hero-exhibit .hero-visual__edge { writing-mode: horizontal-tb; transform: none; }
 .hero-exhibit .hero-visual__edge, .hero-exhibit .hero-visual__legend { bottom: 15px; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-visual__loading-label { animation: sk-copy-breathe 1.9s ease-in-out infinite alternate; }
+  .hero-visual--error .hero-node { animation: diagram-in 300ms ease-out both; }
+  @keyframes diagram-in { from { opacity: 0; } to { opacity: 1; } }
+}
 .hero-section--horizon .hero-section__bottomline { border-color: var(--hero-rule); }
 .hero-section--horizon .hero-section__bottomline .container-shell { color: var(--hero-copy); }
 @media (max-width: 640px) {
@@ -116,6 +121,13 @@ html[lang="ar"] .hero-section--horizon h1 { line-height: 1.34; letter-spacing: n
   .hero-exhibit { padding-block-end: var(--section-inset); }
   .hero-exhibit .hero-visual { min-height: clamp(360px, 86vw, 420px); }
   .hero-exhibit .hero-section__footnote { font-size: 11px; padding: 20px 0; }
+  .hero-exhibit .hero-visual__topline { inset-inline: 4px; font-size: 10px; }
+  .hero-exhibit .hero-visual__edge, .hero-exhibit .hero-visual__legend {
+    inset-inline: 4px; justify-content: center; text-align: center; line-height: 1.5;
+  }
+  .hero-exhibit .hero-visual__edge { bottom: 6px; font-size: 9px; }
+  .hero-exhibit .hero-visual__legend { bottom: 23px; font-size: 11px; }
+  .hero-exhibit .product-scene { inset-block: 38px 54px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-horizon__plate { transform: translateX(-50%); }
