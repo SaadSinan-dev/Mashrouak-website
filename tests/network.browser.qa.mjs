@@ -13,7 +13,7 @@ function probe() {
   const raf = window.requestAnimationFrame.bind(window),
     cancel = window.cancelAnimationFrame.bind(window);
   window.requestAnimationFrame = (callback) => {
-    if (!callback.toString().includes("adaptiveFps")) return raf(callback);
+    if (!callback.toString().includes("sampleScroll()")) return raf(callback);
     const id = raf((time) => {
       pending.delete(id);
       data.pending = pending.size;
@@ -200,8 +200,18 @@ export async function networkChecks(
     const background = await page
       .locator(".public-atmosphere canvas")
       .elementHandle();
+    const seek = async (y) => {
+      await page.evaluate(y => window.scrollTo({ top: y, behavior: "instant" }), y);
+      await page.waitForFunction(() => !__networkProbe.pending);
+      await page.waitForTimeout(65);
+      return page.evaluate(() => __networkProbe.frames.at(-1).pulses);
+    };
     const start = await page.evaluate(() => __networkProbe.frames.length);
-    await page.waitForTimeout(4500);
+    const firstSample = await seek(120);
+    for (let y = 280; y < 2500; y += 160) await seek(y);
+    const lastSample = await seek(120);
+    check(firstSample.length && JSON.stringify(firstSample) === JSON.stringify(lastSample),
+      "Returning to the same scroll position restores the original signal paths");
     const metrics = await page.evaluate((start) => {
       const f = __networkProbe.frames.slice(start),
         durations = __networkProbe.costs.slice(-f.length).sort((a, b) => a - b);
@@ -209,7 +219,7 @@ export async function networkChecks(
         last = f.at(-1);
       return {
         frames: f.length,
-        fps: ((f.length - 1) * 1000) / (last.at - first.at),
+        elapsedMs: last.at - first.at,
         avg: durations.reduce((a, b) => a + b, 0) / durations.length,
         p95: durations[Math.floor(durations.length * 0.95)],
         connections: [...new Set(f.map((v) => v.connections))],
@@ -226,8 +236,8 @@ export async function networkChecks(
         maxPending: __networkProbe.maxPending,
       };
     }, start);
-    check(metrics.glyphMoved, "Programming characters visibly change position");
-    check(metrics.pulseMoved, "Data packets travel along connections");
+    check(metrics.glyphMoved, "Scrolling moves programming characters");
+    check(metrics.pulseMoved, "Scrolling advances data packets along connections");
     check(
       metrics.connections.length > 1,
       "Connections establish and dissolve during observation",
@@ -237,6 +247,7 @@ export async function networkChecks(
       "No concurrent background animation callbacks",
     );
     summary.performance = metrics;
+    await seek(0);
     await page.screenshot({ path: dir + "/after-light.png", scale: "css" });
     await page.locator(".preference-control--theme").click();
     await page.locator('html[data-theme="dark"]').waitFor();
@@ -293,7 +304,7 @@ export async function networkChecks(
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page
-      .locator('.public-atmosphere[data-network-state="running"]')
+      .locator('.public-atmosphere[data-network-state="linked"]')
       .waitFor();
     await page.emulateMedia({ forcedColors: "active" });
     check(

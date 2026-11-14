@@ -1,6 +1,6 @@
 import {CmsText,CmsCopy,CmsValue} from '../../features/content/Editable';
 import { useServices } from '../../app/providers/content-context';
-import { ArrowUpLeft, ArrowUpRight, Github, Instagram, Mail, MessageCircle } from 'lucide-react';
+import { ArrowUpLeft, ArrowUpRight, Github, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLocale } from '../../app/providers/preferences-context';
 import { Logo } from '../shared/Logo';

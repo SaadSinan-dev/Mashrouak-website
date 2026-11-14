@@ -1,5 +1,21 @@
 CODE:https://github.com/SaadSinan-dev/Mashrouak-website
-LIVE:https://mashrouak-net.pages.dev/
+LIVE-cloud:https://mashrouak-net.pages.dev/
+LIVE-vercel:
 admin dashboard:https://mashrouak-admin.pages.dev/
 linkedin:https://www.linkedin.com/company/mashrouak-net/
 github:https://github.com/Mashrouak-net
+post:
+
+  AR:
+
+
+
+
+
+
+
+
+
+
+
+  EN:

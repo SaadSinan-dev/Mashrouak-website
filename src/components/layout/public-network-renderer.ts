@@ -2,7 +2,8 @@ import { circuitRoute, createNetworkField } from "./network-field";
 
 type RGB = [number, number, number];
 type Tone = "paper" | "mist" | "night" | "petrol";
-type Surface = { element: HTMLElement; tone: Tone; rect: DOMRect };
+type Bounds = { left: number; top: number; width: number; height: number };
+type Surface = { tone: Tone; rect: Bounds };
 type Palette = Record<Tone | "ink" | "signal" | "onNight", RGB>;
 const rgb = (value: string): RGB => {
   const hex = value.trim().replace("#", "");
@@ -13,8 +14,6 @@ const rgb = (value: string): RGB => {
 };
 const css = (color: RGB, alpha = 1) =>
   `rgba(${color[0]},${color[1]},${color[2]},${alpha})`;
-const mix = (a: RGB, b: RGB, progress: number): RGB =>
-  a.map((v, i) => v + (b[i]! - v) * progress) as RGB;
 
 const protectedSelector = [
   "h1",
@@ -51,8 +50,8 @@ const protectedSelector = [
   ".stat-card",
 ].join(",");
 
-/** Owns one visible canvas and one cancellable clock. Layout is read only after
- * DOM/size/scroll changes, never as part of the network simulation. */
+/** One demand-driven canvas. Cache document geometry on layout changes;
+ * a scroll frame only samples the cache and the current scroll offset. */
 export function createPublicNetwork(host: HTMLDivElement) {
   const canvas = host.querySelector("canvas");
   const ctx = canvas?.getContext("2d", { alpha: true });
@@ -71,14 +70,13 @@ export function createPublicNetwork(host: HTMLDivElement) {
   let sizeDirty = true,
     layoutDirty = true,
     paletteDirty = true;
-  let time = 0,
-    lastTick = 0,
-    lastPaint = 0,
-    nextPaint = 0,
-    paletteStart = 0;
-  let target: Palette, from: Palette, palette: Palette;
+  let chapter = 0, spread = 1, strength = 1, lastPaint = -Infinity;
+  let palette: Palette;
   let field = createNetworkField(1440, 900);
   let surfaces: Surface[] = [];
+  let documentSurfaces: Surface[] = [];
+  let masks: (Bounds & { fixed: boolean })[] = [];
+  let hero: HTMLElement | null = null, heroTop = 0;
   const marked = new Set<HTMLElement>();
   let protection = new Path2D();
   let quietRects: {
@@ -87,11 +85,6 @@ export function createPublicNetwork(host: HTMLDivElement) {
     top: number;
     bottom: number;
   }[] = [];
-  let pointerX = -1000,
-    pointerY = -1000;
-  let frameCost = 0,
-    samples = 0,
-    adaptiveFps = 60;
   let resolution: MediaQueryList | undefined;
 
   const invalidate = () => {
@@ -122,16 +115,15 @@ export function createPublicNetwork(host: HTMLDivElement) {
     canvas!.width = Math.ceil(width * dpr);
     canvas!.height = Math.ceil(height * dpr);
     ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-    adaptiveFps = field.budget.fps;
     host.dataset.networkNodes = String(field.budget.nodes);
     watchResolution();
     sizeDirty = false;
   }
-  function readPalette(now: number) {
+  function readPalette() {
     const style = getComputedStyle(host),
       tokens = getComputedStyle(root);
     const value = (name: string) => rgb(style.getPropertyValue(name));
-    const next: Palette = {
+    palette = {
       paper: rgb(tokens.getPropertyValue("--ivory")),
       mist: rgb(tokens.getPropertyValue("--mist")),
       night: value("--network-night"),
@@ -140,14 +132,12 @@ export function createPublicNetwork(host: HTMLDivElement) {
       signal: value("--network-signal"),
       onNight: value("--network-on-night"),
     };
-    from = { ...(palette ?? next) };
-    target = next;
-    palette ??= next;
-    paletteStart = now;
     paletteDirty = false;
   }
   function readLayout() {
-    surfaces = [];
+    documentSurfaces = [];
+    const scroll = window.scrollY;
+    const nextMarked = new Set<HTMLElement>();
     for (const element of scope.querySelectorAll<HTMLElement>(
       "main section, .site-footer, .chat-shell, .contact-bottom",
     )) {
@@ -155,62 +145,84 @@ export function createPublicNetwork(host: HTMLDivElement) {
         .getPropertyValue("--network-surface")
         .trim();
       if (!["paper", "mist", "night", "petrol"].includes(tone)) continue;
-      element.dataset.networkSurface = tone;
-      marked.add(element);
+      if (element.dataset.networkSurface !== tone) element.dataset.networkSurface = tone;
+      nextMarked.add(element);
       const rect = element.getBoundingClientRect();
-      if (rect.bottom > 0 && rect.top < height && rect.width > 0)
-        surfaces.push({ element, tone: tone as Tone, rect });
+      if (rect.width && rect.height)
+        documentSurfaces.push({ tone: tone as Tone, rect: { left: rect.left, top: rect.top + scroll, width: rect.width, height: rect.height } });
     }
-    for (const element of marked)
-      if (!element.isConnected) marked.delete(element);
-    protection = new Path2D();
-    quietRects = [];
+    for (const element of marked) if (!nextMarked.has(element)) delete element.dataset.networkSurface;
+    marked.clear();
+    for (const element of nextMarked) marked.add(element);
+    documentSurfaces.sort((a,b) => a.rect.top - b.rect.top);
+    hero = scope.querySelector<HTMLElement>(".hero-section--horizon");
+    heroTop = hero ? hero.getBoundingClientRect().top + scroll : 0;
+    masks = [];
     for (const element of scope.querySelectorAll<HTMLElement>(
       protectedSelector,
     )) {
       if (element.closest(".public-atmosphere")) continue;
       const rect = element.getBoundingClientRect();
-      if (!rect.width || !rect.height || rect.bottom < 0 || rect.top > height)
-        continue;
+      if (!rect.width || !rect.height) continue;
       // Entire model/form areas are quiet; text gets a small breathing margin.
       const pad = element.matches(".hero-visual, .contact-form, .artwork")
         ? 12
         : 8;
       // Reserve the 18px reveal travel as well as the settled text position.
       const verticalPad = element.matches("h1, h2, h3, h4, p") ? pad + 18 : pad;
-      protection.roundRect(
-        rect.left - pad,
-        rect.top - verticalPad,
-        rect.width + pad * 2,
-        rect.height + verticalPad * 2,
-        10,
-      );
-      quietRects.push({
-        left: rect.left - pad,
-        right: rect.right + pad,
-        top: rect.top - verticalPad,
-        bottom: rect.bottom + verticalPad,
-      });
+      const fixed = !!element.closest(".site-header,.company-chatbot,.support-launcher");
+      masks.push({ left: rect.left - pad, top: rect.top - verticalPad + (fixed ? 0 : scroll),
+        width: rect.width + pad * 2, height: rect.height + verticalPad * 2, fixed });
     }
     layoutDirty = false;
+  }
+  function sampleScroll() {
+    const scroll = window.scrollY;
+    const focus = scroll + height * .36;
+    const profiles = { paper: [1, .72], mist: [.89, .64], night: [1.14, 1], petrol: [1.14, 1] } as const;
+    let index = 0;
+    for (let i = 1; i < documentSurfaces.length && documentSurfaces[i]!.rect.top <= focus; i++) index = i;
+    const current = documentSurfaces[index], next = documentSurfaces[index + 1];
+    const fraction = current ? Math.max(0, Math.min(1, (focus - current.rect.top) / Math.max(1, (next?.rect.top ?? current.rect.top + current.rect.height) - current.rect.top))) : 0;
+    const a = profiles[current?.tone ?? "paper"], b = profiles[next?.tone ?? current?.tone ?? "paper"];
+    const blend = fraction * fraction * (3 - 2 * fraction);
+    chapter = motion.matches ? 0 : index + fraction;
+    spread = motion.matches ? 1 : a[0] + (b[0] - a[0]) * blend;
+    strength = motion.matches ? .68 : a[1] + (b[1] - a[1]) * blend;
+    if (hero) {
+      const offset = motion.matches ? 0 : Math.min(95, Math.max(0, (scroll - heroTop) * .16));
+      const value = offset.toFixed(1) + "px";
+      if (hero.style.getPropertyValue("--horizon-offset") !== value) hero.style.setProperty("--horizon-offset", value);
+    }
+    surfaces = [];
+    for (const { tone, rect } of documentSurfaces) {
+      const top = rect.top - scroll;
+      if (top < height && top + rect.height > 0) surfaces.push({ tone, rect: { ...rect, top } });
+    }
+    protection = new Path2D();
+    quietRects = [];
+    for (const rect of masks) {
+      const top = rect.top - (rect.fixed ? 0 : scroll);
+      if (top > height || top + rect.height < 0) continue;
+      protection.roundRect(rect.left, top, rect.width, rect.height, 10);
+      quietRects.push({
+        left: rect.left, right: rect.left + rect.width, top, bottom: top + rect.height,
+      });
+    }
   }
   function darkAt(x: number, y: number) {
     let tone: Tone = "paper";
     for (const surface of surfaces) {
       const r = surface.rect;
-      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom)
+      if (x >= r.left && x <= r.left + r.width && y >= r.top && y <= r.top + r.height)
         tone = surface.tone;
     }
     const color = palette[tone];
     return (color[0] + color[1] + color[2]) / 3 < 100;
   }
-  function draw(now: number) {
-    const progress = motion.matches
-      ? 1
-      : Math.min(1, (now - paletteStart) / 240);
-    for (const key of Object.keys(target) as (keyof Palette)[])
-      palette[key] = mix(from[key], target[key], progress);
+  function draw() {
     ctx!.clearRect(0, 0, width, height);
+    ctx!.globalAlpha = strength;
     ctx!.lineCap = "round";
     ctx!.lineJoin = "round";
     for (const edge of field.edges.values()) {
@@ -229,7 +241,7 @@ export function createPublicNetwork(host: HTMLDivElement) {
       ctx!.lineWidth = 0.7;
       ctx!.stroke();
       if ((edge.a + edge.b) % 3 !== 0) continue;
-      const phase = (time * 0.26 + edge.phase) % 1;
+      const phase = (chapter * .84 + edge.phase) % 1;
       const envelope = Math.sin(phase * Math.PI) * edge.strength;
       const length = route
         .slice(1)
@@ -311,6 +323,7 @@ export function createPublicNetwork(host: HTMLDivElement) {
     }
     // Erase decoration, then backfill the original section colours. This needs
     // no overlay above content, extra canvas, or changes to foreground elements.
+    ctx!.globalAlpha = 1;
     ctx!.globalCompositeOperation = "destination-out";
     ctx!.fillStyle = "#fff";
     ctx!.shadowColor = "#fff";
@@ -332,34 +345,19 @@ export function createPublicNetwork(host: HTMLDivElement) {
     frame = 0;
     if (disposed || document.hidden || contrast.matches || print.matches)
       return;
-    const delta = lastTick ? Math.min(0.08, (now - lastTick) / 1000) : 0;
-    lastTick = now;
-    if (!motion.matches) time += delta;
-    if (now + 0.5 >= nextPaint || sizeDirty || layoutDirty || paletteDirty) {
-      const start = performance.now();
-      if (sizeDirty) readSize();
-      if (paletteDirty) readPalette(now);
-      if (layoutDirty) readLayout();
-      field.update(
-        motion.matches ? 0 : time,
-        Math.min(0.1, (now - lastPaint) / 1000) || 0.016,
-        pointerX,
-        pointerY,
-      );
-      draw(now);
-      lastPaint = now;
-      const interval = 1000 / adaptiveFps;
-      nextPaint = now + interval - (Math.max(0, now - nextPaint) % interval);
-      frameCost += performance.now() - start;
-      if (++samples === 90) {
-        if (frameCost / samples > 7) adaptiveFps = Math.min(adaptiveFps, 30);
-        frameCost = 0;
-        samples = 0;
-      }
+    if (!sizeDirty && !layoutDirty && !paletteDirty && now - lastPaint + 1 < 1000 / field.budget.fps) {
+      schedule();
+      return;
     }
-    const state = motion.matches ? "static" : "running";
+    if (sizeDirty) readSize();
+    if (paletteDirty) readPalette();
+    if (layoutDirty) readLayout();
+    sampleScroll();
+    field.update(chapter, spread);
+    draw();
+    lastPaint = now;
+    const state = motion.matches ? "static" : "linked";
     if (host.dataset.networkState !== state) host.dataset.networkState = state;
-    if (!motion.matches) schedule();
   }
   function schedule() {
     if (
@@ -374,15 +372,14 @@ export function createPublicNetwork(host: HTMLDivElement) {
   function mode() {
     cancelAnimationFrame(frame);
     frame = 0;
-    lastTick = 0;
-    nextPaint = 0;
+    lastPaint = -Infinity;
     if (contrast.matches || print.matches) delete host.dataset.ready;
     host.dataset.networkState =
       document.hidden || contrast.matches || print.matches
         ? "paused"
         : motion.matches
           ? "static"
-          : "running";
+          : "linked";
     invalidate();
   }
   const dom = new MutationObserver((records) => {
@@ -419,7 +416,10 @@ export function createPublicNetwork(host: HTMLDivElement) {
     signal: abort.signal,
     passive: true,
   });
-  window.addEventListener("scroll", invalidate, {
+  window.addEventListener("scroll", (event) => {
+    if (event.target === document || event.target === window) schedule();
+    else invalidate();
+  }, {
     signal: abort.signal,
     passive: true,
     capture: true,
@@ -427,21 +427,6 @@ export function createPublicNetwork(host: HTMLDivElement) {
   window.addEventListener("mashrouak:route-ready", invalidate, {
     signal: abort.signal,
   });
-  window.addEventListener(
-    "pointermove",
-    (event) => {
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-    },
-    { signal: abort.signal, passive: true },
-  );
-  document.addEventListener(
-    "pointerleave",
-    () => {
-      pointerX = pointerY = -1000;
-    },
-    { signal: abort.signal },
-  );
   document.addEventListener("visibilitychange", mode, { signal: abort.signal });
   for (const query of [motion, contrast, print])
     query.addEventListener("change", mode);
@@ -461,6 +446,7 @@ export function createPublicNetwork(host: HTMLDivElement) {
     for (const query of [motion, contrast, print])
       query.removeEventListener("change", mode);
     for (const element of marked) delete element.dataset.networkSurface;
+    hero?.style.removeProperty("--horizon-offset");
     delete host.dataset.ready;
     canvas.width = canvas.height = 0;
   };

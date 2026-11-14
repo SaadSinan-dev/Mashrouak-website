@@ -1,41 +1,48 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-language="ar" data-theme="light">
+<html lang="en" dir="ltr" data-language="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#142B3A" />
+    <meta name="theme-color" content="#102733" />
     <meta name="referrer" content="no-referrer" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="description" content="مشروعك.net — استوديو للمنتجات الرقمية والحلول البرمجية نصمّم ونطوّر المواقع والمتاجر والتطبيقات والأنظمة المخصّصة للأعمال" />
+    <meta name="description" content="We design and develop websites, applications, and custom systems that help businesses reach customers and organize operations" />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="ar_AR" />
-    <meta property="og:title" content="مشروعك.net — حلول رقمية مصمّمة لأعمالك" />
-    <meta property="og:description" content="مواقع وتطبيقات وأنظمة رقمية تساعد مشروعك على العمل بصورة أوضح وأكثر ترابطاً" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Mashrouak.net — Digital products for your business" />
+    <meta property="og:description" content="Websites, applications, and digital systems shaped around real business needs" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="/brand/instagram-avatar.svg" />
-    <title>مشروعك.net — حلول رقمية مصمّمة لأعمالك</title>
+    <title>Mashrouak.net — Digital products for your business</title>
     <style>
       #app-loader{position:fixed;inset:0;z-index:9999;background:#F6F4EE;color:#142B3A;overflow:hidden} .boot-header{height:84px;border-bottom:1px solid #d8e0dc;display:flex;align-items:center;justify-content:space-between;padding-inline:max(32px,calc((100vw - 1240px)/2));gap:25px}.app-loader__logo{width:174px;height:52px;object-fit:contain}.boot-nav{display:flex;gap:22px}.boot-line{display:block;position:relative;overflow:hidden;background:#dce3df;border-radius:3px;height:12px;width:100%}.boot-line:after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent,#f6f4ee88,transparent);transform:translateX(-100%);animation:boot-shimmer 1.9s ease-in-out infinite}.boot-nav .boot-line{width:48px;height:9px}.boot-actions{width:110px;height:42px}.boot-main{max-width:1240px;width:calc(100% - 64px);margin:auto;padding-block:60px;display:grid;grid-template-columns:1.1fr .9fr;gap:65px;align-items:center}.boot-copy{display:grid;gap:18px}.boot-copy>.boot-line:first-child{height:10px;width:125px;margin-bottom:12px}.boot-copy>.boot-line:nth-child(2),.boot-copy>.boot-line:nth-child(3){height:62px}.boot-copy>.boot-line:nth-child(3){width:76%;margin-bottom:15px}.boot-copy>.boot-line:nth-child(5){width:85%}.boot-copy>.boot-line:nth-child(6){width:60%}.boot-copy>.boot-line:last-child{width:160px;height:52px;margin-top:20px}.boot-visual{aspect-ratio:1;min-height:350px;position:relative;background:#e9efec;border:1px solid #d8e0dc;padding:30px;display:grid;align-content:center;gap:20px}.boot-visual>.boot-line:first-child{height:180px}.boot-visual>.boot-line:last-child{width:65%}.boot-bottom{max-width:1240px;width:calc(100% - 64px);margin:35px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}.boot-bottom>.boot-line{height:130px}.app-loader__label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.app-loader__retry{min-height:44px;padding:8px 20px;background:#0b625d;color:#f6f4ee;border:0;cursor:pointer}.app-loader__retry[hidden]{display:none}#app-loader[data-route=inner] .boot-visual{aspect-ratio:auto;min-height:180px;background:none;border:0}#app-loader[data-route=inner] .boot-visual>.boot-line:first-child{height:12px}#app-loader[data-route=chat] .boot-main{padding-block:32px}#app-loader[data-route=chat] .boot-visual{height:calc(100dvh - 150px);min-height:300px}#app-loader[data-route=chat] .boot-bottom{display:none}:root[data-theme=dark] #app-loader{background:#102733;color:#eaf0ec}:root[data-theme=dark] .boot-line{background:#264451}:root[data-theme=dark] .boot-line:after{background:linear-gradient(100deg,transparent,#31525d88,transparent)}:root[data-theme=dark] .boot-header,:root[data-theme=dark] .boot-visual{border-color:#eaf0ec26}:root[data-theme=dark] .boot-visual{background:#193744}
       @keyframes boot-shimmer{to{transform:translateX(100%)}}@media(max-width:900px){.boot-nav{display:none}.boot-main{grid-template-columns:1fr}.boot-visual{min-height:320px;aspect-ratio:1.4}.boot-copy>.boot-line:nth-child(2),.boot-copy>.boot-line:nth-child(3){height:50px}#app-loader[data-route=chat] .boot-copy{display:none}}@media(max-width:640px){.boot-header{height:68px;padding-inline:20px}.app-loader__logo{width:145px}.boot-actions{width:65px;height:38px}.boot-main{width:calc(100% - 40px);padding-block:38px;gap:32px}.boot-copy{gap:14px}.boot-copy>.boot-line:nth-child(2),.boot-copy>.boot-line:nth-child(3){height:42px}.boot-bottom{width:calc(100% - 40px);grid-template-columns:1fr}.boot-visual{min-height:300px}#app-loader[data-route=inner] .boot-visual{min-height:100px;padding:0}}@media(prefers-reduced-motion:reduce){.boot-line:after{animation:none;transform:none;opacity:.12}}
     </style>
     <script>
-      try {
-        const language = localStorage.getItem('mashrouak-language');
-        const theme = localStorage.getItem('mashrouak-theme');
+      (() => {
+        const stored = key => { try { return localStorage.getItem('mashrouak-' + key); } catch { return null; } };
+        const query = new URLSearchParams(location.search);
+        const preference = (key, allowed) => {
+          const preview = query.has('preview') && query.get('preview_' + key);
+          return allowed.includes(preview) ? preview : stored(key);
+        };
+        const language = preference('language', ['en', 'ar']);
+        const saved = preference('theme', ['light', 'dark']);
+        const theme = saved === 'light' || saved === 'dark' ? saved
+          : window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
         const root = document.documentElement;
-        if (language === 'en') {
-          root.lang = 'en'; root.dir = 'ltr'; root.dataset.language = 'en';
-          document.title = 'Mashrouak.net — Digital products for your business';
-          document.querySelector('meta[name="description"]').content = 'We design and develop websites, applications, and custom systems that help businesses reach customers and organize operations';
-          document.querySelector('meta[property="og:locale"]').content = 'en_US';
+        if (language === 'ar') {
+          root.lang = 'ar'; root.dir = 'rtl'; root.dataset.language = 'ar';
+          document.title = 'مشروعك.net — حلول رقمية مصمّمة لأعمالك';
+          document.querySelector('meta[name="description"]').content = 'مشروعك.net — استوديو للمنتجات الرقمية والحلول البرمجية نصمّم ونطوّر المواقع والمتاجر والتطبيقات والأنظمة المخصّصة للأعمال';
+          document.querySelector('meta[property="og:locale"]').content = 'ar_AR';
           document.querySelector('meta[property="og:title"]').content = document.title;
-          document.querySelector('meta[property="og:description"]').content = 'Websites, applications, and digital systems shaped around real business needs';
+          document.querySelector('meta[property="og:description"]').content = 'مواقع وتطبيقات وأنظمة رقمية تساعد مشروعك على العمل بصورة أوضح وأكثر ترابطاً';
         }
-        if (theme === 'dark') {
-          root.dataset.theme = 'dark'; root.style.colorScheme = 'dark';
-          document.querySelector('meta[name="theme-color"]').content = '#102733';
-        }
-      } catch { /* Preferences may be unavailable when storage is blocked. */ }
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+        document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#102733' : '#F6F4EE';
+      })();
     </script>
   </head>
   <body>

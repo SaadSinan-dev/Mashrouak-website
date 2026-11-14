@@ -30,7 +30,9 @@
     "test:devices:browser": "tsx tests/devices.browser.runner.mjs",
     "test:portfolio:live": "node tests/live-projects.browser.mjs",
     "test:portfolio:browser": "node tests/portfolio.browser.runner.mjs",
-    "test:scene:browser": "tsx tests/scene.browser.runner.mjs"
+    "test:scene:browser": "tsx tests/scene.browser.runner.mjs",
+    "test:network:browser": "tsx tests/network.browser.runner.mjs",
+    "test:preferences:browser": "tsx tests/public-preferences.browser.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -64,10 +64,6 @@ export function SiteHeader() {
 
                 <MainNavigation variant="drawer" onNavigate={() => setMobileOpen(false)} />
 
-                <div className="mobile-menu-panel__preferences" role="group" aria-label={t('header.preferences')}>
-                  <span>{t('header.preferences')}</span>
-                  <div><LanguageToggle /><ThemeToggle /></div>
-                </div>
                 <ButtonLink className="mobile-menu-panel__cta" to="/contact" onClick={() => setMobileOpen(false)}>
                   <CmsText k={'common.discuss'}/> <Arrow size={17} />
                 </ButtonLink>
@@ -85,8 +81,8 @@ export function SiteHeader() {
 
         <div className="site-header__actions">
           <div className="site-header__preferences" role="group" aria-label={t('header.preferences')}>
-            <LanguageToggle />
             <ThemeToggle />
+            <LanguageToggle />
           </div>
           <ButtonLink className="site-header__cta" to="/contact" size="sm">
             <CmsText k={'common.discuss'}/> <Arrow size={16} aria-hidden="true" />

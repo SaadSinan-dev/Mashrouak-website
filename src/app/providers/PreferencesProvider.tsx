@@ -3,6 +3,7 @@ import {
   useLayoutEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
@@ -16,6 +17,17 @@ import {
   PreferencesContext,
   type PreferencesContextValue,
 } from "./preferences-context";
+
+// A positive light preference wins; unsupported or unspecified media falls back to dark.
+const lightQuery = "(prefers-color-scheme: light)";
+function systemTheme(): Theme {
+  return window.matchMedia?.(lightQuery).matches ? "light" : "dark";
+}
+function subscribeSystemTheme(notify: () => void) {
+  const query = window.matchMedia?.(lightQuery);
+  query?.addEventListener("change", notify);
+  return () => query?.removeEventListener("change", notify);
+}
 function readStoredLanguage(): Language | null {
   try {
     const query = new URLSearchParams(window.location.search);
@@ -54,8 +66,9 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [selectedTheme, setThemeState] = useState<Theme | null>(
     readStoredTheme,
   );
-  const language = selectedLanguage ?? settings?.defaultLanguage ?? "ar";
-  const theme = selectedTheme ?? settings?.defaultTheme ?? "light";
+  const preferredTheme = useSyncExternalStore(subscribeSystemTheme, systemTheme, () => "dark" as const);
+  const language = selectedLanguage ?? "en";
+  const theme = selectedTheme ?? preferredTheme;
   const direction: PreferencesContextValue["direction"] =
     language === "ar" ? "rtl" : "ltr";
   useLayoutEffect(() => {
@@ -84,7 +97,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       'meta[name="theme-color"]',
     );
     if (themeColor)
-      themeColor.content = theme === "dark" ? "#102733" : "#142B3A";
+      themeColor.content = theme === "dark" ? "#102733" : "#F6F4EE";
     try {
       if (
         selectedTheme &&

@@ -1,0 +1,125 @@
+/* One etched horizon, with a day and a night exposure. The disc's centre
+   stays deliberately quiet for the editable, bilingual type. */
+.hero-section--horizon {
+  --sky: var(--ivory);
+  --rim-shade: #e9f0ed;
+  --rim-close: #c0dcda;
+  --rim-glow: #75abb3;
+  --rim-lit: #fff;
+  --rim-grid: #8aa9a7;
+  --hero-ink: var(--petrol);
+  --hero-accent: var(--teal);
+  --hero-copy: var(--steel);
+  --hero-rule: var(--line);
+  isolation: isolate;
+  padding-block-start: 0;
+}
+:root[data-theme="dark"] .hero-section--horizon,
+.cms-slot--petrol > .hero-section--horizon {
+  --sky: #081923;
+  --rim-shade: #112d3e;
+  --rim-close: #24566c;
+  --rim-glow: #58a8c1;
+  --rim-lit: #d7fff2;
+  --rim-grid: #567f8c;
+  --hero-ink: #f2f6f2;
+  --hero-accent: #a2d9ce;
+  --hero-copy: #bed0d1;
+  --hero-rule: #34505a;
+}
+.cms-slot--mist > .hero-section--horizon { --sky: var(--mist); }
+.cms-slot--ivory > .hero-section--horizon { --sky: var(--ivory); }
+.hero-horizon {
+  position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+  background: var(--sky);
+}
+.hero-horizon__plate {
+  position: absolute; top: 0; left: 50%; width: clamp(1120px, 100%, 1770px); max-width: none;
+  transform: translate3d(-50%, var(--horizon-offset, 0px), 0);
+  mask-image: linear-gradient(to bottom, black 35%, transparent 96%);
+}
+.hero-section--horizon .hero-section__layout {
+  display: flex; flex-direction: column; gap: 0; align-items: stretch; padding-bottom: 0;
+}
+.hero-section--horizon .hero-section__copy {
+  width: 100%; max-width: 1100px; margin: auto;
+  padding: clamp(115px, 10.6vw, 176px) 0 clamp(38px, 5vw, 76px);
+  text-align: center;
+}
+.hero-kicker {
+  display: flex; justify-content: center; align-items: center; gap: 12px;
+  margin: 0 0 20px; color: var(--hero-accent);
+  font-size: 12px; font-weight: 600; line-height: 1.5;
+}
+.hero-kicker::before, .hero-kicker::after {
+  content: ""; width: 22px; height: 1px; background: currentColor; opacity: .66;
+}
+html[lang="en"] .hero-kicker { font-size: 11px; letter-spacing: .15em; text-transform: uppercase; }
+.hero-section--horizon .hero-section__copy h1,
+html[lang="en"] .hero-section--horizon .hero-section__copy h1 {
+  max-width: 22ch; margin: auto; color: var(--hero-ink); font-size: clamp(40px, 5.35vw, 85px);
+  font-weight: 500; letter-spacing: -.052em; line-height: 1.025; text-wrap: balance;
+}
+.hero-section--horizon .hero-section__copy h1 em { display: block; color: var(--hero-accent); }
+html[lang="ar"] .hero-section--horizon h1 { line-height: 1.34; letter-spacing: normal; }
+.hero-section--horizon .hero-section__description {
+  max-width: 61ch; margin: 22px auto 0; color: var(--hero-copy);
+  line-height: 1.65; font-size: clamp(15px, 1.2vw, 18px); text-wrap: pretty;
+}
+.hero-section--horizon .hero-section__actions { justify-content: center; gap: 22px; margin-top: 27px; }
+.hero-section--horizon .hero-section__actions .button {
+  min-height: 48px; padding-inline: 22px; border-radius: 5px;
+  color: var(--sky); background: var(--hero-ink); border-color: var(--hero-ink);
+  font-size: 14px;
+}
+.hero-section--horizon .hero-section__actions .button:hover {
+  background: var(--hero-accent); border-color: var(--hero-accent);
+}
+.hero-section--horizon .hero-section__secondary { min-height: 44px; color: var(--hero-ink); }
+.hero-section--horizon .hero-section__secondary:hover { gap: 9px; text-decoration: underline; text-underline-offset: 5px; }
+.hero-exhibit {
+  position: relative; width: min(100%, 980px); margin-inline: auto;
+  border-top: 1px solid var(--hero-rule);
+}
+.hero-exhibit::before, .hero-exhibit::after {
+  content: ""; position: absolute; top: -4px; height: 7px; width: 1px; background: var(--hero-accent);
+}
+.hero-exhibit::before { left: 0; } .hero-exhibit::after { right: 0; }
+.hero-exhibit .hero-section__footnote {
+  margin: 0; padding: 16px 0; justify-content: center; gap: 12px;
+  color: var(--hero-copy); font-size: 12px; text-align: center;
+}
+.hero-exhibit .hero-section__footnote > span:first-child { color: var(--hero-accent); white-space: nowrap; font-size: 10px; }
+.hero-exhibit .hero-section__footnote > span:last-child::before { display: none; }
+.hero-exhibit .hero-visual { width: min(100%, 710px); min-height: 340px; margin: auto; }
+.hero-exhibit .hero-visual:is(.hero-visual--fallback, .hero-visual--error) { min-height: 420px; }
+.hero-exhibit .hero-visual__grid { opacity: .065; mask-image: radial-gradient(ellipse, black, transparent 74%); }
+.hero-exhibit .hero-visual::before { border: 0; }
+.hero-exhibit .hero-visual__topline { inset-block-start: 10px; }
+.hero-exhibit .hero-visual__edge { writing-mode: horizontal-tb; transform: none; }
+.hero-exhibit .hero-visual__edge, .hero-exhibit .hero-visual__legend { bottom: 15px; }
+.hero-section--horizon .hero-section__bottomline { border-color: var(--hero-rule); }
+.hero-section--horizon .hero-section__bottomline .container-shell { color: var(--hero-copy); }
+@media (max-width: 640px) {
+  .hero-horizon__plate { width: 780px; top: -4px; }
+  .hero-section--horizon .hero-section__copy { padding: 69px 0 32px; }
+  .hero-kicker { margin-bottom: 16px; gap: 7px; }
+  html[lang="en"] .hero-kicker { letter-spacing: .08em; font-size: 10px; }
+  .hero-kicker::before, .hero-kicker::after { width: 12px; flex-shrink: 0; }
+  .hero-section--horizon .hero-section__copy h1,
+  html[lang="en"] .hero-section--horizon .hero-section__copy h1 {
+    font-size: clamp(33px, 8.4vw, 49px);
+  }
+  .hero-section--horizon .hero-section__description { margin-top: 17px; font-size: 15px; }
+  .hero-section--horizon .hero-section__actions { gap: 10px 16px; margin-top: 20px; }
+  .hero-section--horizon .hero-section__actions .button { padding-inline: 14px; font-size: 13px; }
+  .hero-exhibit .hero-visual { min-height: 300px; }
+  .hero-exhibit .hero-visual:is(.hero-visual--fallback, .hero-visual--error) { min-height: 360px; }
+  .hero-exhibit .hero-section__footnote { font-size: 11px; padding: 12px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-horizon__plate { transform: translateX(-50%); }
+}
+@media (forced-colors: active) {
+  .hero-horizon { display: none; }
+}

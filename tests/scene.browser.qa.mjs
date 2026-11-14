@@ -150,7 +150,7 @@ export async function sceneChecks(
           await page
             .locator(".hero-visual")
             .screenshot({ path: `${dir}/${language}-${theme}-${width}.png` });
-          const initialCanvas = await page.locator("canvas").elementHandle();
+          const initialCanvas = await page.locator(".product-scene canvas").elementHandle();
           if (width === 1440) {
             await page.locator(".preference-control--theme").first().click();
             await page
@@ -200,7 +200,7 @@ export async function sceneChecks(
       )
       .waitFor();
     check(
-      (await loadingPage.locator("canvas").count()) === 0,
+      (await loadingPage.locator(".product-scene canvas").count()) === 0,
       "Model preparation displays one complete structural placeholder before WebGL loads",
     );
     await loadingPage
@@ -226,20 +226,21 @@ export async function sceneChecks(
     await failurePage.locator(".hero-visual[data-scene-state=error]").waitFor();
     check(
       (await failurePage.locator(".hero-node").count()) === 3 &&
-        (await failurePage.locator("canvas").count()) === 0,
+        (await failurePage.locator(".product-scene canvas").count()) === 0,
       "Asset failure removes renderer and preserves a static illustration",
     );
     await failurePage.unroute("**/brand/logo-horizontal-en-colour.png");
     await failurePage
+      .locator(".hero-visual")
       .getByRole("button", { name: "Retry", exact: true })
       .click();
     await idle(failurePage);
     check(
-      (await failurePage.locator("canvas").count()) === 1,
+      (await failurePage.locator(".product-scene canvas").count()) === 1,
       "Asset retry creates exactly one complete renderer",
     );
     await failurePage
-      .locator("canvas")
+      .locator(".product-scene canvas")
       .evaluate((canvas) =>
         canvas
           .getContext("webgl2")
@@ -248,15 +249,16 @@ export async function sceneChecks(
       );
     await failurePage.locator(".hero-visual[data-scene-state=error]").waitFor();
     check(
-      (await failurePage.locator("canvas").count()) === 0,
+      (await failurePage.locator(".product-scene canvas").count()) === 0,
       "Context loss removes the incomplete renderer immediately",
     );
     await failurePage
+      .locator(".hero-visual")
       .getByRole("button", { name: "Retry", exact: true })
       .click();
     await idle(failurePage);
     check(
-      (await failurePage.locator("canvas").count()) === 1,
+      (await failurePage.locator(".product-scene canvas").count()) === 1,
       "Context-loss retry recovers one complete model",
     );
     // SPA navigation repeatedly tears down and recreates the shared scene.
@@ -270,14 +272,14 @@ export async function sceneChecks(
         .locator(".product-scene canvas")
         .waitFor({ state: "detached" });
       check(
-        (await failurePage.locator("canvas").count()) === 0,
+        (await failurePage.locator(".product-scene canvas").count()) === 0,
         `Navigation cycle ${cycle + 1}: scene removed`,
       );
       await failurePage.locator('.site-header a[href="/"]').first().click();
       await failurePage.waitForURL(origin + "/");
       await idle(failurePage);
       check(
-        (await failurePage.locator("canvas").count()) === 1,
+        (await failurePage.locator(".product-scene canvas").count()) === 1,
         `Navigation cycle ${cycle + 1}: no duplicate remount`,
       );
     }

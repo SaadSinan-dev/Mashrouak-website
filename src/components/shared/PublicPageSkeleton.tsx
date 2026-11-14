@@ -15,6 +15,7 @@ import type { TranslationKey } from "../../locales/messages";
 import type { ReactNode } from "react";
 import { SpecialPageSkeleton } from "./SpecialPageSkeleton";
 import { ProductSceneSkeleton } from "./ProductSceneSkeleton";
+import { HeroHorizon } from "../../features/home/sections/HeroHorizon";
 
 // The real typography and layout classes reserve each page's geometry.
 function Copy({ children }: { children: ReactNode }) {
@@ -72,10 +73,11 @@ export function PublicPageSkeleton({
   if (kind === "home")
     return (
       <SkeletonRegion label={label} className="sk-public-page sk-page--home">
-        <div className="hero-section">
+        <div className="hero-section hero-section--horizon">
+          <HeroHorizon />
           <div className="container-shell hero-section__layout">
             <div className="hero-section__copy">
-              <p className="eyebrow">
+              <p className="hero-kicker">
                 <Copy><CmsText k="hero.eyebrow"/></Copy>
               </p>
               <h1>
@@ -96,17 +98,19 @@ export function PublicPageSkeleton({
                   <Skeleton style={{ width: 17, height: 17 }} />
                 </span>
               </div>
+            </div>
+            <div className="hero-exhibit">
               <div className="hero-section__footnote">
                 <span dir="ltr">
-                  <Copy>01 / 06</Copy>
+                  <Copy>FIG. 01</Copy>
                 </span>
                 <span>
                   <Copy><CmsText k="hero.footnote"/></Copy>
                 </span>
               </div>
-            </div>
-            <div className="hero-visual sk-product-visual">
-              <ProductSceneSkeleton />
+              <div className="hero-visual sk-product-visual">
+                <ProductSceneSkeleton />
+              </div>
             </div>
           </div>
           <div className="hero-section__bottomline">

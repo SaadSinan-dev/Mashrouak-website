@@ -6,6 +6,7 @@ import './styles/globals.css';
 import './styles/experience.css';
 import '../shared/ui/skeleton.css';
 import './styles/platform.css';
+import './features/home/sections/hero-horizon.css';
 
 const rootElement = document.getElementById('root');
 

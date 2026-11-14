@@ -63,26 +63,18 @@ export function createNetworkField(width: number, height: number, cores = 8) {
   const degrees = new Uint8Array(nodes.length);
   const buckets = new Map<number, number[]>();
   const columns = Math.ceil(width / budget.reach) + 4;
-  const pointer = { x: -1000, y: -1000 };
-  const carriers = new Map<number, NetworkEdge>();
-  const previousPhases = new Float64Array(budget.glyphs);
-
-  function update(
-    time: number,
-    dt: number,
-    pointerX = -1000,
-    pointerY = -1000,
-  ) {
-    const follow = 1 - Math.exp(-dt * 3);
-    pointer.x += (pointerX - pointer.x) * follow;
-    pointer.y += (pointerY - pointer.y) * follow;
+  // Sample an absolute position, not an elapsed time. Returning to a section
+  // reconstructs the same links and packets regardless of scroll speed.
+  function update(chapter: number, spread = 1) {
+    const phasePosition = chapter * 6;
     buckets.clear();
+    edges.clear();
     degrees.fill(0);
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i]!;
       const lane = i % 4;
       const phase = seed(i + 1) * Math.PI * 2;
-      const flow = time * (0.075 + seed(i + 10) * 0.055);
+      const flow = phasePosition * (0.075 + seed(i + 10) * 0.055);
       const x =
         lane < 2
           ? width * (lane === 0 ? 0.065 : 0.935) +
@@ -94,12 +86,9 @@ export function createNetworkField(width: number, height: number, cores = 8) {
             Math.cos(phase + flow * 1.3) * 65
           : height * (lane === 2 ? 0.14 : 0.87) +
             Math.cos(phase + flow) * Math.min(height * 0.14, 110);
-      const dx = pointer.x - x,
-        dy = pointer.y - y;
-      const influence = Math.max(0, 1 - Math.hypot(dx, dy) / 170) * 0.065;
-      n.x = x + dx * influence;
-      n.y = y + dy * influence;
       n.depth = 0.5 + seed(i + 91) * 0.5;
+      n.x = width / 2 + (x - width / 2) * (1 + (spread - 1) * n.depth);
+      n.y = y + Math.sin(chapter * .64 + lane) * height * .075 * n.depth;
       const key =
         (Math.floor(n.y / budget.reach) + 2) * columns +
         Math.floor(n.x / budget.reach) +
@@ -108,7 +97,6 @@ export function createNetworkField(width: number, height: number, cores = 8) {
       bucket.push(i);
       buckets.set(key, bucket);
     }
-    const wanted = new Set<string>();
     for (let i = 0; i < nodes.length; i++) {
       const a = nodes[i]!;
       const col = Math.floor(a.x / budget.reach) + 2;
@@ -122,42 +110,29 @@ export function createNetworkField(width: number, height: number, cores = 8) {
             if (distance >= budget.reach || distance < 22) continue;
             // Staggered link handoffs give nearby nodes occasional disconnect /
             // reconnect sequences, in addition to distance-driven topology changes.
-            if (Math.sin(time * 0.4 + seed(i * 71 + j) * Math.PI * 2) < -0.72)
-              continue;
+            const gate = smooth((Math.sin(phasePosition * .22 + seed(i * 71 + j) * Math.PI * 2) + 1) / .42);
+            if (gate < .01) continue;
             degrees[i]!++;
             degrees[j]!++;
             const key = `${i}:${j}`;
-            wanted.add(key);
             const target = smooth(
               (budget.reach - distance) / (budget.reach * 0.5),
             );
-            const edge = edges.get(key) ?? {
+            edges.set(key, {
               a: i,
               b: j,
-              strength: 0,
+              strength: target * gate,
               phase: seed(i * 71 + j),
-            };
-            edge.strength += (target - edge.strength) * (1 - Math.exp(-dt * 3));
-            edges.set(key, edge);
+            });
           }
         }
-    }
-    for (const [key, edge] of edges) {
-      if (wanted.has(key)) continue;
-      edge.strength *= Math.exp(-dt * 4);
-      if (edge.strength < 0.005) edges.delete(key);
     }
     glyphs.length = 0;
     const paths = Array.from(edges.values()).filter((e) => e.strength > 0.35);
     for (let i = 0; i < budget.glyphs; i++) {
-      const phase = fract(time / (10 + seed(i + 53) * 10) + seed(i + 70));
+      const phase = fract(phasePosition / (10 + seed(i + 53) * 10) + seed(i + 70));
       const anchor = nodes[(i * 7 + 3) % nodes.length]!;
-      if (!carriers.has(i) || phase < previousPhases[i]!) {
-        const next = paths[(i * 3) % Math.max(1, paths.length)];
-        if (next) carriers.set(i, next);
-      }
-      previousPhases[i] = phase;
-      const edge = carriers.get(i);
+      const edge = paths[(i * 3) % Math.max(1, paths.length)];
       let x = anchor.x + Math.sin(phase * Math.PI * 2) * 55;
       let y = anchor.y + (phase - 0.5) * 150;
       if (i % 3 === 0 && edge) {
@@ -185,7 +160,7 @@ export function createNetworkField(width: number, height: number, cores = 8) {
       });
     }
   }
-  update(0, 1);
+  update(0);
   return { nodes, edges, glyphs, budget, update };
 }
 

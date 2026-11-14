@@ -23,6 +23,7 @@ import {
 import { ProductSceneSkeleton } from "../../../components/shared/ProductSceneSkeleton";
 import { withModuleDeadline } from "../../../../shared/loadable";
 import type { SceneStatus } from "../../../lib/scene-lifecycle";
+import { HeroHorizon } from "./HeroHorizon";
 
 function HeroVisual() {
   const { t, isArabic } = useLocale();
@@ -202,10 +203,11 @@ export function HeroSection() {
   const ArrowUp = isArabic ? ArrowUpLeft : ArrowUpRight;
   const ArrowDown = isArabic ? ArrowDownLeft : ArrowDownRight;
   return (
-    <section className="hero-section">
+    <section className="hero-section hero-section--horizon">
+      <HeroHorizon />
       <Container className="hero-section__layout">
         <div className="hero-section__copy">
-
+          <p className="hero-kicker"><CmsText k="hero.eyebrow" /></p>
           <h1>
             <CmsText k="hero.title" />{" "}
             <em>
@@ -223,14 +225,14 @@ export function HeroSection() {
               <CmsText k={"common.exploreWork"} /> <ArrowDown size={17} />
             </Link>
           </div>
-          <div className="hero-section__footnote">
-            <span dir="ltr">01 / 06</span>
-            <span>
-              <CmsText k="hero.footnote" />
-            </span>
-          </div>
         </div>
-        <HeroVisual />
+        <div className="hero-exhibit">
+          <div className="hero-section__footnote">
+            <span dir="ltr">FIG. 01</span>
+            <span><CmsText k="hero.footnote" /></span>
+          </div>
+          <HeroVisual />
+        </div>
       </Container>
       <div className="hero-section__bottomline">
         <Container>

@@ -996,10 +996,6 @@ img { display: block; }
 .preference-control--language { min-width: 48px; font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", sans-serif; font-size: 11px; font-weight: 600; }
 .preference-control--theme { width: 38px; padding: 0; }
 .site-header__preferences { display: inline-flex; align-items: center; gap: 7px; }
-.mobile-menu-panel__preferences { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 22px; padding-block: 16px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; }
-.mobile-menu-panel__preferences > div { display: flex; align-items: center; gap: 8px; }
-.mobile-menu-panel__preferences .preference-control { min-width: 42px; min-height: 42px; }
-.mobile-menu-panel__preferences .preference-control--language { min-width: 58px; }
 
 html[lang="en"] body { font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", sans-serif; }
 html[lang="en"] .eyebrow { letter-spacing: .075em; }
@@ -1136,8 +1132,6 @@ html[lang="en"] .site-footer__bottom > div { flex-wrap: wrap; }
   .site-header__preferences { margin-inline-start: auto; }
 }
 @media (max-width: 640px) {
-  .site-header__preferences { display: none; }
-  .mobile-menu-panel__preferences { margin-top: 18px; }
   html[lang="en"] .hero-section__copy h1 { font-size: clamp(38px, 9vw, 52px); line-height: 1.13; }
   html[lang="en"] .page-hero h1 { font-size: clamp(43px, 10vw, 68px); }
 }
