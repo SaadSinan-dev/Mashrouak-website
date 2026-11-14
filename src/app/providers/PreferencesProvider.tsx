@@ -67,7 +67,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     readStoredTheme,
   );
   const preferredTheme = useSyncExternalStore(subscribeSystemTheme, systemTheme, () => "dark" as const);
-  const language = selectedLanguage ?? "en";
+  const language = selectedLanguage ?? "ar";
   const theme = selectedTheme ?? preferredTheme;
   const direction: PreferencesContextValue["direction"] =
     language === "ar" ? "rtl" : "ltr";
