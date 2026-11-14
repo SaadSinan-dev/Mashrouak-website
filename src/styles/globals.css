@@ -1000,7 +1000,7 @@ img { display: block; }
 .preference-control:active { transform: scale(.96); }
 .preference-control--language { min-width: 48px; font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", sans-serif; font-size: 11px; font-weight: 600; }
 .preference-control--theme { width: 38px; padding: 0; }
-.site-header__preferences { display: inline-flex; align-items: center; gap: 7px; }
+.site-header__preferences { display: flex; align-items: center; gap: 7px; }
 
 html[lang="en"] body { font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", sans-serif; }
 html[lang="en"] .eyebrow { letter-spacing: .075em; }

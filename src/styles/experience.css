@@ -236,15 +236,22 @@ html[dir="ltr"] .main-navigation--drawer .main-navigation__link:hover .main-navi
   .site-header__brand-group, .site-header__actions { direction: inherit; }
   html[dir="rtl"] .site-header__cta { direction: rtl; }
   .site-header__actions { margin: 0 0 0 auto; flex-direction: row-reverse; }
-  .site-header__preferences {
-    display: inline-grid;
-    grid-template-rows: repeat(2, 44px);
-    gap: 0;
-    margin: 0;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--ivory);
-  }
+ .site-header__preferences {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ivory);
+  flex-wrap: nowrap;
+}
+
+.site-header__preferences > * {
+  flex: 0 0 auto;
+}
   .site-header__preferences .preference-control {
     width: 52px; min-width: 0; min-height: 44px; padding: 0;
     border: 0; border-radius: 7px 7px 0 0;
