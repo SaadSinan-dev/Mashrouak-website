@@ -5,6 +5,7 @@ import {
   contentSchemas,
   entryInput,
   kinds,
+  publicMetric,
   validatePublication,
   type ContentData,
   type ContentEntry,
@@ -37,7 +38,7 @@ export async function publicEntries(c: Ctx): Promise<PublicEntry[]> {
   return rows.results.map(({ published, ...row }) => ({
     ...row,
     data: JSON.parse(published),
-  }));
+  })).filter(entry => entry.kind !== 'results' || publicMetric(entry.data));
 }
 export const cms = new Hono<AppEnv>();
 cms.use("*", authorize(["owner", "editor"]));

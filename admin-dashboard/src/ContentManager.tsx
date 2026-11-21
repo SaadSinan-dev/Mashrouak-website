@@ -334,7 +334,7 @@ function ContentEditor({
                   ? "/services"
                   : "/";
         setPreview(
-          `${origin}${path}?preview=${result.token}&preview_language=${language}`,
+          `${origin}${path}?preview=${result.token}&preview_language=${language}${kind === "results" ? `&metric=${encodeURIComponent(entry.id)}` : ""}`,
         );
         return;
       }
@@ -427,7 +427,13 @@ function ContentEditor({
     assistant: ["chatEnabled", "aiEnabled"],
     translations: ["translations"],
   };
-  const fields = Object.entries(data).filter(
+  const editorData = kind === "results" ? { ...blank("results"), ...data } : data;
+  const fields = Object.entries(editorData).filter(([key]) => {
+    if (!("display" in editorData)) return true;
+    if (key === "before") return editorData.display === "comparison";
+    if (key === "comparable") return editorData.display !== "reading";
+    return key !== "observations" || editorData.display === "history";
+  }).filter(
     ([key]) => kind !== "settings" || settingsTabs[tab]?.includes(key),
   );
   const settings = data as SettingsContent;

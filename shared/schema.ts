@@ -65,14 +65,27 @@ export const resultSchema = z
   .object({
     title: requiredText,
     description: requiredText,
-    before: z.number().finite(),
+    before: z.number().finite().nullable().optional(),
     after: z.number().finite(),
     unit: requiredText,
     period: bilingual,
-    projectSlug: z.string().max(100),
+    projectSlug: z.string().max(200),
+    metricCategory: z
+      .enum(["engineering", "performance", "experience"])
+      .optional(),
+    display: z.enum(["reading", "comparison", "history"]).optional(),
+    measuredOn: z.union([z.iso.date(), z.literal("")]).optional(),
+    comparable: z.boolean().optional(),
+    metricVisible: z.boolean().optional(),
+    observations: z
+      .array(
+        z.object({ date: z.iso.date(), value: z.number().finite() }).strict(),
+      )
+      .max(60)
+      .optional(),
     methodology: bilingual,
     evidence: z.array(z.object({ label: requiredText, url: safeLink })).max(10),
-    verification: z.enum(["verified", "demonstration", "draft"]),
+    verification: z.enum(["verified", "achievement", "demonstration", "draft"]),
     approvedBy: z.string().max(120),
   })
   .strict();
@@ -169,6 +182,12 @@ export const contentSchemas = {
 export type ProjectContent = z.infer<typeof projectSchema>;
 export type ServiceContent = z.infer<typeof serviceSchema>;
 export type ResultContent = z.infer<typeof resultSchema>;
+export function publicMetric(data: ResultContent) {
+  return (
+    data.metricVisible !== false &&
+    (data.verification === "verified" || data.verification === "achievement")
+  );
+}
 export type PageContent = z.infer<typeof pageSchema>;
 export type SettingsContent = z.infer<typeof settingsSchema>;
 export type KnowledgeContent = z.infer<typeof knowledgeSchema>;
@@ -284,7 +303,8 @@ export function validatePublication(
     if (result.verification === "draft")
       return "Draft results cannot be published";
     if (
-      result.verification === "verified" &&
+      (result.verification === "verified" ||
+        result.verification === "achievement") &&
       (!result.evidence.length ||
         result.evidence.some((e) => !e.url) ||
         !result.approvedBy.trim() ||
@@ -294,6 +314,23 @@ export function validatePublication(
         !result.methodology.en)
     )
       return "Verified results need evidence, approval, period and methodology in both languages";
+    if (
+      result.display === "comparison" &&
+      (result.before == null || !result.comparable)
+    )
+      return "A comparison needs a baseline and confirmation of identical measurement conditions";
+    if (result.display === "history") {
+      const observations = result.observations ?? [];
+      if (
+        !result.comparable ||
+        !result.measuredOn ||
+        !observations.length ||
+        observations.some(({ date }) => date >= result.measuredOn!) ||
+        new Set(observations.map(({ date }) => date)).size !==
+          observations.length
+      )
+        return "History needs comparable observations on distinct dates before the current measurement date";
+    }
   }
   if (kind === "projects") {
     const project = projectSchema.parse(data);

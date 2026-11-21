@@ -11,6 +11,7 @@ import { ProjectFeedStatus } from './ProjectFeedStatus';
 import { ProjectShowcaseCard } from './ProjectShowcaseCard';
 import { projectText } from './project-feed';
 import { usePortfolioProjects } from './usePortfolioProjects';
+import { ResultsSection } from '../results/ResultsSection';
 
 export function CaseStudyPage() {
   const { slug } = useParams();
@@ -28,6 +29,7 @@ export function CaseStudyPage() {
       <ProjectFeedStatus loading={false} error={error} stale={stale} retry={retry} />
     </Container></section>
     <section className="showcase-detail-body section-space"><Container><div className="showcase-detail-body__layout"><div><p className="eyebrow">{isArabic ? 'عن المشروع' : 'About the project'}</p><h2>{copy.focus || copy.title}</h2><div className="showcase-detail-links">{project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">{isArabic ? 'زيارة المشروع' : 'Visit project'} <Arrow size={18} /></a>}{project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noopener noreferrer"><Github size={18} /> GitHub</a>}</div></div><div>{copy.description && <p className="showcase-detail-body__description">{copy.description}</p>}{project.technologies.length > 0 && <div className="showcase-detail-group"><h3>{isArabic ? 'التقنيات' : 'Technologies'}</h3><ul className="showcase-card__stack">{project.technologies.map((tech) => <li key={tech}>{tech}</li>)}</ul></div>}{copy.features.length > 0 && <div className="showcase-detail-group"><h3>{isArabic ? 'الميزات' : 'Features'}</h3><ul className="showcase-detail-features">{copy.features.map((feature) => <li key={feature}>{feature}</li>)}</ul></div>}</div></div></Container></section>
+    <ResultsSection projectSlug={project.id} />
     {related.length > 0 && <section className="showcase-related section-space"><Container><div className="showcase-related__heading"><h2>{isArabic ? 'أعمال أخرى' : 'More work'}</h2><Link to="/work">{isArabic ? 'كل الأعمال' : 'All work'} <Arrow size={17} /></Link></div><div className="showcase-grid showcase-grid--related">{related.map((item, index) => <ProjectShowcaseCard key={item.id} project={item} index={index} />)}</div></Container></section>}
     <CTASection />
   </>;

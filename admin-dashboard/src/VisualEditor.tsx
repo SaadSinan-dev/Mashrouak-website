@@ -23,6 +23,7 @@ import type {
   PublicContent,
   SettingsContent,
 } from "../../shared/schema";
+import { matchesPublicSnapshot } from '../../src/lib/publication';
 import {
   getField,
   setField,
@@ -455,17 +456,7 @@ function Editor({
       );
       if (
         publicContent.revision! < result.publication.revision ||
-        result.entries.some(
-          (entry) =>
-            entry.kind !== "knowledge" &&
-            !publicContent.entries.some(
-              (item) =>
-                item.id === entry.id &&
-                same(item.data, entry.published) &&
-                item.slug === entry.slug &&
-                item.sort_order === entry.sort_order,
-            ),
-        )
+        result.entries.some(entry => !matchesPublicSnapshot(entry, publicContent))
       )
         throw new Error("publication_not_verified");
       setNotice(

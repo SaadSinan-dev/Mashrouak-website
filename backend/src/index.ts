@@ -5,7 +5,7 @@ import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
 import { ZodError } from "zod";
 import { streamSSE } from "hono/streaming";
-import { inquirySchema, type SettingsContent } from "../../shared/schema";
+import { inquirySchema, publicMetric, type SettingsContent } from "../../shared/schema";
 import { auth } from "./auth";
 import { cms, publicEntries } from "./content";
 import { media } from "./media";
@@ -84,7 +84,7 @@ app.get("/api/public/content", async (c) => {
   const entries = snapshot[1]!.results.map(({ published, ...row }) => ({
     ...row,
     data: JSON.parse(published as string),
-  }));
+  })).filter(entry => !('kind' in entry) || entry.kind !== 'results' || publicMetric(entry.data));
   c.header("Cache-Control", "private, no-cache, must-revalidate");
   c.header("CDN-Cache-Control", "no-store");
   c.header("ETag", `"cms-${state.revision}"`);

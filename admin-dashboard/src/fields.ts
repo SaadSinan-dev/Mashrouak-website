@@ -40,7 +40,13 @@ export function blank(kind: ContentKind): ContentData {
       return {
         title: bi(),
         description: bi(),
-        before: 0,
+        before: null,
+        metricCategory: "engineering",
+        display: "reading",
+        measuredOn: "",
+        comparable: false,
+        metricVisible: true,
+        observations: [],
         after: 0,
         unit: bi(),
         period: bi(),
@@ -86,6 +92,7 @@ export function blank(kind: ContentKind): ContentData {
   }
 }
 export function arrayItem(key: string): unknown {
+  if (key === "observations") return { date: "", value: 0 };
   if (key === "technologies") return "";
   if (key === "navigation") return { label: bi(), to: "/" };
   if (key === "evidence") return { label: bi(), url: "" };
@@ -108,7 +115,9 @@ export const options: Record<string, string[]> = {
   category: ["web", "commerce", "mobile", "systems"],
   accent: ["teal", "ivory", "petrol"],
   icon: ["website", "store", "mobile", "webapp", "system", "integration"],
-  verification: ["draft", "demonstration", "verified"],
+  verification: ["draft", "demonstration", "achievement", "verified"],
+  metricCategory: ["engineering", "performance", "experience"],
+  display: ["reading", "comparison", "history"],
   background: ["default", "ivory", "mist", "petrol"],
   kind: [
     "hero",
@@ -127,6 +136,17 @@ export const options: Record<string, string[]> = {
   defaultTheme: ["light", "dark"],
 };
 export const fieldLabels: Record<string, [string, string]> = {
+  metricCategory: ["فئة المؤشر", "Metric category"],
+  display: ["طريقة العرض", "Visualization"],
+  measuredOn: ["تاريخ القياس الحالي", "Current measurement date"],
+  comparable: [
+    "تأكدت من تطابق الأداة والوحدة وظروف القياس",
+    "I confirmed equivalent tools, units and measurement conditions",
+  ],
+  metricVisible: ["عرض المؤشر للزوّار", "Show metric to visitors"],
+  observations: ["القياسات السابقة", "Earlier observations"],
+  date: ["تاريخ القياس", "Observation date"],
+  value: ["القراءة", "Reading"],
   name: ["اسم المشروع", "Project name"],
   title: ["العنوان", "Title"],
   description: ["الوصف", "Description"],
@@ -160,7 +180,10 @@ export const fieldLabels: Record<string, [string, string]> = {
   after: ["القيمة بعد", "After value"],
   unit: ["وحدة القياس", "Measurement unit"],
   period: ["فترة القياس", "Measurement period"],
-  projectSlug: ["رابط المشروع المرتبط", "Associated project slug"],
+  projectSlug: [
+    "معرّف المشروع (من رابط /work/)",
+    "Project ID (from the /work/ address)",
+  ],
   methodology: ["منهجية القياس", "Measurement methodology"],
   evidence: ["الأدلة والمصادر", "Evidence & references"],
   verification: ["حالة التحقق", "Verification state"],
@@ -197,6 +220,13 @@ export const fieldLabels: Record<string, [string, string]> = {
   translations: ["نصوص الواجهة", "Interface copy"],
 };
 export const enumLabels: Record<string, [string, string]> = {
+  engineering: ["هندسة", "Engineering"],
+  performance: ["أداء", "Performance"],
+  experience: ["تجربة المنتج", "Product experience"],
+  reading: ["قراءة واحدة", "Single reading"],
+  comparison: ["قبل وبعد", "Before and after"],
+  history: ["سجل زمني", "Dated history"],
+  achievement: ["إنجاز تقني", "Technical achievement"],
   web: ["منصات الويب", "Web platforms"],
   commerce: ["تجارة إلكترونية", "E-commerce"],
   mobile: ["تطبيقات الموبايل", "Mobile apps"],

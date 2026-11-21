@@ -164,7 +164,7 @@ export const copy = {
     verified: "موثّق",
     demonstration: "توضيحي",
     illustrativeNote:
-      "الأمثلة التوضيحية تحمل تنويهاً دائماً. لا تنشر نتائج عملاء دون دليل",
+      "تظهر البيانات التوضيحية في المعاينة فقط. استخدم معرّف المشروع من رابط دراسة الحالة، وحدّد ترتيب المؤشر من حقل الترتيب.",
     invalidCredentials: "البريد أو كلمة المرور غير صحيحين",
     imageError: "اختر صورة PNG أو JPEG أو WebP أو AVIF سليمة",
     serverError: "تعذّر إتمام الطلب؛ أعد المحاولة",
@@ -347,7 +347,7 @@ export const copy = {
     verified: "Verified",
     demonstration: "Demonstration",
     illustrativeNote:
-      "Demonstration results always carry a label. Never publish client achievements without evidence",
+      "Illustrative data appears only in previews. Use the project ID from its case study URL. Display order sets metric priority.",
     invalidCredentials: "The email or password is incorrect",
     imageError: "Choose a valid PNG, JPEG, WebP or AVIF image",
     serverError: "Unable to complete the request; please retry",

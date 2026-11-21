@@ -190,6 +190,26 @@ export function FieldEditor({
   const { ar, t } = useLocale();
   const label =
     fieldLabels[field]?.[ar ? 0 : 1] ?? (ar ? "المحتوى" : "Content");
+  if (field === "before" || field === "measuredOn" || field === "date")
+    return (
+      <label className="editor-field">
+        <span>{label}</span>
+        <input
+          type={field === "before" ? "number" : "date"}
+          step={field === "before" ? "any" : undefined}
+          value={String(value ?? "")}
+          onChange={(event) =>
+            onChange(
+              field === "before"
+                ? event.target.value === ""
+                  ? null
+                  : Number(event.target.value)
+                : event.target.value,
+            )
+          }
+        />
+      </label>
+    );
   if (field === "cover" || field === "image")
     return (
       <div className="editor-field">

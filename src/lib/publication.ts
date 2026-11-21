@@ -1,8 +1,32 @@
 import { api, ApiError } from "./platform-api";
-import type { ContentEntry, PublicContent } from "../../shared/schema";
+import {
+  publicMetric,
+  type ContentEntry,
+  type PublicContent,
+  type ResultContent,
+} from "../../shared/schema";
 export interface PublicationReceipt {
   revision: number;
   updatedAt: string;
+}
+export function matchesPublicSnapshot(
+  entry: ContentEntry,
+  snapshot: PublicContent,
+) {
+  const item = snapshot.entries.find((candidate) => candidate.id === entry.id);
+  if (
+    entry.kind === "knowledge" ||
+    (entry.kind === "results" &&
+      entry.published &&
+      !publicMetric(entry.published as ResultContent))
+  )
+    return !item;
+  return (
+    !!item &&
+    item.slug === entry.slug &&
+    item.sort_order === entry.sort_order &&
+    JSON.stringify(item.data) === JSON.stringify(entry.published)
+  );
 }
 export async function publishContent(entry: ContentEntry) {
   const result = await api<{
@@ -22,15 +46,7 @@ export async function publishContent(entry: ContentEntry) {
     `/public/content?min_revision=${result.publication.revision}`,
     { cache: "no-store" },
   );
-  const published = publicSnapshot.entries?.find(
-    (item) => item.id === entry.id,
-  );
-  // Knowledge is intentionally excluded from the public content endpoint.
-  if (
-    entry.kind !== "knowledge" &&
-    (!published ||
-      JSON.stringify(published.data) !== JSON.stringify(result.entry.published))
-  )
+  if (!matchesPublicSnapshot(result.entry, publicSnapshot))
     throw new ApiError("publication_not_verified", 502);
   return result;
 }
