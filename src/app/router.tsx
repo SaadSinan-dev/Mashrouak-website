@@ -76,7 +76,8 @@ function Page({ name }: { name: keyof typeof modules }) {
   const { content, loading, unavailable, retry } = usePlatform();
   const { pathname } = useLocation();
   const { language, t } = useLocale();
-  if (module.error || (unavailable && !content))
+  const independent = name === 'work' || name === 'project' || name === 'results';
+  if (module.error || (unavailable && !content && !independent))
     return (
       <div className="container-shell section-space">
         <ResourceError
@@ -88,7 +89,7 @@ function Page({ name }: { name: keyof typeof modules }) {
         />
       </div>
     );
-  if (loading || module.pending || !module.Component)
+  if ((!independent && loading) || module.pending || !module.Component)
     return (
       <PublicPageSkeleton
         kind={skeletonKind(pathname)}

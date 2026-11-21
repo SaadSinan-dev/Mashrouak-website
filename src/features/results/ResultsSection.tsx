@@ -51,11 +51,13 @@ export function ResultsSection({
   const linked = visible.filter(
     (entry) => !!project && entry.data.projectSlug === project.id,
   );
-  const independent = visible.filter(
+  const orphaned = visible.filter(
     (entry) =>
-      !entry.data.projectSlug ||
-      (entry.id === target?.id &&
-        !feed.projects.some((item) => item.id === entry.data.projectSlug)),
+      !!entry.data.projectSlug &&
+      !feed.projects.some((item) => item.id === entry.data.projectSlug),
+  );
+  const independent = visible.filter(
+    (entry) => !entry.data.projectSlug || orphaned.includes(entry),
   );
   const format = new Intl.NumberFormat(language, { minimumIntegerDigits: 2 })
     .format;

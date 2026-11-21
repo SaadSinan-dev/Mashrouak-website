@@ -2,31 +2,83 @@ import { useCallback, useEffect, type ReactNode } from "react";
 import type { PublicContent } from "../../../shared/schema";
 import { createResourceCache } from "../../../shared/resource-cache";
 import { api, apiOrigin, ApiError } from "../../lib/platform-api";
+import { startContentSync } from "../../lib/content-sync";
+import {
+  observeRecovery,
+  ReadFailure,
+  retryRead,
+} from "../../lib/read-recovery";
 import { ContentContext } from "./content-context";
+
 let minimumRevision = 0;
+const cacheKey = "mashrouak-public:v1:" + apiOrigin;
+function valid(content: PublicContent) {
+  return (
+    content &&
+    Array.isArray(content.entries) &&
+    typeof content.updatedAt === "string" &&
+    (content.revision === undefined ||
+      (Number.isSafeInteger(content.revision) && content.revision >= 0)) &&
+    content.entries.every(
+      (entry) =>
+        entry &&
+        typeof entry.slug === "string" &&
+        typeof entry.kind === "string" &&
+        entry.data &&
+        typeof entry.data === "object",
+    )
+  );
+}
+let saved: PublicContent | null = null;
+try {
+  const stored = JSON.parse(localStorage.getItem(cacheKey) || "null");
+  if (valid(stored)) {
+    saved = stored;
+    minimumRevision = Number(stored.revision ?? 0);
+  }
+} catch {}
 const resources = createResourceCache(async (path, options) => {
   const publicRequest = path === "/public/content";
-  const requested =
-    publicRequest && minimumRevision
-      ? `${path}?min_revision=${minimumRevision}`
-      : path;
-  const content = await api<PublicContent>(requested, {
-    ...options,
-    cache: "no-store",
-    signal: options.signal
-      ? AbortSignal.any([options.signal, AbortSignal.timeout(90000)])
-      : AbortSignal.timeout(90000),
-  });
-  if (!Array.isArray(content.entries) || typeof content.updatedAt !== "string")
-    throw new ApiError("invalid_api_response", 502);
-  if (publicRequest && Number(content.revision ?? 0) < minimumRevision) {
-    queueMicrotask(() => {
-      void resources.invalidate(path);
-    });
-    throw new ApiError("publication_not_ready", 409);
-  }
-  return content;
+  return retryRead(async () => {
+    const requested =
+      publicRequest && minimumRevision
+        ? `${path}?min_revision=${minimumRevision}`
+        : path;
+    let content: PublicContent;
+    try {
+      content = await api<PublicContent>(requested, {
+        ...options,
+        cache: "no-store",
+        signal: AbortSignal.any([options.signal!, AbortSignal.timeout(15000)]),
+      });
+    } catch (error) {
+      if (error instanceof ApiError && error.code === "publication_not_ready")
+        throw new ReadFailure(
+          "transport",
+          error.code,
+          error.status,
+          error.retryAfter,
+        );
+      throw error;
+    }
+    if (!valid(content))
+      throw new ReadFailure("invalid-data", "Invalid public content");
+    if (publicRequest && Number(content.revision ?? 0) < minimumRevision)
+      throw new ReadFailure("transport", "publication_not_ready", 409);
+    if (publicRequest && !options.signal?.aborted) {
+      minimumRevision = Math.max(
+        minimumRevision,
+        Number(content.revision ?? 0),
+      );
+      saved = content;
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(content));
+      } catch {}
+    }
+    return content;
+  }, options.signal!);
 });
+
 export function ContentProvider({ children }: { children: ReactNode }) {
   const preview = new URLSearchParams(window.location.search).get("preview");
   const path = preview
@@ -36,87 +88,39 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     path,
     preview ? 30000 : 0,
   );
+  const content = resource.data ?? (preview ? null : saved);
+  const refresh = useCallback(() => resources.refresh(path), [path]);
   const retry = useCallback(() => {
-    void resources.invalidate(path);
-  }, [path]);
+    void refresh();
+  }, [refresh]);
   useEffect(() => {
-    const refresh = () => {
-      if (!document.hidden) retry();
-    };
-    window.addEventListener("focus", refresh);
-    document.addEventListener("visibilitychange", refresh);
-    return () => {
-      window.removeEventListener("focus", refresh);
-      document.removeEventListener("visibilitychange", refresh);
-    };
-  }, [retry]);
-  useEffect(() => {
-    if (preview) return;
-    let active = true,
-      etag = "",
-      checking = false;
-    const notice = (revision: number) => {
-      if (!active || !Number.isSafeInteger(revision) || revision < 0) return;
-      minimumRevision = Math.max(minimumRevision, revision);
-      const snapshot = resources.peek(path);
-      if (!snapshot.data) return;
-      if (
-        !document.hidden &&
-        revision > Number((snapshot.data as PublicContent).revision ?? 0)
-      )
-        void resources.invalidate(path);
-    };
-    const source =
-      typeof EventSource === "undefined"
-        ? null
-        : new EventSource(`${apiOrigin}/api/public/events`, {
-            withCredentials: true,
-          });
-    const receive = (event: MessageEvent<string>) => {
-      try {
-        notice(JSON.parse(event.data).revision);
-      } catch {
-        /* Ignore malformed notifications; revision checks remain authoritative. */
-      }
-    };
-    source?.addEventListener("publication", receive);
-    const revision = async () => {
-      if (!active || document.hidden || checking) return;
-      checking = true;
-      try {
-        const response = await fetch(`${apiOrigin}/api/public/revision`, {
-          credentials: "include",
-          cache: "no-store",
-          headers: etag ? { "If-None-Match": etag } : {},
-          signal: AbortSignal.timeout(8000),
-        });
-        if (response.status === 304) return;
-        if (!response.ok) return;
-        const current = await response.json();
-        etag = response.headers.get("ETag") ?? "";
-        notice(current.revision);
-      } catch {
-        /* Polling is a fallback; retained content is never cleared. */
-      } finally {
-        checking = false;
-      }
-    };
-    const timer = window.setInterval(() => {
-      void revision();
-    }, 2000);
-    return () => {
-      active = false;
-      clearInterval(timer);
-      source?.close();
-    };
-  }, [path, preview]);
+    if (preview) {
+      return observeRecovery((active) => {
+        if (active) void refresh();
+      });
+    }
+    return startContentSync({
+      eventsUrl: `${apiOrigin}/api/public/events`,
+      revisionUrl: `${apiOrigin}/api/public/revision`,
+      refresh,
+      currentRevision: () =>
+        Number(
+          (resources.peek(path).data as PublicContent | null)?.revision ??
+            saved?.revision ??
+            0,
+        ),
+      notice: (revision) => {
+        minimumRevision = Math.max(minimumRevision, revision);
+      },
+    });
+  }, [path, preview, refresh]);
   return (
     <ContentContext.Provider
       value={{
-        content: resource.data,
+        content,
         unavailable: !!resource.error,
         preview: !!preview,
-        loading: resource.loading,
+        loading: !content && resource.loading,
         retry,
       }}
     >

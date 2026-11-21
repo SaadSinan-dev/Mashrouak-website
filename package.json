@@ -8,6 +8,7 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
+    "test:sync:browser": "tsx tests/data-sync.browser.mjs",
     "test:results:browser": "tsx tests/results.browser.mjs",
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build && node scripts/security-headers.mjs dist",

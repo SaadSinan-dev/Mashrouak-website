@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ReadFailure, responseFailure } from '../../lib/read-recovery';
 
 const safeUrl = z.string().url().refine((value) => { try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password; } catch { return false; } });
 const projectSchema = z.object({
@@ -29,14 +30,12 @@ export function normalizeFeed(input: unknown): PortfolioProject[] {
   }).sort((a, b) => Number(b.featured) - Number(a.featured) || a.order - b.order || a.id.localeCompare(b.id));
 }
 
-let inFlight: Promise<PortfolioProject[]> | null = null;
-export function fetchProjectFeed(): Promise<PortfolioProject[]> {
-  if (!inFlight) inFlight = (async () => {
-    const response = await fetch(FEED_URL, { cache: 'no-cache', signal: AbortSignal.timeout(30000) });
-    if (!response.ok) throw new Error(`Projects feed returned ${response.status}`);
-    return normalizeFeed(await response.json());
-  })().finally(() => { inFlight = null; });
-  return inFlight;
+export async function fetchProjectFeed(signal: AbortSignal): Promise<PortfolioProject[]> {
+  const response = await fetch(FEED_URL, { cache: 'no-cache', signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]) });
+  if (!response.ok) throw responseFailure(response);
+  const body = await response.text();
+  try { return normalizeFeed(JSON.parse(body)); }
+  catch { throw new ReadFailure('invalid-data', 'Invalid public project feed'); }
 }
 
 export function projectText(project: PortfolioProject, language: 'ar' | 'en') {

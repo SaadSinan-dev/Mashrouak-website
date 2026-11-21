@@ -1,3 +1,5 @@
+import { ReadFailure, responseFailure } from "./read-recovery";
+
 export const apiOrigin = (import.meta.env.VITE_API_URL ?? "").replace(
   /\/$/,
   "",
@@ -5,12 +7,18 @@ export const apiOrigin = (import.meta.env.VITE_API_URL ?? "").replace(
 export function mediaUrl(url: string) {
   return url.startsWith("/api/") ? `${apiOrigin}${url}` : url;
 }
-export class ApiError extends Error {
+export class ApiError extends ReadFailure {
   constructor(
     public code: string,
-    public status: number,
+    status: number,
+    retryAfter = 0,
   ) {
-    super(code);
+    super(
+      code === "invalid_api_response" ? "invalid-data" : "http",
+      code,
+      status,
+      retryAfter,
+    );
   }
 }
 export async function api<T>(
@@ -33,8 +41,6 @@ export async function api<T>(
     },
   });
   const body = await response.json().catch(() => null);
-  if (!body || typeof body !== "object")
-    throw new ApiError("invalid_api_response", 502);
   if (!response.ok) {
     if (
       response.status === 401 &&
@@ -42,7 +48,13 @@ export async function api<T>(
       typeof window !== "undefined"
     )
       window.dispatchEvent(new Event("mashrouak:unauthorized"));
-    throw new ApiError(body.error ?? "network_error", response.status);
+    throw new ApiError(
+      body?.error ?? "network_error",
+      response.status,
+      responseFailure(response).retryAfter,
+    );
   }
+  if (!body || typeof body !== "object")
+    throw new ApiError("invalid_api_response", 502);
   return body as T;
 }
