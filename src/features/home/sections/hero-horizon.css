@@ -43,7 +43,7 @@
 }
 .hero-section--horizon .hero-section__copy {
   width: 100%; max-width: 1100px; margin: auto;
-  padding: clamp(115px, 10.6vw, 176px) 0 clamp(38px, 5vw, 76px);
+  padding: clamp(80px, 7vw, 104px) 0 var(--heading-gap);
   text-align: center;
 }
 .hero-kicker {
@@ -57,18 +57,18 @@
 html[lang="en"] .hero-kicker { font-size: 11px; letter-spacing: .15em; text-transform: uppercase; }
 .hero-section--horizon .hero-section__copy h1,
 html[lang="en"] .hero-section--horizon .hero-section__copy h1 {
-  max-width: 22ch; margin: auto; color: var(--hero-ink); font-size: clamp(40px, 5.35vw, 85px);
-  font-weight: 500; letter-spacing: -.052em; line-height: 1.025; text-wrap: balance;
+  max-width: 25ch; margin: auto; color: var(--hero-ink); font-size: clamp(36px, 4.6vw, 66px);
+  font-weight: 500; letter-spacing: -.04em; line-height: 1.14; text-wrap: balance;
 }
 .hero-section--horizon .hero-section__copy h1 em { display: block; color: var(--hero-accent); }
-html[lang="ar"] .hero-section--horizon h1 { line-height: 1.34; letter-spacing: normal; }
+html[lang="ar"] .hero-section--horizon h1 { line-height: 1.45; letter-spacing: normal; }
 .hero-section--horizon .hero-section__description {
-  max-width: 61ch; margin: 22px auto 0; color: var(--hero-copy);
-  line-height: 1.65; font-size: clamp(15px, 1.2vw, 18px); text-wrap: pretty;
+  max-width: 68ch; margin: 24px auto 0; color: var(--hero-copy);
+  line-height: var(--leading-body); font-size: clamp(16px, 1.2vw, 18px); text-wrap: pretty;
 }
-.hero-section--horizon .hero-section__actions { justify-content: center; gap: 22px; margin-top: 27px; }
+.hero-section--horizon .hero-section__actions { justify-content: center; gap: 16px 24px; margin-top: 32px; }
 .hero-section--horizon .hero-section__actions .button {
-  min-height: 48px; padding-inline: 22px; border-radius: 5px;
+  min-height: 52px; padding-inline: 24px; border-radius: var(--radius-control);
   color: var(--sky); background: var(--hero-ink); border-color: var(--hero-ink);
   font-size: 14px;
 }
@@ -107,17 +107,20 @@ html[lang="ar"] .hero-section--horizon h1 { line-height: 1.34; letter-spacing: n
 .hero-section--horizon .hero-section__bottomline .container-shell { color: var(--hero-copy); }
 @media (max-width: 640px) {
   .hero-horizon__plate { width: 780px; top: -4px; }
-  .hero-section--horizon .hero-section__copy { padding: 69px 0 var(--section-inset); }
+  .hero-section--horizon .hero-section__copy { padding: 56px 0 40px; }
   .hero-kicker { margin-bottom: 16px; gap: 7px; }
-  html[lang="en"] .hero-kicker { letter-spacing: .08em; font-size: 10px; }
+  html[lang="en"] .hero-kicker { letter-spacing: .06em; font-size: 11px; }
   .hero-kicker::before, .hero-kicker::after { width: 12px; flex-shrink: 0; }
   .hero-section--horizon .hero-section__copy h1,
   html[lang="en"] .hero-section--horizon .hero-section__copy h1 {
-    font-size: clamp(33px, 8.4vw, 49px);
+    font-size: clamp(34px, 8.8vw, 46px);
   }
-  .hero-section--horizon .hero-section__description { margin-top: 17px; font-size: 15px; }
-  .hero-section--horizon .hero-section__actions { gap: 10px 16px; margin-top: 20px; }
-  .hero-section--horizon .hero-section__actions .button { padding-inline: 14px; font-size: 13px; }
+  html[lang="ar"] .hero-section--horizon .hero-section__copy h1 {
+    font-size: clamp(30px, 8.2vw, 42px);
+  }
+  .hero-section--horizon .hero-section__description { margin-top: 24px; }
+  .hero-section--horizon .hero-section__actions { gap: 12px 20px; margin-top: 24px; }
+  .hero-section--horizon .hero-section__actions .button { padding-inline: 16px; font-size: 14px; }
   .hero-exhibit { padding-block-end: var(--section-inset); }
   .hero-exhibit .hero-visual { min-height: clamp(360px, 86vw, 420px); }
   .hero-exhibit .hero-section__footnote { font-size: 11px; padding: 20px 0; }

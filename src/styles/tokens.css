@@ -25,7 +25,38 @@
   --muted: #68757A;
   --container: 1240px;
   --header-height: 84px;
-  --section-space: clamp(84px, 9vw, 142px);
+  /* Shared rhythm: section, heading-to-content, layout and card insets. */
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --section-space: clamp(80px, 7.8vw, 112px);
+  --section-inset: calc(var(--section-space) / 2);
+  --heading-gap: clamp(36px, 4vw, 56px);
+  --layout-gap: clamp(32px, 5vw, 72px);
+  --card-padding: clamp(24px, 2.5vw, 32px);
+  --type-display: clamp(40px, 4.8vw, 68px);
+  --type-heading: clamp(32px, 3.4vw, 48px);
+  --type-body: 1rem;
+  --type-small: .875rem;
+  --type-label: .75rem;
+  --leading-body: 1.8;
+  --leading-heading: 1.4;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --shadow-soft: 0 18px 55px rgba(20, 43, 58, 0.09);
+}
+
+html[lang="en"] { --leading-heading: 1.2; }
+@media (max-width: 1100px) {
+  :root { --header-height: 76px; }
+}
+@media (max-width: 640px) {
+  :root {
+    --section-space: 72px;
+    --heading-gap: 36px;
+    --layout-gap: 32px;
+    --type-display: clamp(38px, 10.5vw, 48px);
+    --type-heading: clamp(30px, 8vw, 36px);
+  }
 }

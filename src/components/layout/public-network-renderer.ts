@@ -168,8 +168,8 @@ export function createPublicNetwork(host: HTMLDivElement) {
       const pad = element.matches(".hero-visual, .contact-form, .artwork")
         ? 12
         : 8;
-      // Reserve the 18px reveal travel as well as the settled text position.
-      const verticalPad = element.matches("h1, h2, h3, h4, p") ? pad + 18 : pad;
+      // Reserve the reveal travel as well as the settled text position.
+      const verticalPad = element.matches("h1, h2, h3, h4, p") ? pad + 12 : pad;
       const fixed = !!element.closest(".site-header,.company-chatbot,.support-launcher");
       masks.push({ left: rect.left - pad, top: rect.top - verticalPad + (fixed ? 0 : scroll),
         width: rect.width + pad * 2, height: rect.height + verticalPad * 2, fixed });
@@ -222,7 +222,8 @@ export function createPublicNetwork(host: HTMLDivElement) {
   }
   function draw() {
     ctx!.clearRect(0, 0, width, height);
-    ctx!.globalAlpha = strength;
+    // Quiet decoration without changing the opaque section colours below.
+    ctx!.globalAlpha = strength * (width < 640 ? 0.3 : 0.45);
     ctx!.lineCap = "round";
     ctx!.lineJoin = "round";
     for (const edge of field.edges.values()) {

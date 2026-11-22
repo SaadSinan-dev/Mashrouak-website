@@ -163,20 +163,21 @@
 .results-heading {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
-  gap: clamp(30px, 7vw, 100px);
+  gap: var(--layout-gap);
   align-items: end;
-  margin-bottom: 52px;
+  margin-bottom: var(--heading-gap);
 }
 .results-heading h1,
 .results-heading h2 {
-  font-size: clamp(36px, 4.7vw, 66px);
+  font-size: var(--type-heading);
   font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: -0.04em;
+  line-height: var(--leading-heading);
+  letter-spacing: normal;
+  text-wrap: balance;
   margin: 0;
 }
 .results-heading h1 {
-  font-size: clamp(44px, 6.3vw, 86px);
+  font-size: var(--type-display);
 }
 .results-heading h1 span,
 .results-heading h2 span {
@@ -184,10 +185,10 @@
 }
 .results-heading > p {
   margin: 0;
-  max-width: 470px;
+  max-width: 60ch;
   color: var(--steel);
-  font-size: 14px;
-  line-height: 2.1;
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
 }
 .results-method {
   display: grid;
@@ -355,7 +356,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 30px;
+  padding: var(--card-padding);
   position: relative;
   border-inline-end: 1px solid var(--line);
   transition: background 0.2s;
@@ -370,9 +371,9 @@
   background: var(--mist);
 }
 .contact-channels a > span {
-  font-size: 10px;
+  font-size: var(--type-label);
   color: var(--steel);
-  margin-bottom: 30px;
+  margin-bottom: 24px;
   letter-spacing: 0.05em;
 }
 .contact-channels a > svg:first-of-type {
@@ -385,12 +386,12 @@
   margin: 20px 0 8px;
 }
 .contact-channels p {
-  font-size: 12px;
+  font-size: var(--type-small);
   color: var(--steel);
   margin: 0 0 25px;
 }
 .contact-channels strong {
-  font-size: 12px;
+  font-size: var(--type-small);
   font-weight: 500;
   overflow-wrap: anywhere;
 }
@@ -863,8 +864,7 @@
 @media (max-width: 760px) {
   .results-heading {
     grid-template-columns: 1fr;
-    gap: 22px;
-    margin-bottom: 30px;
+    gap: 24px;
   }
   .results-method {
     grid-template-columns: 1fr;
@@ -967,10 +967,13 @@
   .support-launcher {
     inset-inline-end: 16px;
     inset-block-end: max(16px, env(safe-area-inset-bottom));
+    width: 48px;
+    height: 48px;
+    justify-content: center;
     padding: 12px;
   }
   .support-launcher > span {
-    font-size: 11px;
+    display: none;
   }
   .support-launcher small {
     display: none;

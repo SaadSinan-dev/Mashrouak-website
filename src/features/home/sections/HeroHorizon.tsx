@@ -22,14 +22,14 @@ export function HeroHorizon() {
           </linearGradient>
           <clipPath id="horizon-disc"><ellipse cx="720" cy="588" rx="644" ry="506"/></clipPath>
         </defs>
-        <path d="M76 588a644 506 0 0 1 1288 0" stroke="url(#horizon-rim)" strokeWidth="29" filter="url(#horizon-bloom)" opacity=".78"/>
+        <path d="M76 588a644 506 0 0 1 1288 0" stroke="url(#horizon-rim)" strokeWidth="22" filter="url(#horizon-bloom)" opacity=".48"/>
         <ellipse cx="720" cy="588" rx="644" ry="506" fill="url(#horizon-body)" />
-        <g clipPath="url(#horizon-disc)" stroke="var(--rim-grid)" strokeWidth=".85" opacity=".35">
+        <g clipPath="url(#horizon-disc)" stroke="var(--rim-grid)" strokeWidth=".85" opacity=".2">
           <path d="M50 181 Q736 -147 1395 326 M24 265 Q718 -153 1430 397 M0 393 Q726 -146 1440 481"/>
           <path d="M598 56 Q238 182 184 540 M648 61 Q439 172 453 580 M760 57 Q944 235 915 564 M802 55 Q1120 155 1223 502"/>
         </g>
         <path d="M76 588a644 506 0 0 1 1288 0" stroke="url(#horizon-rim)" strokeWidth="2"/>
-        <g stroke="var(--rim-grid)" opacity=".62">
+        <g stroke="var(--rim-grid)" opacity=".35">
           <path d="M185 175h12m-6-6v12 M1241 210h12m-6-6v12 M340 64h6m-3-3v6"/>
           <circle cx="1080" cy="169" r="3"/>
         </g>

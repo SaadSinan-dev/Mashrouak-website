@@ -3,10 +3,10 @@
   display: grid;
   place-items: center;
   min-width: 0;
-  height: clamp(280px, 34vw, 510px);
+  height: clamp(280px, 30vw, 440px);
   padding: 30px 5% 48px;
   background:
-    radial-gradient(ellipse at 46% 28%, #ffffff47, transparent 62%),
+    radial-gradient(ellipse at 46% 28%, #ffffff26, transparent 62%),
     var(--device-field, #d4e2dc);
   isolation: isolate;
   overflow: hidden;
@@ -88,7 +88,7 @@
 }
 .device-controls button {
   width: 44px;
-  height: 40px;
+  height: 44px;
   color: inherit;
   border: 0;
   background: transparent;

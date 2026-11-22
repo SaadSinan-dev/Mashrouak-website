@@ -42,7 +42,7 @@ export function networkBudget(width: number, height: number, cores = 8) {
       constrained ? 32 : 54,
       Math.max(compact ? 22 : 32, Math.round((width * height) / 26000)),
     ),
-    glyphs: compact ? 10 : constrained ? 16 : 24,
+    glyphs: compact ? 3 : constrained ? 5 : 7,
     fps: compact || constrained ? 30 : 60,
     dpr: Math.min(1.5, Math.sqrt(2800000 / Math.max(1, width * height))),
     reach: compact ? 145 : Math.min(235, width * 0.18),

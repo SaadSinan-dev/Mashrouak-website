@@ -8,7 +8,7 @@ interface RevealProps {
   y?: number;
 }
 
-export function Reveal({ children, className, delay = 0, y = 18 }: RevealProps) {
+export function Reveal({ children, className, delay = 0, y = 12 }: RevealProps) {
   const reduceMotion = useReducedMotion();
   if (reduceMotion) return <div className={className}>{children}</div>;
 
@@ -18,7 +18,7 @@ export function Reveal({ children, className, delay = 0, y = 18 }: RevealProps) 
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.18 }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.4, delay: Math.min(delay, 0.15), ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
